@@ -1,11 +1,12 @@
-#include <BlynkSimpleEsp8266_WM.h>
+#define BLYNK_PRINT Serial
+
+#include <BlynkSimpleEsp32_WM.h>
 #include <Ticker.h>
 #include <DHT.h>
 
-#define PIN_LED   2   // Pin D4 mapped to pin GPIO2/TXD1 of ESP8266, NodeMCU and WeMoS, control on-board LED
-#define PIN_D2    4   // Pin D2 mapped to pin GPIO4 of ESP8266
+#define PIN_D22   22            // Pin D22 mapped to pin GPIO22/SCL of ESP32
   
-#define DHT_PIN     PIN_D2
+#define DHT_PIN     PIN_D22     // pin DATA @ D22 / GPIO22
 #define DHT_TYPE    DHT11
 
 #define DHT_DEBUG   1
@@ -19,6 +20,7 @@ void readAndSendData()
     float temperature = dht.readTemperature();
     float humidity    = dht.readHumidity();
     
+
     if (!isnan(temperature) && !isnan(humidity)) 
     {
       Blynk.virtualWrite(V17, temperature);
@@ -33,7 +35,7 @@ void readAndSendData()
 
 void set_led(byte status)
 {
-  digitalWrite(PIN_LED, status);
+  digitalWrite(LED_BUILTIN, status);
 }
 
 void check_status()
@@ -66,23 +68,23 @@ void setup()
 {
     // Debug console
     Serial.begin(115200);
-    pinMode(PIN_LED, OUTPUT);
+    pinMode(LED_BUILTIN, OUTPUT);
 
     Serial.println("\nStarting ...");
-      
+    
     dht.begin();
     Blynk.begin();
     timer.setInterval(60 * 1000, readAndSendData);
 
     if (Blynk.connected())
     {
-       Serial.println("\nBlynk connected. Board Name : " + Blynk.getBoardName());
-    }    
+       Serial.println("\nBlynk ESP32 connected. Board Name : " + Blynk.getBoardName());
+    }
 }
 
 void loop() 
 {
     Blynk.run();
     timer.run();
-    check_status();    
+    check_status();
 }

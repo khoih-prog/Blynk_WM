@@ -4,14 +4,17 @@
 #include <Ticker.h>
 #include <DHT.h>
 
-#define DHT_PIN     2
+#define PIN_LED   2   // Pin D4 mapped to pin GPIO2/TXD1 of ESP8266, NodeMCU and WeMoS, control on-board LED
+#define PIN_D2    4   // Pin D2 mapped to pin GPIO4 of ESP8266
+  
+#define DHT_PIN     PIN_D2
 #define DHT_TYPE    DHT11
 
 #define DHT_DEBUG   1
 
 DHT dht(DHT_PIN, DHT_TYPE);
 BlynkTimer timer;
-Ticker     aux_ticker;
+Ticker     led_ticker;
 
 void readAndSendData() 
 {
@@ -31,12 +34,10 @@ void readAndSendData()
     }
 }
 
-#define PIN_LED   2 // Pin D4 mapped to pin GPIO2/TXD1 of ESP8266, NodeMCU and WeMoS, control on-board LED
-
 void set_led(byte status)
 {
-  digitalWrite(PIN_LED  /*LED_BUILTIN*/, status);
- }
+  digitalWrite(PIN_LED, status);
+}
 
 void check_status()
 {
@@ -51,7 +52,7 @@ void check_status()
     if (Blynk.connected())
     {
       set_led(LOW);
-      aux_ticker.once_ms(111, set_led, (byte) HIGH);
+      led_ticker.once_ms(111, set_led, (byte) HIGH);
 
       Serial.println("B");
     }
@@ -68,13 +69,17 @@ void setup()
 {
     // Debug console
     Serial.begin(115200);
+    pinMode(PIN_LED, OUTPUT);
+
+    Serial.println("\nStarting ...");
+    
     dht.begin();
     Blynk.begin();
     timer.setInterval(60 * 1000, readAndSendData);
 
     if (Blynk.connected())
     {
-       Serial.println("Blynk connected. Board Name : " + Blynk.getBoardName());
+       Serial.println("\nBlynk ESP8288 connected. Board Name : " + Blynk.getBoardName());
     }
 }
 

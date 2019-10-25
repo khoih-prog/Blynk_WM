@@ -1,4 +1,6 @@
-#include <BlynkSimpleEsp8266_WM.h>
+#define BLYNK_PRINT Serial
+
+#include <BlynkSimpleEsp8266_SSL_WM.h>
 #include <Ticker.h>
 #include <DHT.h>
 
@@ -19,6 +21,7 @@ void readAndSendData()
     float temperature = dht.readTemperature();
     float humidity    = dht.readHumidity();
     
+
     if (!isnan(temperature) && !isnan(humidity)) 
     {
       Blynk.virtualWrite(V17, temperature);
@@ -69,20 +72,20 @@ void setup()
     pinMode(PIN_LED, OUTPUT);
 
     Serial.println("\nStarting ...");
-      
+    
     dht.begin();
     Blynk.begin();
     timer.setInterval(60 * 1000, readAndSendData);
 
     if (Blynk.connected())
     {
-       Serial.println("\nBlynk connected. Board Name : " + Blynk.getBoardName());
-    }    
+       Serial.println("\nBlynk ESP8266 SSL connected. Board Name : " + Blynk.getBoardName());
+    }
 }
 
 void loop() 
 {
     Blynk.run();
     timer.run();
-    check_status();    
+    check_status();
 }
