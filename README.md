@@ -20,11 +20,15 @@ That's it.
 ## So, how it works?
 If it cannot connect to the Blynk server in 30 seconds, it will switch to `Configuration Mode`. You will see your built-in LED turned ON. In `Configuration Mode`, it starts an access point called `ESP_xxxxxx`. Connect to it using password `MyESP_xxxxxx` .
 
-https://github.com/khoih-prog/Blynk_WM/blob/master/pics/Selection_004.jpg
+<p align="center">
+    <img src="https://github.com/khoih-prog/Blynk_WM/blob/master/pics/Selection_004.jpg">
+</p>
 
 After you connected, please, go to http://192.168.4.1.
 
-https://github.com/khoih-prog/Blynk_WM/blob/master/pics/Selection_005.jpg
+<p align="center">
+    <img src="https://github.com/khoih-prog/Blynk_WM/blob/master/pics/Selection_005.jpg">
+</p>
 
 Enter your credentials, then click `Save`. After you restarted, you will see your built-in LED turned OFF. That means, it connected to your Blynk server successfully.
 
