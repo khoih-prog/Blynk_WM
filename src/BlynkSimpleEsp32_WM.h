@@ -323,7 +323,7 @@ public:
           strcpy(BlynkESP32_WM_config.blynk_token,      no_config);
           strcpy(BlynkESP32_WM_config.board_name,       no_config);
           
-          EEPROM.put(0, Blynk8266_WM_config);
+          EEPROM.put(0, BlynkESP32_WM_config);
           EEPROM.commit();
       }
   
