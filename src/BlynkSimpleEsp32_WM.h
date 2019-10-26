@@ -190,6 +190,115 @@ public:
     }
    
    
+    #define LED_BUILTIN       2         // Pin D2 mapped to pin GPIO2/ADC12 of ESP32, control on-board LED
+        
+    void begin(void) 
+    {
+        #define TIMEOUT_CONNECT_WIFI			30000
+               
+        getConfigData();
+
+        Base::begin(BlynkESP32_WM_config.blynk_token);
+        this->conn.begin(BlynkESP32_WM_config.blynk_server, BlynkESP32_WM_config.blynk_port);
+
+        if (connectToWifi(TIMEOUT_CONNECT_WIFI)) 
+        {
+          BLYNK_LOG1(BLYNK_F("begin: WiFi connected. Try connecting to Blynk"));
+          
+          int i = 0;
+          while ( (i++ < 10) && !this->connect() )
+          {
+          }
+          
+          if  (this->connected())
+          {
+            BLYNK_LOG1(BLYNK_F("begin: WiFi and Blynk connected"));
+          }
+          else 
+          {
+            BLYNK_LOG1(BLYNK_F("begin: WiFi connected but Bynk not connected"));
+            // failed to connect to Blynk server, will start configuration mode
+            // Turn the LED_BUILTIN ON in configuration mode. ESP32 LED_BUILDIN is correct polarity, HIGH to turn ON
+            digitalWrite(LED_BUILTIN, HIGH);
+            startConfigurationMode();
+          }
+        } 
+        else 
+        {
+            BLYNK_LOG1(BLYNK_F("begin: Fail to connect WiFi and Blynk"));
+            // failed to connect to Blynk server, will start configuration mode
+            // Turn the LED_BUILTIN ON in configuration mode. ESP32 LED_BUILDIN is correct polarity, HIGH to turn ON
+            digitalWrite(LED_BUILTIN, HIGH);            
+            startConfigurationMode();
+        }   
+    }    
+   
+    void run()
+    {
+      #define TIMEOUT_RECONNECT_WIFI			10000
+      
+      // Lost connection in running. Give chance to reconfig.
+      if ( WiFi.status() != WL_CONNECTED || !connected() )
+      {   
+		    if (configuration_mode)
+		    {
+			    server.handleClient();		
+			    return;
+		    }
+		    else
+		    {
+			    // Not in config mode, try reconnecting before force to config mode
+			    if ( WiFi.status() != WL_CONNECTED )
+			    {
+				    BLYNK_LOG1(BLYNK_F("run: WiFi lost. Try reconnecting WiFi and Blynk"));
+				    if (connectToWifi(TIMEOUT_RECONNECT_WIFI)) 
+				    {
+				      BLYNK_LOG1(BLYNK_F("run: WiFi reconnected. Trying connect to Blynk"));
+				      
+				      if (connect())
+				      {
+					      BLYNK_LOG1(BLYNK_F("run: WiFi and Blynk reconnected"));
+					    }
+				    }
+			    }
+			    else
+			    {
+				    BLYNK_LOG1(BLYNK_F("run: Blynk lost. Try connecting Blynk"));
+				    if (connect()) 
+				    {
+					    BLYNK_LOG1(BLYNK_F("run: Blynk reconnected"));
+				    }
+			    }
+					
+			    //BLYNK_LOG1(BLYNK_F("run: Lost connection => configMode"));
+			    //startConfigurationMode();
+        }
+      }
+      else if (configuration_mode)
+      {
+      	configuration_mode = false;
+      	BLYNK_LOG1(BLYNK_F("run: got WiFi/Blynk back, great"));
+      	// Turn the LED_BUILTIN OFF when out of configuration mode. ESP32 LED_BUILDIN is correct polarity, LOW to turn OFF
+        digitalWrite(LED_BUILTIN, LOW);      	
+      }
+
+      if (connected())
+      {
+        Base::run();
+      }
+    }
+        
+    String getBoardName()
+    {
+      return (String(BlynkESP32_WM_config.board_name));
+    }
+    
+        
+private:
+    WebServer server;
+    boolean configuration_mode = false;
+    struct Configuration BlynkESP32_WM_config;
+    
 #if USE_SPIFFS     
 
     #define  CONFIG_FILENAME         BLYNK_F("/wm_config.dat")
@@ -343,117 +452,7 @@ public:
       EEPROM.commit();
     }
     
-#endif
-
-   
-    #define LED_BUILTIN       2         // Pin D2 mapped to pin GPIO2/ADC12 of ESP32, control on-board LED
-        
-    void begin(void) 
-    {
-        #define TIMEOUT_CONNECT_WIFI			30000
-               
-        getConfigData();
-
-        Base::begin(BlynkESP32_WM_config.blynk_token);
-        this->conn.begin(BlynkESP32_WM_config.blynk_server, BlynkESP32_WM_config.blynk_port);
-
-        if (connectToWifi(TIMEOUT_CONNECT_WIFI)) 
-        {
-          BLYNK_LOG1(BLYNK_F("begin: WiFi connected. Try connecting to Blynk"));
-          
-          int i = 0;
-          while ( (i++ < 10) && !this->connect() )
-          {
-          }
-          
-          if  (this->connected())
-          {
-            BLYNK_LOG1(BLYNK_F("begin: WiFi and Blynk connected"));
-          }
-          else 
-          {
-            BLYNK_LOG1(BLYNK_F("begin: WiFi connected but Bynk not connected"));
-            // failed to connect to Blynk server, will start configuration mode
-            // Turn the LED_BUILTIN ON in configuration mode. ESP32 LED_BUILDIN is correct polarity, HIGH to turn ON
-            digitalWrite(LED_BUILTIN, HIGH);
-            startConfigurationMode();
-          }
-        } 
-        else 
-        {
-            BLYNK_LOG1(BLYNK_F("begin: Fail to connect WiFi and Blynk"));
-            // failed to connect to Blynk server, will start configuration mode
-            // Turn the LED_BUILTIN ON in configuration mode. ESP32 LED_BUILDIN is correct polarity, HIGH to turn ON
-            digitalWrite(LED_BUILTIN, HIGH);            
-            startConfigurationMode();
-        }   
-    }    
-   
-    void run()
-    {
-      #define TIMEOUT_RECONNECT_WIFI			10000
-      
-      // Lost connection in running. Give chance to reconfig.
-      if ( WiFi.status() != WL_CONNECTED || !connected() )
-      {   
-		    if (configuration_mode)
-		    {
-			    server.handleClient();		
-			    return;
-		    }
-		    else
-		    {
-			    // Not in config mode, try reconnecting before force to config mode
-			    if ( WiFi.status() != WL_CONNECTED )
-			    {
-				    BLYNK_LOG1(BLYNK_F("run: WiFi lost. Try reconnecting WiFi and Blynk"));
-				    if (connectToWifi(TIMEOUT_RECONNECT_WIFI)) 
-				    {
-				      BLYNK_LOG1(BLYNK_F("run: WiFi reconnected. Trying connect to Blynk"));
-				      
-				      if (connect())
-				      {
-					      BLYNK_LOG1(BLYNK_F("run: WiFi and Blynk reconnected"));
-					    }
-				    }
-			    }
-			    else
-			    {
-				    BLYNK_LOG1(BLYNK_F("run: Blynk lost. Try connecting Blynk"));
-				    if (connect()) 
-				    {
-					    BLYNK_LOG1(BLYNK_F("run: Blynk reconnected"));
-				    }
-			    }
-					
-			    //BLYNK_LOG1(BLYNK_F("run: Lost connection => configMode"));
-			    //startConfigurationMode();
-        }
-      }
-      else if (configuration_mode)
-      {
-      	configuration_mode = false;
-      	BLYNK_LOG1(BLYNK_F("run: got WiFi/Blynk back, great"));
-      	// Turn the LED_BUILTIN OFF when out of configuration mode. ESP32 LED_BUILDIN is correct polarity, LOW to turn OFF
-        digitalWrite(LED_BUILTIN, LOW);      	
-      }
-
-      if (connected())
-      {
-        Base::run();
-      }
-    }
-        
-    String getBoardName()
-    {
-      return (String(BlynkESP32_WM_config.board_name));
-    }
-    
-        
-private:
-    WebServer server;
-    boolean configuration_mode = false;
-    struct Configuration BlynkESP32_WM_config;
+#endif    
 
     boolean connectToWifi(int timeout)
     {

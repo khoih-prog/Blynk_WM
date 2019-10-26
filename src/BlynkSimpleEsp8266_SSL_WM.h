@@ -297,6 +297,121 @@ public:
         config(auth, ip, port, fingerprint);
         while(this->connect() != true) {}
     }
+     
+    void begin(const char* fingerprint = NULL) 
+    {
+        #define TIMEOUT_CONNECT_WIFI			30000
+               
+        getConfigData();
+
+        Base::begin(Blynk8266_WM_config.blynk_token);
+        this->conn.begin(Blynk8266_WM_config.blynk_server, Blynk8266_WM_config.blynk_port);
+        
+        if (fingerprint) 
+        {
+          this->conn.setFingerprint(fingerprint);
+        } 
+        else 
+        {
+          this->conn.setCACert_P(BLYNK_DEFAULT_CERT_DER, sizeof(BLYNK_DEFAULT_CERT_DER));
+        }        
+
+        if (connectToWifi(TIMEOUT_CONNECT_WIFI)) 
+        {
+          BLYNK_LOG1(BLYNK_F("begin: WiFi connected. Try connecting to Blynk"));
+          
+          int i = 0;
+          while ( (i++ < 10) && !this->connect() )
+          {
+          }
+          
+          if  (this->connected())
+          {
+            BLYNK_LOG1(BLYNK_F("begin: WiFi and Blynk connected"));
+          }
+          else 
+          {
+            BLYNK_LOG1(BLYNK_F("begin: WiFi connected but Bynk not connected"));
+            // failed to connect to Blynk server, will start configuration mode
+            // turn the LED_BUILTIN ON to tell us we are in configuration mode.
+            digitalWrite(LED_BUILTIN, LOW);
+            startConfigurationMode();
+          }
+        } 
+        else 
+        {
+            BLYNK_LOG1(BLYNK_F("begin: Fail to connect WiFi and Blynk"));
+            // failed to connect to Blynk server, will start configuration mode
+            // turn the LED_BUILTIN ON to tell us we are in configuration mode.
+            digitalWrite(LED_BUILTIN, LOW);            
+            startConfigurationMode();
+        }   
+    }    
+   
+    void run()
+    {
+      #define TIMEOUT_RECONNECT_WIFI			10000
+      
+      // Lost connection in running. Give chance to reconfig.
+      if ( WiFi.status() != WL_CONNECTED || !this->connected() )
+      {   
+		    if (configuration_mode)
+		    {
+			    server.handleClient();		
+			    return;
+		    }
+		    else
+		    {
+			    // Not in config mode, try reconnecting before force to config mode
+			    if ( WiFi.status() != WL_CONNECTED )
+			    {
+				    BLYNK_LOG1(BLYNK_F("run: WiFi lost. Try reconnecting WiFi and Blynk"));
+				    if (connectToWifi(TIMEOUT_RECONNECT_WIFI)) 
+				    {
+				      BLYNK_LOG1(BLYNK_F("run: WiFi reconnected. Trying connect to Blynk"));
+				      
+			        if (this->connect())
+			        {
+				        BLYNK_LOG1(BLYNK_F("run: WiFi and Blynk reconnected"));
+				      }					    
+				    }
+			    }
+			    else
+			    {
+				    BLYNK_LOG1(BLYNK_F("run: Blynk lost. Try connecting Blynk"));
+			      if (this->connect()) 
+			      {
+				      BLYNK_LOG1(BLYNK_F("run: Blynk reconnected"));
+			      }
+			    }
+					
+			    //BLYNK_LOG1(BLYNK_F("run: Lost connection => configMode"));
+			    //startConfigurationMode();
+        }
+      }
+      else if (configuration_mode)
+      {
+      	configuration_mode = false;
+      	BLYNK_LOG1(BLYNK_F("run: got WiFi/Blynk back, great"));
+      	// turn the LED_BUILTIN OFF to tell us we exit configuration mode.
+        digitalWrite(LED_BUILTIN, HIGH);      	
+      }
+
+      if (this->connected())
+      {
+        Base::run();
+      }
+    }
+    
+    String getBoardName()
+    {
+      return (String(Blynk8266_WM_config.board_name));
+    }
+    
+private:
+    ESP8266WebServer server;
+    boolean configuration_mode = false;
+    struct Configuration Blynk8266_WM_config;
 
 #if USE_SPIFFS     
 
@@ -452,121 +567,6 @@ public:
     }
     
 #endif
-       
-    void begin(const char* fingerprint = NULL) 
-    {
-        #define TIMEOUT_CONNECT_WIFI			30000
-               
-        getConfigData();
-
-        Base::begin(Blynk8266_WM_config.blynk_token);
-        this->conn.begin(Blynk8266_WM_config.blynk_server, Blynk8266_WM_config.blynk_port);
-        
-        if (fingerprint) 
-        {
-          this->conn.setFingerprint(fingerprint);
-        } 
-        else 
-        {
-          this->conn.setCACert_P(BLYNK_DEFAULT_CERT_DER, sizeof(BLYNK_DEFAULT_CERT_DER));
-        }        
-
-        if (connectToWifi(TIMEOUT_CONNECT_WIFI)) 
-        {
-          BLYNK_LOG1(BLYNK_F("begin: WiFi connected. Try connecting to Blynk"));
-          
-          int i = 0;
-          while ( (i++ < 10) && !this->connect() )
-          {
-          }
-          
-          if  (this->connected())
-          {
-            BLYNK_LOG1(BLYNK_F("begin: WiFi and Blynk connected"));
-          }
-          else 
-          {
-            BLYNK_LOG1(BLYNK_F("begin: WiFi connected but Bynk not connected"));
-            // failed to connect to Blynk server, will start configuration mode
-            // turn the LED_BUILTIN ON to tell us we are in configuration mode.
-            digitalWrite(LED_BUILTIN, LOW);
-            startConfigurationMode();
-          }
-        } 
-        else 
-        {
-            BLYNK_LOG1(BLYNK_F("begin: Fail to connect WiFi and Blynk"));
-            // failed to connect to Blynk server, will start configuration mode
-            // turn the LED_BUILTIN ON to tell us we are in configuration mode.
-            digitalWrite(LED_BUILTIN, LOW);            
-            startConfigurationMode();
-        }   
-    }    
-   
-    void run()
-    {
-      #define TIMEOUT_RECONNECT_WIFI			10000
-      
-      // Lost connection in running. Give chance to reconfig.
-      if ( WiFi.status() != WL_CONNECTED || !this->connected() )
-      {   
-		    if (configuration_mode)
-		    {
-			    server.handleClient();		
-			    return;
-		    }
-		    else
-		    {
-			    // Not in config mode, try reconnecting before force to config mode
-			    if ( WiFi.status() != WL_CONNECTED )
-			    {
-				    BLYNK_LOG1(BLYNK_F("run: WiFi lost. Try reconnecting WiFi and Blynk"));
-				    if (connectToWifi(TIMEOUT_RECONNECT_WIFI)) 
-				    {
-				      BLYNK_LOG1(BLYNK_F("run: WiFi reconnected. Trying connect to Blynk"));
-				      
-			        if (this->connect())
-			        {
-				        BLYNK_LOG1(BLYNK_F("run: WiFi and Blynk reconnected"));
-				      }					    
-				    }
-			    }
-			    else
-			    {
-				    BLYNK_LOG1(BLYNK_F("run: Blynk lost. Try connecting Blynk"));
-			      if (this->connect()) 
-			      {
-				      BLYNK_LOG1(BLYNK_F("run: Blynk reconnected"));
-			      }
-			    }
-					
-			    //BLYNK_LOG1(BLYNK_F("run: Lost connection => configMode"));
-			    //startConfigurationMode();
-        }
-      }
-      else if (configuration_mode)
-      {
-      	configuration_mode = false;
-      	BLYNK_LOG1(BLYNK_F("run: got WiFi/Blynk back, great"));
-      	// turn the LED_BUILTIN OFF to tell us we exit configuration mode.
-        digitalWrite(LED_BUILTIN, HIGH);      	
-      }
-
-      if (this->connected())
-      {
-        Base::run();
-      }
-    }
-    
-    String getBoardName()
-    {
-      return (String(Blynk8266_WM_config.board_name));
-    }
-    
-private:
-    ESP8266WebServer server;
-    boolean configuration_mode = false;
-    struct Configuration Blynk8266_WM_config;
 
     boolean connectToWifi(int timeout)
     {
