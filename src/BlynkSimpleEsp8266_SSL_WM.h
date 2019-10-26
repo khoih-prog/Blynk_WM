@@ -42,7 +42,13 @@
 #include <time.h>
 
 #include <ESP8266WebServer.h>
+
+//default to use EEPROM, otherwise, use SPIFFS
+#if USE_SPIFFS
+#include <FS.h>
+#else
 #include <EEPROM.h>
+#endif
 
 template <typename Client>
 class BlynkArduinoClientSecure
@@ -292,7 +298,117 @@ public:
         while(this->connect() != true) {}
     }
 
-    void getEEPROM()
+#if USE_SPIFFS     
+
+    #define  CONFIG_FILENAME         BLYNK_F("/wmssl_conf.dat")
+    #define  CONFIG_FILENAME_BACKUP  BLYNK_F("/wmssl_conf.bak")
+
+    void loadConfigData(void)
+    {
+      File file = SPIFFS.open(CONFIG_FILENAME, "r");
+      BLYNK_LOG1(BLYNK_F("Loading config file..."));
+      
+      if (!file) 
+      {
+        BLYNK_LOG1(BLYNK_F(" failed"));
+        
+        // Trying open redundant config file
+        file = SPIFFS.open(CONFIG_FILENAME_BACKUP, "r");
+        BLYNK_LOG1(BLYNK_F("Loading backup config file...")); 
+        
+        if (!file)
+        {
+          BLYNK_LOG1(BLYNK_F(" also failed"));
+          return;
+        }
+      }
+        
+      file.readBytes((char*) &Blynk8266_WM_config, sizeof(Blynk8266_WM_config));
+      
+      BLYNK_LOG1(BLYNK_F("OK"));
+      file.close();    
+    }
+
+    void saveConfigData(void)
+    {
+      File file = SPIFFS.open(CONFIG_FILENAME, "w");
+      BLYNK_LOG1(BLYNK_F("Saving config file..."));
+      
+      if (file) 
+      {
+        file.write((char*) &Blynk8266_WM_config, sizeof(Blynk8266_WM_config));  
+        file.close();     
+        BLYNK_LOG1(BLYNK_F("OK"));
+      }
+      else
+      {
+        BLYNK_LOG1(BLYNK_F(" failed"));        
+      }  
+      
+      // Trying open redundant Auth file
+      file = SPIFFS.open(CONFIG_FILENAME_BACKUP, "w");
+      BLYNK_LOG1(BLYNK_F("Saving backup config file...")); 
+      
+      if (file)
+      {
+        file.write((char*) &Blynk8266_WM_config, sizeof(Blynk8266_WM_config));
+        file.close();  
+        BLYNK_LOG1(BLYNK_F("OK"));      
+      }
+      else
+      {
+        BLYNK_LOG1(BLYNK_F(" failed"));       
+      }              
+    }
+    
+    void getConfigData()
+    {
+      #define BOARD_TYPE        "SSL_ESP8266"
+      
+      if (!SPIFFS.begin()) 
+      {
+        BLYNK_LOG1(BLYNK_F("SPIFFS failed!. Please use EEPROM."));
+        return;
+      }
+      
+      if ( SPIFFS.exists(CONFIG_FILENAME) || SPIFFS.exists(CONFIG_FILENAME_BACKUP) )
+      { 
+        // if config file exists, load
+        loadConfigData();
+      }
+
+      if (strncmp(Blynk8266_WM_config.header, BOARD_TYPE, strlen(BOARD_TYPE)) != 0) 
+      {
+          memset(&Blynk8266_WM_config, 0, sizeof(Blynk8266_WM_config));
+                                   
+          char no_config[] = "nothing";
+          BLYNK_LOG2(BLYNK_F("Init new config file, size = "), sizeof(Blynk8266_WM_config));          
+          // doesn't have any configuration
+          strcpy(Blynk8266_WM_config.header,           BOARD_TYPE);
+          strcpy(Blynk8266_WM_config.wifi_ssid,        no_config);
+          strcpy(Blynk8266_WM_config.wifi_passphrase,  no_config);
+          strcpy(Blynk8266_WM_config.blynk_server,     no_config);
+          Blynk8266_WM_config.blynk_port = BLYNK_SERVER_HARDWARE_PORT;
+          strcpy(Blynk8266_WM_config.blynk_token,      no_config);
+          strcpy(Blynk8266_WM_config.board_name,       no_config);
+          
+          saveConfigData();          
+      }
+  
+      else
+      {
+        BLYNK_LOG6(BLYNK_F("Header = "), Blynk8266_WM_config.header, BLYNK_F(", SSID = "), Blynk8266_WM_config.wifi_ssid, 
+                   BLYNK_F(", PW = "),     Blynk8266_WM_config.wifi_passphrase);
+        BLYNK_LOG6(BLYNK_F("Server = "), Blynk8266_WM_config.blynk_server, BLYNK_F(", Port = "), Blynk8266_WM_config.blynk_port, 
+                   BLYNK_F(", Token = "),  Blynk8266_WM_config.blynk_token);
+        BLYNK_LOG2(BLYNK_F("Board Name = "), Blynk8266_WM_config.board_name);               
+      }
+    }
+     
+
+#else    
+
+    void getConfigData()
     {
       #define EEPROM_SIZE       512
       #define BOARD_TYPE        "SSL_ESP8266"
@@ -303,10 +419,7 @@ public:
       if (strncmp(Blynk8266_WM_config.header, BOARD_TYPE, strlen(BOARD_TYPE)) != 0) 
       {
           memset(&Blynk8266_WM_config, 0, sizeof(Blynk8266_WM_config));
-          
-          EEPROM.put(0, Blynk8266_WM_config);
-          EEPROM.commit();
-                                    
+                                   
           char no_config[] = "nothing";
           BLYNK_LOG2(BLYNK_F("Init new EEPROM, size = "), EEPROM.length());          
           // doesn't have any configuration
@@ -331,12 +444,20 @@ public:
         BLYNK_LOG2(BLYNK_F("Board Name = "), Blynk8266_WM_config.board_name);               
       }
     }      
-        
+    
+    void saveConfigData()
+    {      
+      EEPROM.put(0, Blynk8266_WM_config);
+      EEPROM.commit();
+    }
+    
+#endif
+       
     void begin(const char* fingerprint = NULL) 
     {
         #define TIMEOUT_CONNECT_WIFI			30000
                
-        getEEPROM();
+        getConfigData();
 
         Base::begin(Blynk8266_WM_config.blynk_token);
         this->conn.begin(Blynk8266_WM_config.blynk_server, Blynk8266_WM_config.blynk_port);
@@ -551,8 +672,7 @@ private:
       {
         BLYNK_LOG1(BLYNK_F("handleRequest: Updating data to EEPROM"));
 
-        EEPROM.put(0, Blynk8266_WM_config);
-        EEPROM.commit();
+        saveConfigData();
 
         BLYNK_LOG1(BLYNK_F("handleRequest: Resetting"));
         

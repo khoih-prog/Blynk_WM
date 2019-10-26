@@ -23,7 +23,14 @@
 #include <WiFi.h>
 
 #include <WebServer.h>
+
+//default to use EEPROM, otherwise, use SPIFFS
+#if USE_SPIFFS
+#include <FS.h>
+#include "SPIFFS.h"
+#else
 #include <EEPROM.h>
+#endif
 
 #include <esp_wifi.h>
 #define ESP_getChipId()   ((uint32_t)ESP.getEfuseMac())
@@ -181,8 +188,119 @@ public:
         config(auth, ip, port);
         while(this->connect() != true) {}
     }
+   
+   
+#if USE_SPIFFS     
 
-    void getEEPROM()
+    #define  CONFIG_FILENAME         BLYNK_F("/wm_config.dat")
+    #define  CONFIG_FILENAME_BACKUP  BLYNK_F("/wm_config.bak")
+
+    void loadConfigData(void)
+    {
+      File file = SPIFFS.open(CONFIG_FILENAME, "r");
+      BLYNK_LOG1(BLYNK_F("Loading config file..."));
+      
+      if (!file) 
+      {
+        BLYNK_LOG1(BLYNK_F(" failed"));
+        
+        // Trying open redundant config file
+        file = SPIFFS.open(CONFIG_FILENAME_BACKUP, "r");
+        BLYNK_LOG1(BLYNK_F("Loading backup config file...")); 
+        
+        if (!file)
+        {
+          BLYNK_LOG1(BLYNK_F(" also failed"));
+          return;
+        }
+      }
+        
+      file.readBytes((char *) &BlynkESP32_WM_config, sizeof(BlynkESP32_WM_config));
+      
+      BLYNK_LOG1(BLYNK_F("OK"));
+      file.close();    
+    }
+
+    void saveConfigData(void)
+    {
+      File file = SPIFFS.open(CONFIG_FILENAME, "w");
+      BLYNK_LOG1(BLYNK_F("Saving config file..."));
+      
+      if (file) 
+      {
+        file.write((uint8_t*) &BlynkESP32_WM_config, sizeof(BlynkESP32_WM_config));  
+        file.close();     
+        BLYNK_LOG1(BLYNK_F("OK"));
+      }
+      else
+      {
+        BLYNK_LOG1(BLYNK_F(" failed"));        
+      }  
+      
+      // Trying open redundant Auth file
+      file = SPIFFS.open(CONFIG_FILENAME_BACKUP, "w");
+      BLYNK_LOG1(BLYNK_F("Saving backup config file...")); 
+      
+      if (file)
+      {
+        file.write((uint8_t *) &BlynkESP32_WM_config, sizeof(BlynkESP32_WM_config));
+        file.close();  
+        BLYNK_LOG1(BLYNK_F("OK"));      
+      }
+      else
+      {
+        BLYNK_LOG1(BLYNK_F(" failed"));       
+      }              
+    }
+    
+    void getConfigData()
+    {
+      #define BOARD_TYPE        "ESP32"
+      
+      if (!SPIFFS.begin()) 
+      {
+        BLYNK_LOG1(BLYNK_F("SPIFFS failed!. Please use EEPROM."));
+        return;
+      }
+      
+      if ( SPIFFS.exists(CONFIG_FILENAME) || SPIFFS.exists(CONFIG_FILENAME_BACKUP) )
+      { 
+        // if config file exists, load
+        loadConfigData();
+      }
+
+      if (strncmp(BlynkESP32_WM_config.header, BOARD_TYPE, strlen(BOARD_TYPE)) != 0) 
+      {
+          memset(&BlynkESP32_WM_config, 0, sizeof(BlynkESP32_WM_config));
+                                   
+          char no_config[] = "nothing";
+          BLYNK_LOG2(BLYNK_F("Init new config file, size = "), sizeof(BlynkESP32_WM_config));          
+          // doesn't have any configuration
+          strcpy(BlynkESP32_WM_config.header,           BOARD_TYPE);
+          strcpy(BlynkESP32_WM_config.wifi_ssid,        no_config);
+          strcpy(BlynkESP32_WM_config.wifi_passphrase,  no_config);
+          strcpy(BlynkESP32_WM_config.blynk_server,     no_config);
+          BlynkESP32_WM_config.blynk_port = BLYNK_SERVER_HARDWARE_PORT;
+          strcpy(BlynkESP32_WM_config.blynk_token,      no_config);
+          strcpy(BlynkESP32_WM_config.board_name,       no_config);
+          
+          saveConfigData();          
+      }
+  
+      else
+      {
+        BLYNK_LOG6(BLYNK_F("Header = "), BlynkESP32_WM_config.header, BLYNK_F(", SSID = "), BlynkESP32_WM_config.wifi_ssid, 
+                   BLYNK_F(", PW = "),     BlynkESP32_WM_config.wifi_passphrase);
+        BLYNK_LOG6(BLYNK_F("Server = "), BlynkESP32_WM_config.blynk_server, BLYNK_F(", Port = "), BlynkESP32_WM_config.blynk_port, 
+                   BLYNK_F(", Token = "),  BlynkESP32_WM_config.blynk_token);
+        BLYNK_LOG2(BLYNK_F("Board Name = "), BlynkESP32_WM_config.board_name);               
+      }
+    }
+     
+
+#else    
+
+    void getConfigData()
     {
       #define EEPROM_SIZE       512
       #define BOARD_TYPE        "ESP32"
@@ -193,34 +311,40 @@ public:
       if (strncmp(BlynkESP32_WM_config.header, BOARD_TYPE, strlen(BOARD_TYPE)) != 0) 
       {
           memset(&BlynkESP32_WM_config, 0, sizeof(BlynkESP32_WM_config));
-          
-          EEPROM.put(0, BlynkESP32_WM_config);
-          EEPROM.commit();
-                          
+                                   
           char no_config[] = "nothing";
-          BLYNK_LOG2(BLYNK_F("Init new EEPROM, size = "), EEPROM_SIZE);      
+          BLYNK_LOG2(BLYNK_F("Init new EEPROM, size = "), EEPROM.length());          
           // doesn't have any configuration
-          strcpy(BlynkESP32_WM_config.header, BOARD_TYPE);
-          strcpy(BlynkESP32_WM_config.wifi_ssid, no_config);
-          strcpy(BlynkESP32_WM_config.wifi_passphrase, no_config);
-          strcpy(BlynkESP32_WM_config.blynk_server, no_config);
+          strcpy(BlynkESP32_WM_config.header,           BOARD_TYPE);
+          strcpy(BlynkESP32_WM_config.wifi_ssid,        no_config);
+          strcpy(BlynkESP32_WM_config.wifi_passphrase,  no_config);
+          strcpy(BlynkESP32_WM_config.blynk_server,     no_config);
           BlynkESP32_WM_config.blynk_port = BLYNK_SERVER_HARDWARE_PORT;
-          strcpy(BlynkESP32_WM_config.blynk_token, no_config);
-          strcpy(BlynkESP32_WM_config.board_name, no_config);
-
-          EEPROM.put(0, BlynkESP32_WM_config);
+          strcpy(BlynkESP32_WM_config.blynk_token,      no_config);
+          strcpy(BlynkESP32_WM_config.board_name,       no_config);
+          
+          EEPROM.put(0, Blynk8266_WM_config);
           EEPROM.commit();
       }
+  
       else
       {
         BLYNK_LOG6(BLYNK_F("Header = "), BlynkESP32_WM_config.header, BLYNK_F(", SSID = "), BlynkESP32_WM_config.wifi_ssid, 
                    BLYNK_F(", PW = "),     BlynkESP32_WM_config.wifi_passphrase);
         BLYNK_LOG6(BLYNK_F("Server = "), BlynkESP32_WM_config.blynk_server, BLYNK_F(", Port = "), BlynkESP32_WM_config.blynk_port, 
                    BLYNK_F(", Token = "),  BlynkESP32_WM_config.blynk_token);
-        BLYNK_LOG2(BLYNK_F("Board Name = "), BlynkESP32_WM_config.board_name);                
-        
+        BLYNK_LOG2(BLYNK_F("Board Name = "), BlynkESP32_WM_config.board_name);               
       }
     }      
+    
+    void saveConfigData()
+    {      
+      EEPROM.put(0, BlynkESP32_WM_config);
+      EEPROM.commit();
+    }
+    
+#endif
+
    
     #define LED_BUILTIN       2         // Pin D2 mapped to pin GPIO2/ADC12 of ESP32, control on-board LED
         
@@ -228,7 +352,7 @@ public:
     {
         #define TIMEOUT_CONNECT_WIFI			30000
                
-        getEEPROM();
+        getConfigData();
 
         Base::begin(BlynkESP32_WM_config.blynk_token);
         this->conn.begin(BlynkESP32_WM_config.blynk_server, BlynkESP32_WM_config.blynk_port);
@@ -435,8 +559,7 @@ private:
       {
         BLYNK_LOG1(BLYNK_F("handleRequest: Updating data to EEPROM"));
 
-        EEPROM.put(0, BlynkESP32_WM_config);
-        EEPROM.commit();
+        saveConfigData();
 
         BLYNK_LOG1(BLYNK_F("handleRequest: Resetting"));
         

@@ -1,5 +1,12 @@
 #define BLYNK_PRINT Serial
 
+// Not use #define USE_SPIFFS  => using EEPROM for configuration data in WiFiManager
+// #define USE_SPIFFS    false => using EEPROM for configuration data in WiFiManager
+// #define USE_SPIFFS    true  => using SPIFFS for configuration data in WiFiManager
+// Be sure to define USE_SPIFFS before #include <BlynkSimpleEsp8266_WM.h>
+
+#define USE_SPIFFS    true
+
 #include <BlynkSimpleEsp32_WM.h>
 #include <Ticker.h>
 #include <DHT.h>
@@ -8,8 +15,6 @@
   
 #define DHT_PIN     PIN_D22     // pin DATA @ D22 / GPIO22
 #define DHT_TYPE    DHT11
-
-#define DHT_DEBUG   1
 
 DHT dht(DHT_PIN, DHT_TYPE);
 BlynkTimer timer;
@@ -20,16 +25,15 @@ void readAndSendData()
     float temperature = dht.readTemperature();
     float humidity    = dht.readHumidity();
     
-
     if (!isnan(temperature) && !isnan(humidity)) 
     {
-      Blynk.virtualWrite(V17, temperature);
-      Blynk.virtualWrite(V18, humidity);
+      Blynk.virtualWrite(V17, String(temperature, 1));
+      Blynk.virtualWrite(V18, String(humidity, 1));    
     }
     else
     {
-      Blynk.virtualWrite(V17, -100);
-      Blynk.virtualWrite(V18, -100);
+      Blynk.virtualWrite(V17, "NAN");
+      Blynk.virtualWrite(V18, "NAN");
     }
 }
 
@@ -78,7 +82,11 @@ void setup()
 
     if (Blynk.connected())
     {
-       Serial.println("\nBlynk ESP32 connected. Board Name : " + Blynk.getBoardName());
+       #if USE_SPIFFS     
+        Serial.println("\nBlynk ESP32 using SPIFFS connected. Board Name : " + Blynk.getBoardName());
+      #else
+        Serial.println("\nBlynk ESP32 using EEPROM connected. Board Name : " + Blynk.getBoardName());
+      #endif  
     }
 }
 

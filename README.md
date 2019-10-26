@@ -10,8 +10,19 @@ In your code, replace
 2. BlynkSimpleEsp8266_SSL.h with BlynkSimpleEsp8266_SSL_WM.h  for ESP8266 with SSL
 3. BlynkSimpleEsp32.h       with BlynkSimpleEsp32_WM.h        for ESP32 without SSL
 4. BlynkSimpleEsp32_SSL.h   with BlynkSimpleEsp32_SSL_WM.h    for ESP32 with SSL
+5. In your code, insert
 
-and replace
+```
+#define USE_SPIFFS    true
+```
+to use SPIFFS or
+
+```
+#define USE_SPIFFS    false
+```
+to use EEPROM to save your configuration data.
+
+Then replace
 
 , `Blynk.begin(...)` with `Blynk.begin()` in your code. Keep `Blynk.run()`.
 
@@ -44,6 +55,9 @@ Anyway, this is better for projects using Blynk just for graphical user interfac
 ## Hello World
 Please take a look at examples, as well.
 ```
+#define BLYNK_PRINT   Serial
+#define USE_SPIFFS    true
+
 #include <BlynkSimpleEsp8266_WM.h>
 
 void setup() 
