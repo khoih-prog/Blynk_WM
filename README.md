@@ -20,7 +20,7 @@ to use SPIFFS or
 ```
 #define USE_SPIFFS    false
 ```
-to use EEPROM to save your configuration data.
+to use EEPROM ( 168 bytes from address 0-167) to save your configuration data.
 
 Then replace
 
