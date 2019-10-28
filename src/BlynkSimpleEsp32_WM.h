@@ -1,11 +1,10 @@
 /**
  * Blynk_WM is a library for the ESP8266/ESP32 Arduino platform (https://github.com/esp8266/Arduino) to enable easy
  * configuration/reconfiguration and autoconnect/autoreconnect of WiFi/Blynk
- * inspired by:
- * https://github.com/Barbayar/EasyBlynk8266
  * Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
  * Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
  * Licensed under MIT license
+ * Version: 1.0.1 
  * Original Blynk Library author:
  * @file       BlynkSimpleEsp32.h
  * @author     Volodymyr Shymanskyy
@@ -53,7 +52,7 @@ struct Configuration
     char blynk_server   [32];
     int  blynk_port;
     char blynk_token    [36];
-    char board_name     [16];
+    char board_name     [24];
 };
 
 String root_html_template = " \
@@ -204,57 +203,122 @@ public:
     {
         #define TIMEOUT_CONNECT_WIFI			30000
                
-        getConfigData();
-
-        Base::begin(BlynkESP32_WM_config.blynk_token);
-        this->conn.begin(BlynkESP32_WM_config.blynk_server, BlynkESP32_WM_config.blynk_port);
-
-        if (connectToWifi(TIMEOUT_CONNECT_WIFI)) 
+        if (getConfigData())
         {
-          BLYNK_LOG1(BLYNK_F("begin: WiFi connected. Try connecting to Blynk"));
-          
-          int i = 0;
-          while ( (i++ < 10) && !this->connect() )
+          hadConfigData = true;
+
+          Base::begin(BlynkESP32_WM_config.blynk_token);
+          this->conn.begin(BlynkESP32_WM_config.blynk_server, BlynkESP32_WM_config.blynk_port);
+
+          if (connectToWifi(TIMEOUT_CONNECT_WIFI)) 
           {
-          }
-          
-          if  (this->connected())
-          {
-            BLYNK_LOG1(BLYNK_F("begin: WiFi and Blynk connected"));
-          }
+            BLYNK_LOG1(BLYNK_F("begin: WiFi connected. Try connecting to Blynk"));
+            
+            int i = 0;
+            while ( (i++ < 10) && !this->connect() )
+            {
+            }
+            
+            if  (this->connected())
+            {
+              BLYNK_LOG1(BLYNK_F("begin: WiFi and Blynk connected"));
+            }
+            else 
+            {
+              BLYNK_LOG1(BLYNK_F("begin: WiFi connected but Bynk not connected"));
+              // failed to connect to Blynk server, will start configuration mode
+              // Turn the LED_BUILTIN ON in configuration mode. ESP32 LED_BUILDIN is correct polarity, HIGH to turn ON
+              digitalWrite(LED_BUILTIN, HIGH);
+              startConfigurationMode();
+            }
+          } 
           else 
           {
-            BLYNK_LOG1(BLYNK_F("begin: WiFi connected but Bynk not connected"));
-            // failed to connect to Blynk server, will start configuration mode
-            // Turn the LED_BUILTIN ON in configuration mode. ESP32 LED_BUILDIN is correct polarity, HIGH to turn ON
-            digitalWrite(LED_BUILTIN, HIGH);
-            startConfigurationMode();
+              BLYNK_LOG1(BLYNK_F("begin: Fail to connect WiFi and Blynk"));
+              // failed to connect to Blynk server, will start configuration mode
+              // Turn the LED_BUILTIN ON in configuration mode. ESP32 LED_BUILDIN is correct polarity, HIGH to turn ON
+              digitalWrite(LED_BUILTIN, HIGH);            
+              startConfigurationMode();
           }
-        } 
-        else 
+        }
+        else
         {
-            BLYNK_LOG1(BLYNK_F("begin: Fail to connect WiFi and Blynk"));
+            BLYNK_LOG1(BLYNK_F("begin: No stored config data. Will forever stay in config mode until getting data"));
             // failed to connect to Blynk server, will start configuration mode
-            // Turn the LED_BUILTIN ON in configuration mode. ESP32 LED_BUILDIN is correct polarity, HIGH to turn ON
-            digitalWrite(LED_BUILTIN, HIGH);            
-            startConfigurationMode();
-        }   
+            // turn the LED_BUILTIN ON to tell us we are in configuration mode.
+            hadConfigData = false;
+            digitalWrite(LED_BUILTIN, LOW);            
+            startConfigurationMode();                  
+        }        
     }    
+
+#ifndef TIMEOUT_RECONNECT_WIFI
+  #define TIMEOUT_RECONNECT_WIFI   10000L
+#else
+  // Force range of user-defined TIMEOUT_RECONNECT_WIFI between 10-60s
+  #if (TIMEOUT_RECONNECT_WIFI < 10000L)
+    #warning TIMEOUT_RECONNECT_WIFI too low. Reseting to 10000
+    #undef TIMEOUT_RECONNECT_WIFI
+    #define TIMEOUT_RECONNECT_WIFI   10000L
+  #elif (TIMEOUT_RECONNECT_WIFI > 60000L)
+    #warning TIMEOUT_RECONNECT_WIFI too high. Reseting to 60000
+    #undef TIMEOUT_RECONNECT_WIFI
+    #define TIMEOUT_RECONNECT_WIFI   60000L
+  #endif
+#endif
+
+#ifndef RESET_IF_CONFIG_TIMEOUT
+  #define RESET_IF_CONFIG_TIMEOUT   true
+#endif
+
+#ifndef CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET
+  #define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET          10
+#else
+  // Force range of user-defined TIMES_BEFORE_RESET between 2-100
+  #if (CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET < 2)
+    #warning CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET too low. Reseting to 2
+    #undef CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET
+    #define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET   2
+  #elif (CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET > 100)
+    #warning CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET too high. Reseting to 100
+    #undef CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET
+    #define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET   100
+  #endif
+#endif
    
     void run()
     {
-      #define TIMEOUT_RECONNECT_WIFI			10000
+      static int retryTimes = 0;
       
       // Lost connection in running. Give chance to reconfig.
       if ( WiFi.status() != WL_CONNECTED || !connected() )
       {   
-		    if (configuration_mode)
+        // If configTimeout but user hasn't connected to configWeb => try to reconnect WiFi / Blynk. 
+        // But if user has connected to configWeb, stay there until done, then reset hardware
+		    if ( configuration_mode && ( configTimeout == 0 ||  millis() < configTimeout ) )
 		    {
+		      retryTimes = 0;
 			    server.handleClient();		
 			    return;
 		    }
 		    else
 		    {
+		      #if RESET_IF_CONFIG_TIMEOUT
+		      // If we're here but still in configuration_mode, permit running TIMES_BEFORE_RESET times before reset hardware
+		      // to permit user another chance to config.
+		      if ( configuration_mode && (configTimeout != 0) )
+		      {	        
+		        if (++retryTimes <= CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET)
+		        {
+		          BLYNK_LOG2(BLYNK_F("run: WiFi lost but config Timeout. Try connecting WiFi and Blynk. RetryTimes : "), retryTimes);
+		        }
+		        else
+		        {
+              ESP.restart();
+		        }		        
+		      }
+		      #endif
+		      		    
 			    // Not in config mode, try reconnecting before force to config mode
 			    if ( WiFi.status() != WL_CONNECTED )
 			    {
@@ -304,8 +368,13 @@ public:
         
 private:
     WebServer server;
-    boolean configuration_mode = false;
+    bool configuration_mode = false;
     struct Configuration BlynkESP32_WM_config;
+    
+    unsigned long configTimeout;
+    bool hadConfigData;    
+
+#define BOARD_TYPE        "ESP32"
     
 #if USE_SPIFFS     
 
@@ -370,14 +439,13 @@ private:
       }              
     }
     
-    void getConfigData()
-    {
-      #define BOARD_TYPE        "ESP32"
-      
+    // Return false if init new EEPROM or SPIFFS. No more need trying to connect. Go directly to config mode 
+    bool getConfigData()
+    {     
       if (!SPIFFS.begin()) 
       {
         BLYNK_LOG1(BLYNK_F("SPIFFS failed!. Please use EEPROM."));
-        return;
+        return false;
       }
       
       if ( SPIFFS.exists(CONFIG_FILENAME) || SPIFFS.exists(CONFIG_FILENAME_BACKUP) )
@@ -401,7 +469,9 @@ private:
           strcpy(BlynkESP32_WM_config.blynk_token,      no_config);
           strcpy(BlynkESP32_WM_config.board_name,       no_config);
           
-          saveConfigData();          
+          saveConfigData();
+          
+          return false;        
       }
   
       else
@@ -412,25 +482,50 @@ private:
                    BLYNK_F(", Token = "),  BlynkESP32_WM_config.blynk_token);
         BLYNK_LOG2(BLYNK_F("Board Name = "), BlynkESP32_WM_config.board_name);               
       }
+      
+      return true;
     }
      
 
-#else    
+#else
 
-    void getConfigData()
-    {
-      #define EEPROM_SIZE       512
-      #define BOARD_TYPE        "ESP32"
-      
+#define  CONFIG_DATA_SIZE     172
+
+#ifndef EEPROM_SIZE
+  #define EEPROM_SIZE     512
+#else
+  #if (EEPROM_SIZE > 4096)
+    #warning EEPROM_SIZE must be <= 4096. Reset to 4096
+    #undef EEPROM_SIZE
+    #define EEPROM_SIZE     4096
+  #endif
+  #if (EEPROM_SIZE < CONFIG_DATA_SIZE)
+    #warning EEPROM_SIZE must be > CONFIG_DATA_SIZE. Reset to 512
+    #undef EEPROM_SIZE
+    #define EEPROM_SIZE     512
+  #endif  
+#endif  
+
+#ifndef EEPROM_START
+  #define EEPROM_START     0
+#else
+  #if (EEPROM_START + CONFIG_DATA_SIZE > EEPROM_SIZE)
+    #error EPROM_START + CONFIG_DATA_SIZE > EEPROM_SIZE. Please adjust.
+  #endif
+#endif  
+
+    // Return false if init new EEPROM or SPIFFS. No more need trying to connect. Go directly to config mode 
+    bool getConfigData()
+    {      
       EEPROM.begin(EEPROM_SIZE);
-      EEPROM.get(0, BlynkESP32_WM_config);
+      EEPROM.get(EEPROM_START, BlynkESP32_WM_config);
 
       if (strncmp(BlynkESP32_WM_config.header, BOARD_TYPE, strlen(BOARD_TYPE)) != 0) 
       {
           memset(&BlynkESP32_WM_config, 0, sizeof(BlynkESP32_WM_config));
                                    
           char no_config[] = "nothing";
-          BLYNK_LOG2(BLYNK_F("Init new EEPROM, size = "), EEPROM.length());          
+          BLYNK_LOG2(BLYNK_F("Init new EEPROM, size = "), EEPROM_SIZE /*EEPROM.length()*/);          
           // doesn't have any configuration
           strcpy(BlynkESP32_WM_config.header,           BOARD_TYPE);
           strcpy(BlynkESP32_WM_config.wifi_ssid,        no_config);
@@ -440,8 +535,10 @@ private:
           strcpy(BlynkESP32_WM_config.blynk_token,      no_config);
           strcpy(BlynkESP32_WM_config.board_name,       no_config);
           
-          EEPROM.put(0, BlynkESP32_WM_config);
+          EEPROM.put(EEPROM_START, BlynkESP32_WM_config);
           EEPROM.commit();
+          
+          return false;
       }
   
       else
@@ -452,11 +549,13 @@ private:
                    BLYNK_F(", Token = "),  BlynkESP32_WM_config.blynk_token);
         BLYNK_LOG2(BLYNK_F("Board Name = "), BlynkESP32_WM_config.board_name);               
       }
+      
+      return true;
     }      
     
     void saveConfigData()
     {      
-      EEPROM.put(0, BlynkESP32_WM_config);
+      EEPROM.put(EEPROM_START, BlynkESP32_WM_config);
       EEPROM.commit();
     }
     
@@ -510,6 +609,11 @@ private:
       if (key == "" && value == "") 
       {
           String result = root_html_template;
+          
+          BLYNK_LOG1(BLYNK_F("handleRequest: replacing result"));
+          
+          // Reset configTimeout to stay here until finished.
+          configTimeout = 0;
 
           result.replace("[[wifi_ssid]]",       BlynkESP32_WM_config.wifi_ssid);
           result.replace("[[wifi_passphrase]]", BlynkESP32_WM_config.wifi_passphrase);
@@ -523,17 +627,27 @@ private:
           return;
       }
      
+      if (number_items_Updated == 0)
+      {
+        memset(&BlynkESP32_WM_config, 0, sizeof(BlynkESP32_WM_config));
+        strcpy(BlynkESP32_WM_config.header, BOARD_TYPE);
+      }
+      
       if (key == "wifi_ssid")
       {
           number_items_Updated++;
           if (strlen(value.c_str()) < sizeof(BlynkESP32_WM_config.wifi_ssid) -1)
             strcpy(BlynkESP32_WM_config.wifi_ssid, value.c_str());
+          else
+            strncpy(BlynkESP32_WM_config.wifi_ssid, value.c_str(), sizeof(BlynkESP32_WM_config.wifi_ssid) -1);    
       }
       else if (key == "wifi_passphrase") 
       {
           number_items_Updated++;
           if (strlen(value.c_str()) < sizeof(BlynkESP32_WM_config.wifi_passphrase) -1)
             strcpy(BlynkESP32_WM_config.wifi_passphrase, value.c_str());
+          else
+            strncpy(BlynkESP32_WM_config.wifi_passphrase, value.c_str(), sizeof(BlynkESP32_WM_config.wifi_passphrase) -1);    
       }
 
       else if (key == "blynk_server") 
@@ -541,6 +655,8 @@ private:
           number_items_Updated++;
           if (strlen(value.c_str()) < sizeof(BlynkESP32_WM_config.blynk_server) -1)
             strcpy(BlynkESP32_WM_config.blynk_server, value.c_str());
+          else
+            strncpy(BlynkESP32_WM_config.blynk_server, value.c_str(), sizeof(BlynkESP32_WM_config.blynk_server) -1);      
       }
       else if (key == "blynk_port") 
       {
@@ -552,12 +668,16 @@ private:
           number_items_Updated++;
           if (strlen(value.c_str()) < sizeof(BlynkESP32_WM_config.blynk_token) -1)
             strcpy(BlynkESP32_WM_config.blynk_token, value.c_str());
+          else
+            strncpy(BlynkESP32_WM_config.blynk_token, value.c_str(), sizeof(BlynkESP32_WM_config.blynk_token) -1);    
       }
       else if (key == "board_name") 
       {
           number_items_Updated++;
           if (strlen(value.c_str()) < sizeof(BlynkESP32_WM_config.board_name) -1)
             strcpy(BlynkESP32_WM_config.board_name, value.c_str());
+          else
+            strncpy(BlynkESP32_WM_config.board_name, value.c_str(), sizeof(BlynkESP32_WM_config.board_name) -1);  
       }
       
       server.send(200, "text/html", "OK");
@@ -579,6 +699,8 @@ private:
         
     void startConfigurationMode()
     {
+      #define CONFIG_TIMEOUT			60000L
+      
       String chipID = String(ESP_getChipId(), HEX);
       chipID.toUpperCase();
       
@@ -600,6 +722,12 @@ private:
       server.on("/", [this](){ handleRequest(); });
 
       server.begin();
+      
+      // If there is no saved config Data, stay in config mode forever until having config Data.
+      if (hadConfigData)      
+        configTimeout = millis() + CONFIG_TIMEOUT;
+      else
+        configTimeout = 0;      
        
       configuration_mode = true;    
     }    
