@@ -291,7 +291,7 @@ C) Generate own OpenSSL certificates
 	  
 	  ```	
 	  openssl pkcs8 -topk8 -v1 PBE-SHA1-2DES -in server.key -out server.pem
-	  ```	
+	  ```
 	  
 	  b) For Local Blynk Server running Ubuntu, using
 	  
@@ -308,9 +308,9 @@ C) Generate own OpenSSL certificates
   	openssl pkcs8 -topk8 -inform PEM -outform PEM -in server.key -out server.pem
     ```
   	
-If you connect hardware with USB script you have to provide an option '-s' pointing to "common name" (hostname) you did specified during certificate generation.
+    If you connect hardware with USB script you have to provide an option '-s' pointing to "common name" (hostname) you did specified during certificate generation.
 
-As an output you'll retrieve server.crt and server.pem files that you need to provide for server.ssl properties.
+    As an output you'll retrieve server.crt and server.pem files that you need to provide for server.ssl properties.
 
   ```
   server.ssl.cert=./server.pem
