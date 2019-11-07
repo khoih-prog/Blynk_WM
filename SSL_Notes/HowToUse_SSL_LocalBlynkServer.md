@@ -277,20 +277,26 @@ C) Generate own OpenSSL certificates
   	openssl req -x509 -nodes -days 1825 -newkey rsa:2048 -keyout server.key -out server.crt
   ```
   2) Convert server.key to PKCS#8 private key file in PEM format
-	  a) For Local Blynk Server running RPi Raspbian, 
-	  using openjdk version "11.0.3" 2019-04-16
+  
+	  a) For Local Blynk Server running RPi Raspbian, using:
+	  
+	  ```
+	  openjdk version "11.0.3" 2019-04-16
 	  OpenJDK Runtime Environment (build 11.0.3+7-post-Raspbian-5)
 	  OpenJDK Server VM (build 11.0.3+7-post-Raspbian-5, mixed mode)
+		```
 											
 	  use only v1 PBE-SHA1-2DES by this command: ( If use with Ubuntu => invalid key file )
 	  
 	  ```	
 	  openssl pkcs8 -topk8 -v1 PBE-SHA1-2DES -in server.key -out server.pem
 	  ```	
-	  b) For Local Blynk Server running Ubuntu, 
-	  using java version "11.0.5" 2019-10-15 LTS
+	  b) For Local Blynk Server running Ubuntu, using 
+	  ```
+	  java version "11.0.5" 2019-10-15 LTS
 	  Java(TM) SE Runtime Environment 18.9 (build 11.0.5+10-LTS)
     Java HotSpot(TM) 64-Bit Server VM 18.9 (build 11.0.5+10-LTS, mixed mode
+		```
 													
 	  use this command to generate pem file: ( If use with RPi => invalid key file )
 	  
