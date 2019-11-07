@@ -24,11 +24,14 @@ Certainly don't forget to forward port 9443 from your Internet Router to your lo
       Numbered IP ( e.g. 222.222.111.111) is also not supported. This is the limitation of Let's Encrypt. Also have in mind that "xxxx.duckdns.org"/"xxxx.no-ip.org" must be resolved by public DNS severs.
       
       Add server.host property in server.properties file. For example :
-
+      
+      ```
   		server.host=xxxx.duckdns.org
+  		```
   		or
+  		```
   		server.host=xxxx.no-ip.org
-  		
+  		```
   3) Modifying /home/pi/Blynk-Server/server.properties (assuming your Blynk Server was installed in /home/pi/Blynk-Server, replacing with your correct path). You can try either of the following ways:
   
       a) OK
@@ -47,7 +50,7 @@ Certainly don't forget to forward port 9443 from your Internet Router to your lo
       server.ssl.key.pass= 
       ```
       
-  4) Get LetsEncrypt Certificate => fullchain.crt, privkey.pem and user.pem in / (root / 664)
+  4) Get LetsEncrypt Certificate => fullchain.crt, privkey.pem and user.pem are created in / (root / 664)
   
   5) Convert fullchain.crt -> fullchain_der.h :
   
@@ -58,12 +61,20 @@ Certainly don't forget to forward port 9443 from your Internet Router to your lo
       xxd -i fullchain.der > fullchain_der.h
       ```
      
-     Then delete "unsigned char fullchain_der[] =" and "unsigned int fullchain_der_len = xxxx;" in the file
+     Then delete the line 
+     ```
+     "unsigned char fullchain_der[] ="
+     ``` 
+     and 
+     ```
+     "unsigned int fullchain_der_len = xxxx;"
+     ```
+     in the file
      
   6) Replacing certificate files in ~/Arduino/libraries/Blynk/src/certs/ (assuming Arduino libraries are stored in ~/Arduino/libraries/. Replacing with your correct path) with fullchain_der.h.
   
-      a) ~/Arduino/libraries/Blynk/src/certs/blynkcloud_der.h (if not define BLYNK_SSL_USE_LETSENCRYPT) 
-      b) ~/Arduino/libraries/Blynk/src/certs/dst_der.h (if define BLYNK_SSL_USE_LETSENCRYPT)
+      a) ~/Arduino/libraries/Blynk/src/certs/blynkcloud_der.h (if don't use #define BLYNK_SSL_USE_LETSENCRYPT) 
+      b) ~/Arduino/libraries/Blynk/src/certs/dst_der.h (if use #define BLYNK_SSL_USE_LETSENCRYPT)
       
       ```
       cd ~/Arduino/libraries/Blynk/src/certs/
@@ -182,8 +193,7 @@ Certainly don't forget to forward port 9443 from your Internet Router to your lo
    
    For Example: blynkcloud_pem.h generated from server.crt
    
- ```  
-   
+    
  "-----BEGIN CERTIFICATE-----\n"																			\
 "MIID8TCCAtmgAwIBAgIUXTAEvCpQ1v695km/VZ5xScms0LIwDQYJKoZIhvcNAQEL\n"	\
 "BQAwgYcxCzAJBgNVBAYTAkNBMRAwDgYDVQQIDAdPTlRBUklPMRQwEgYDVQQHDAtN\n"	\
@@ -208,7 +218,7 @@ Certainly don't forget to forward port 9443 from your Internet Router to your lo
 "JEWZcGbwKTkwCaWy+MYFEWJUK/Chic2RgslG4jdO4lMXBDnc0+kCQgasUo6mbNUs\n"	\
 "WSHZY1Q=\n"																													\
 "-----END CERTIFICATE-----\n"																					;
-```
+
       
 ## See more in Blynk Server instructions (https://github.com/blynkkk/blynk-server#blynk-server) :
       
@@ -218,17 +228,13 @@ A) Automatic Let's Encrypt certificates generation (https://github.com/blynkkk/b
 
   Add server.host property in server.properties file. For example :
   
-    ```
     server.host=myhost.com
-    ```
     
   IP is not supported, this is the limitation of Let's Encrypt. Also have in mind that myhost.com should be resolved by public DNS severs.
 
   Add contact.email property in server.properties. For example :
     
-    ```
     contact.email=test@gmail.com
-    ```
     
   You need to start server on port 80 (requires root or admin rights) or make port forwarding to default Blynk HTTP port - 8080.
 
@@ -238,68 +244,61 @@ B) Manual Let's Encrypt SSL/TLS Certificates (https://github.com/blynkkk/blynk-s
 
 	1) First install certbot on your server (machine where you going to run Blynk Server)
   
-  ```
   wget https://dl.eff.org/certbot-auto
   chmod a+x certbot-auto
-  ```
   
 	2) Generate and verify certificates (your server should be connected to internet and have open 80/443 ports)
   
-  ```
-  ./certbot-auto certonly --agree-tos --email YOUR_EMAIL --standalone -d YOUR_HOST
-	```
+   ./certbot-auto certonly --agree-tos --email YOUR_EMAIL --standalone -d YOUR_HOST
+
 	
 	For example
   
-  ```
+
     ./certbot-auto certonly --agree-tos --email pupkin@blynk.cc --standalone -d blynk.cc
-  ```
   
 	Then add to your server.properties file (in folder with server.jar)
 
-  ```
+
   server.ssl.cert=/etc/letsencrypt/live/YOUR_HOST/fullchain.pem
   server.ssl.key=/etc/letsencrypt/live/YOUR_HOST/privkey.pem
   server.ssl.key.pass=your_ssl_key_password
-  ```
+
 
 C) Generate own OpenSSL certificates (https://github.com/blynkkk/blynk-server#generate-own-ssl-certificates)
 
 	1) Generate self-signed certificate and key
   
-    ```
+
   	openssl req -x509 -nodes -days 1825 -newkey rsa:2048 -keyout server.key -out server.crt
-	  ```
+
 	  
 	2) Convert server.key to PKCS#8 private key file in PEM format
 	
-		a) For Local Blynk Server running RPi Raspbian, using openjdk version "11.0.3" 2019-04-16
-											OpenJDK Runtime Environment (build 11.0.3+7-post-Raspbian-5)
-											OpenJDK Server VM (build 11.0.3+7-post-Raspbian-5, mixed mode)
+	  a) For Local Blynk Server running RPi Raspbian, using openjdk version "11.0.3" 2019-04-16
+										  OpenJDK Runtime Environment (build 11.0.3+7-post-Raspbian-5)
+										  OpenJDK Server VM (build 11.0.3+7-post-Raspbian-5, mixed mode)
 											
-		use only v1 PBE-SHA1-2DES by this command: ( If use with Ubuntu => invalid key file )								
+	  use only v1 PBE-SHA1-2DES by this command: ( If use with Ubuntu => invalid key file )								
 		
-		```
-		openssl pkcs8 -topk8 -v1 PBE-SHA1-2DES -in server.key -out server.pem
-		```
+	  openssl pkcs8 -topk8 -v1 PBE-SHA1-2DES -in server.key -out server.pem
 		
-		b) For Local Blynk Server running Ubuntu, using 	java version "11.0.5" 2019-10-15 LTS
-													Java(TM) SE Runtime Environment 18.9 (build 11.0.5+10-LTS)
-													Java HotSpot(TM) 64-Bit Server VM 18.9 (build 11.0.5+10-LTS, mixed mode
+	  b) For Local Blynk Server running Ubuntu, using 	java version "11.0.5" 2019-10-15 LTS
+												  Java(TM) SE Runtime Environment 18.9 (build 11.0.5+10-LTS)
+												  Java HotSpot(TM) 64-Bit Server VM 18.9 (build 11.0.5+10-LTS, mixed mode
 													
-		use this command to generate pem file: ( If use with RPi => invalid key file )
+	  use this command to generate pem file: ( If use with RPi => invalid key file )
   	
-  	```
   	openssl pkcs8 -topk8 -inform PEM -outform PEM -in server.key -out server.pem
-  	```
+
   	
 If you connect hardware with USB script you have to provide an option '-s' pointing to "common name" (hostname) you did specified during certificate generation.
 
 As an output you'll retrieve server.crt and server.pem files that you need to provide for server.ssl properties.
 
-  ```
+
   server.ssl.cert=./server.pem
   server.ssl.key=./server.pem
-  server.ssl.key.pass=******   
-  ```
+  server.ssl.key.pass=your_ssl_key_password   
+
 
