@@ -288,8 +288,9 @@ C) Generate own OpenSSL certificates
 	  											
 	 use only v1 PBE-SHA1-2DES by this command: ( If use with Ubuntu => invalid key file )
 	  
-	  ```openssl pkcs8 -topk8 -v1 PBE-SHA1-2DES -in server.key -out server.pem
-	  ```
+	```
+	openssl pkcs8 -topk8 -v1 PBE-SHA1-2DES -in server.key -out server.pem
+	```
 	  
 	  b) For Local Blynk Server running Ubuntu, using
 	  
