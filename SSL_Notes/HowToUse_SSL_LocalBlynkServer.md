@@ -26,12 +26,12 @@ Certainly don't forget to forward port 9443 from your Internet Router to your lo
       Add server.host property in server.properties file. For example :
       
       ```
-  		server.host=xxxx.duckdns.org
-  		```
-  		or
-  		```
-  		server.host=xxxx.no-ip.org
-  		```
+      server.host=xxxx.duckdns.org
+      ```
+      or
+      ```
+      server.host=xxxx.no-ip.org
+      ```
   3) Modifying /home/pi/Blynk-Server/server.properties (assuming your Blynk Server was installed in /home/pi/Blynk-Server, replacing with your correct path). You can try either of the following ways:
   
       a) OK
@@ -253,12 +253,12 @@ B) Manual Let's Encrypt SSL/TLS Certificates
   
   2) Generate and verify certificates (your server should be connected to internet and have open 80/443 ports)
   ```
-   ./certbot-auto certonly --agree-tos --email YOUR_EMAIL --standalone -d YOUR_HOST
+  ./certbot-auto certonly --agree-tos --email YOUR_EMAIL --standalone -d YOUR_HOST
   ```
   For example:
   
   ```
-    ./certbot-auto certonly --agree-tos --email pupkin@blynk.cc --standalone -d blynk.cc
+  ./certbot-auto certonly --agree-tos --email pupkin@blynk.cc --standalone -d blynk.cc
   ```
   
   Then add to your server.properties file (in folder with server.jar)
@@ -280,17 +280,15 @@ C) Generate own OpenSSL certificates
   
 	  a) For Local Blynk Server running RPi Raspbian, using:
 	  
-	  ```
-	  openjdk version "11.0.3" 2019-04-16
-	  OpenJDK Runtime Environment (build 11.0.3+7-post-Raspbian-5)
-	  OpenJDK Server VM (build 11.0.3+7-post-Raspbian-5, mixed mode)
 	  
-		```
-											
-	  use only v1 PBE-SHA1-2DES by this command: ( If use with Ubuntu => invalid key file )
+	  ```openjdk version "11.0.3" 2019-04-16```
+	  ```OpenJDK Runtime Environment (build 11.0.3+7-post-Raspbian-5)```
+	  ```OpenJDK Server VM (build 11.0.3+7-post-Raspbian-5, mixed mode```
 	  
-	  ```	
-	  openssl pkcs8 -topk8 -v1 PBE-SHA1-2DES -in server.key -out server.pem
+	  											
+	 use only v1 PBE-SHA1-2DES by this command: ( If use with Ubuntu => invalid key file )
+	  
+	  ```openssl pkcs8 -topk8 -v1 PBE-SHA1-2DES -in server.key -out server.pem
 	  ```
 	  
 	  b) For Local Blynk Server running Ubuntu, using
@@ -302,15 +300,15 @@ C) Generate own OpenSSL certificates
 
     ```
 													
-	  use this command to generate pem file: ( If use with RPi => invalid key file )
+   use this command to generate pem file: ( If use with RPi => invalid key file )
 	  
-  	```
-  	openssl pkcs8 -topk8 -inform PEM -outform PEM -in server.key -out server.pem
-    ```
-  	
-    If you connect hardware with USB script you have to provide an option '-s' pointing to "common name" (hostname) you did specified during certificate generation.
+  ```
+  openssl pkcs8 -topk8 -inform PEM -outform PEM -in server.key -out server.pem
+  ```
+    
+   If you connect hardware with USB script you have to provide an option '-s' pointing to "common name" (hostname) you did specified during certificate generation.
 
-    As an output you'll retrieve server.crt and server.pem files that you need to provide for server.ssl properties.
+   As an output you'll retrieve server.crt and server.pem files that you need to provide for server.ssl properties.
 
   ```
   server.ssl.cert=./server.pem
