@@ -193,6 +193,7 @@ Certainly don't forget to forward port 9443 from your Internet Router to your lo
    
    For Example: blynkcloud_pem.h generated from server.crt
    
+ ```
     
  "-----BEGIN CERTIFICATE-----\n"																			\
 "MIID8TCCAtmgAwIBAgIUXTAEvCpQ1v695km/VZ5xScms0LIwDQYJKoZIhvcNAQEL\n"	\
@@ -219,10 +220,11 @@ Certainly don't forget to forward port 9443 from your Internet Router to your lo
 "WSHZY1Q=\n"																													\
 "-----END CERTIFICATE-----\n"																					;
 
+```
       
 ## See more in Blynk Server instructions (https://github.com/blynkkk/blynk-server#blynk-server) :
       
-A) Automatic Let's Encrypt certificates generation (https://github.com/blynkkk/blynk-server#automatic-lets-encrypt-certificates-generation)
+A) Automatic Let's Encrypt certificates generation
 
   Latest Blynk server has super cool feature - automatic Let's Encrypt certificates generation. However, it has few requirements:
 
@@ -240,38 +242,41 @@ A) Automatic Let's Encrypt certificates generation (https://github.com/blynkkk/b
 
   That's it! Run server as regular and certificates will be generated automatically.
       
-B) Manual Let's Encrypt SSL/TLS Certificates (https://github.com/blynkkk/blynk-server#manual-lets-encrypt-ssltls-certificates)
+B) Manual Let's Encrypt SSL/TLS Certificates
 
-	1) First install certbot on your server (machine where you going to run Blynk Server)
+  1) First install certbot on your server (machine where you going to run Blynk Server)
   
+  ```
   wget https://dl.eff.org/certbot-auto
   chmod a+x certbot-auto
+  ```
   
 	2) Generate and verify certificates (your server should be connected to internet and have open 80/443 ports)
-  
+  ```
    ./certbot-auto certonly --agree-tos --email YOUR_EMAIL --standalone -d YOUR_HOST
-
+  ```
 	
 	For example
   
-
+  ```
     ./certbot-auto certonly --agree-tos --email pupkin@blynk.cc --standalone -d blynk.cc
+  ```
   
 	Then add to your server.properties file (in folder with server.jar)
 
-
+  ```
   server.ssl.cert=/etc/letsencrypt/live/YOUR_HOST/fullchain.pem
   server.ssl.key=/etc/letsencrypt/live/YOUR_HOST/privkey.pem
   server.ssl.key.pass=your_ssl_key_password
+  ```
 
-
-C) Generate own OpenSSL certificates (https://github.com/blynkkk/blynk-server#generate-own-ssl-certificates)
+C) Generate own OpenSSL certificates
 
 	1) Generate self-signed certificate and key
   
-
+  ```
   	openssl req -x509 -nodes -days 1825 -newkey rsa:2048 -keyout server.key -out server.crt
-
+  ```
 	  
 	2) Convert server.key to PKCS#8 private key file in PEM format
 	
@@ -280,25 +285,25 @@ C) Generate own OpenSSL certificates (https://github.com/blynkkk/blynk-server#ge
 										  OpenJDK Server VM (build 11.0.3+7-post-Raspbian-5, mixed mode)
 											
 	  use only v1 PBE-SHA1-2DES by this command: ( If use with Ubuntu => invalid key file )								
-		
+	  ```	
 	  openssl pkcs8 -topk8 -v1 PBE-SHA1-2DES -in server.key -out server.pem
-		
+	  ```	
 	  b) For Local Blynk Server running Ubuntu, using 	java version "11.0.5" 2019-10-15 LTS
 												  Java(TM) SE Runtime Environment 18.9 (build 11.0.5+10-LTS)
 												  Java HotSpot(TM) 64-Bit Server VM 18.9 (build 11.0.5+10-LTS, mixed mode
 													
 	  use this command to generate pem file: ( If use with RPi => invalid key file )
-  	
+  	```
   	openssl pkcs8 -topk8 -inform PEM -outform PEM -in server.key -out server.pem
-
+    ```
   	
 If you connect hardware with USB script you have to provide an option '-s' pointing to "common name" (hostname) you did specified during certificate generation.
 
 As an output you'll retrieve server.crt and server.pem files that you need to provide for server.ssl properties.
 
-
+  ```
   server.ssl.cert=./server.pem
   server.ssl.key=./server.pem
   server.ssl.key.pass=your_ssl_key_password   
-
+  ```
 
