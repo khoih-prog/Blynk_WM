@@ -251,12 +251,12 @@ B) Manual Let's Encrypt SSL/TLS Certificates
   chmod a+x certbot-auto
   ```
   
-	2) Generate and verify certificates (your server should be connected to internet and have open 80/443 ports)
+  2) Generate and verify certificates (your server should be connected to internet and have open 80/443 ports)
   ```
    ./certbot-auto certonly --agree-tos --email YOUR_EMAIL --standalone -d YOUR_HOST
   ```
 	
-	For example
+	For example:
   
   ```
     ./certbot-auto certonly --agree-tos --email pupkin@blynk.cc --standalone -d blynk.cc
