@@ -291,7 +291,9 @@ C) Generate own OpenSSL certificates
 	  ```	
 	  openssl pkcs8 -topk8 -v1 PBE-SHA1-2DES -in server.key -out server.pem
 	  ```	
-	  b) For Local Blynk Server running Ubuntu, using 
+	  
+	  b) For Local Blynk Server running Ubuntu, using
+	  
 	  ```
 	  java version "11.0.5" 2019-10-15 LTS
 	  Java(TM) SE Runtime Environment 18.9 (build 11.0.5+10-LTS)
