@@ -53,10 +53,27 @@ After you connected, please, go to http://192.168.4.1.
 
 Enter your credentials, then click `Save`. After you restarted, you will see your built-in LED turned OFF. That means, it connected to your Blynk server successfully.
 
-In operation, if WiFi or Blynk connection is lost, `Blynk.run()` will try reconnecting automatically.
-
 This `Blynk.begin()` is not a blocking call, so you can use it for critical functions requiring in loop(). 
-Anyway, this is better for projects using Blynk just for graphical user interface.
+Anyway, this is better for projects using Blynk just for GUI (graphical user interface).
+
+In operation, if WiFi or Blynk connection is lost, `Blynk.run()` will try reconnecting automatically. Therefore, Blynk.run() must be called in the loop() function. Don't use:
+```
+void loop()
+{
+  if (Blynk.connected())
+     Blynk.run();
+     
+  ...
+}
+```
+just
+```
+void loop()
+{
+  Blynk.run();
+  ...
+}
+```
 
 ## Prerequisite
 * ESP8266 core for Arduino https://github.com/esp8266/Arduino#installing-with-boards-manager
@@ -71,6 +88,8 @@ Anyway, this is better for projects using Blynk just for graphical user interfac
 1. Permit EEPROM size and location configurable to avoid conflict with others.
 2. More flexible to configure reconnection timeout.
 3. For fresh config data, don't need to wait for connecting timeout before entering config portal.
+4. If the config data not entered completely (SSID, password, Server and Blynk token), entering config portal
+5. Correct the operation of BUILTIN_LED
 
 ## Hello World
 Please take a look at examples, as well.
