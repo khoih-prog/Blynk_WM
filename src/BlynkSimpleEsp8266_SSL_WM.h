@@ -4,7 +4,7 @@
  * Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
  * Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
  * Licensed under MIT license
- * Version: 1.0.1
+ * Version: 1.0.2
  * Original Blynk Library author:
  * @file       BlynkSimpleEsp8266_SSL.h
  * @author     Volodymyr Shymanskyy
@@ -308,6 +308,10 @@ public:
     void begin(const char* fingerprint = NULL) 
     {
         #define TIMEOUT_CONNECT_WIFI			30000
+        
+        //Turn OFF
+        pinMode(LED_BUILTIN, OUTPUT);
+        digitalWrite(LED_BUILTIN, HIGH);
                
         if (getConfigData())
         {
@@ -342,8 +346,6 @@ public:
             {
               BLYNK_LOG1(BLYNK_F("begin: WiFi connected but Bynk not connected"));
               // failed to connect to Blynk server, will start configuration mode
-              // turn the LED_BUILTIN ON to tell us we are in configuration mode.
-              digitalWrite(LED_BUILTIN, LOW);
               startConfigurationMode();
             }
           } 
@@ -351,8 +353,6 @@ public:
           {
               BLYNK_LOG1(BLYNK_F("begin: Fail to connect WiFi and Blynk"));
               // failed to connect to Blynk server, will start configuration mode
-              // turn the LED_BUILTIN ON to tell us we are in configuration mode.
-              digitalWrite(LED_BUILTIN, LOW);            
               startConfigurationMode();
           }
         }
@@ -360,9 +360,7 @@ public:
         {
             BLYNK_LOG1(BLYNK_F("begin: No stored config data. Will forever stay in config mode until getting data"));
             // failed to connect to Blynk server, will start configuration mode
-            // turn the LED_BUILTIN ON to tell us we are in configuration mode.
             hadConfigData = false;
-            digitalWrite(LED_BUILTIN, LOW);            
             startConfigurationMode();                  
         }
     }    
@@ -440,6 +438,9 @@ public:
 				    BLYNK_LOG1(BLYNK_F("run: WiFi lost. Try reconnecting WiFi and Blynk"));
 				    if (connectToWifi(TIMEOUT_RECONNECT_WIFI)) 
 				    {
+ 				      // turn the LED_BUILTIN OFF to tell us we exit configuration mode.
+              digitalWrite(LED_BUILTIN, HIGH);
+
 				      BLYNK_LOG1(BLYNK_F("run: WiFi reconnected. Trying connect to Blynk"));
 				      
 				      if (this->connect())
@@ -453,6 +454,8 @@ public:
 				    BLYNK_LOG1(BLYNK_F("run: Blynk lost. Try connecting Blynk"));
 				    if (this->connect()) 
 				    {
+				      // turn the LED_BUILTIN OFF to tell us we exit configuration mode.
+              digitalWrite(LED_BUILTIN, HIGH);
 					    BLYNK_LOG1(BLYNK_F("run: Blynk reconnected"));
 				    }
 			    }
@@ -486,7 +489,10 @@ private:
     struct Configuration Blynk8266_WM_config;
     
     unsigned long configTimeout;
-    bool hadConfigData;    
+    bool hadConfigData;   
+
+#define BOARD_TYPE      "SSL_ESP8266"
+#define NO_CONFIG       "nothing"     
 
 #if USE_SPIFFS     
 
@@ -552,9 +558,7 @@ private:
     }
     
     bool getConfigData()
-    {
-      #define BOARD_TYPE        "SSL_ESP8266"
-      
+    {      
       if (!SPIFFS.begin()) 
       {
         BLYNK_LOG1(BLYNK_F("SPIFFS failed!. Please use EEPROM."));
@@ -571,22 +575,28 @@ private:
       {
           memset(&Blynk8266_WM_config, 0, sizeof(Blynk8266_WM_config));
                                    
-          char no_config[] = "nothing";
           BLYNK_LOG2(BLYNK_F("Init new config file, size = "), sizeof(Blynk8266_WM_config));          
           // doesn't have any configuration
           strcpy(Blynk8266_WM_config.header,           BOARD_TYPE);
-          strcpy(Blynk8266_WM_config.wifi_ssid,        no_config);
-          strcpy(Blynk8266_WM_config.wifi_passphrase,  no_config);
-          strcpy(Blynk8266_WM_config.blynk_server,     no_config);
+          strcpy(Blynk8266_WM_config.wifi_ssid,        NO_CONFIG);
+          strcpy(Blynk8266_WM_config.wifi_passphrase,  NO_CONFIG);
+          strcpy(Blynk8266_WM_config.blynk_server,     NO_CONFIG);
           Blynk8266_WM_config.blynk_port = BLYNK_SERVER_HARDWARE_PORT;
-          strcpy(Blynk8266_WM_config.blynk_token,      no_config);
-          strcpy(Blynk8266_WM_config.board_name,       no_config);
+          strcpy(Blynk8266_WM_config.blynk_token,      NO_CONFIG);
+          strcpy(Blynk8266_WM_config.board_name,       NO_CONFIG);
           
           saveConfigData();   
           
           return false;       
       }
-  
+      else if ( !strncmp(Blynk8266_WM_config.wifi_ssid,       NO_CONFIG, strlen(NO_CONFIG))   ||
+                !strncmp(Blynk8266_WM_config.wifi_passphrase, NO_CONFIG, strlen(NO_CONFIG) )  ||
+                !strncmp(Blynk8266_WM_config.blynk_server,    NO_CONFIG, strlen(NO_CONFIG) )  ||
+                !strncmp(Blynk8266_WM_config.blynk_token,     NO_CONFIG, strlen(NO_CONFIG) ) ) 
+      {
+        // If SSID, PW, Server,Token ="nothing", stay in config mode forever until having config Data.
+        return false;
+      }  
       else
       {
         BLYNK_LOG6(BLYNK_F("Header = "), Blynk8266_WM_config.header, BLYNK_F(", SSID = "), Blynk8266_WM_config.wifi_ssid, 
@@ -628,9 +638,7 @@ private:
 #endif  
 
     bool getConfigData()
-    {
-      #define BOARD_TYPE        "SSL_ESP8266"
-      
+    {      
       EEPROM.begin(EEPROM_SIZE);
       EEPROM.get(EEPROM_START, Blynk8266_WM_config);
 
@@ -638,23 +646,29 @@ private:
       {
           memset(&Blynk8266_WM_config, 0, sizeof(Blynk8266_WM_config));
                                    
-          char no_config[] = "nothing";
           BLYNK_LOG2(BLYNK_F("Init new EEPROM, size = "), EEPROM.length());          
           // doesn't have any configuration
           strcpy(Blynk8266_WM_config.header,           BOARD_TYPE);
-          strcpy(Blynk8266_WM_config.wifi_ssid,        no_config);
-          strcpy(Blynk8266_WM_config.wifi_passphrase,  no_config);
-          strcpy(Blynk8266_WM_config.blynk_server,     no_config);
+          strcpy(Blynk8266_WM_config.wifi_ssid,        NO_CONFIG);
+          strcpy(Blynk8266_WM_config.wifi_passphrase,  NO_CONFIG);
+          strcpy(Blynk8266_WM_config.blynk_server,     NO_CONFIG);
           Blynk8266_WM_config.blynk_port = BLYNK_SERVER_HARDWARE_PORT;
-          strcpy(Blynk8266_WM_config.blynk_token,      no_config);
-          strcpy(Blynk8266_WM_config.board_name,       no_config);
+          strcpy(Blynk8266_WM_config.blynk_token,      NO_CONFIG);
+          strcpy(Blynk8266_WM_config.board_name,       NO_CONFIG);
 
           EEPROM.put(EEPROM_START, Blynk8266_WM_config);
           EEPROM.commit();
           
           return false;
       }
-  
+      else if ( !strncmp(Blynk8266_WM_config.wifi_ssid,       NO_CONFIG, strlen(NO_CONFIG))   ||
+                !strncmp(Blynk8266_WM_config.wifi_passphrase, NO_CONFIG, strlen(NO_CONFIG) )  ||
+                !strncmp(Blynk8266_WM_config.blynk_server,    NO_CONFIG, strlen(NO_CONFIG) )  ||
+                !strncmp(Blynk8266_WM_config.blynk_token,     NO_CONFIG, strlen(NO_CONFIG) ) ) 
+      {
+        // If SSID, PW, Server,Token ="nothing", stay in config mode forever until having config Data.
+        return false;
+      }  
       else
       {
         BLYNK_LOG6(BLYNK_F("Header = "), Blynk8266_WM_config.header, BLYNK_F(", SSID = "), Blynk8266_WM_config.wifi_ssid, 
@@ -799,8 +813,12 @@ private:
       
       if (number_items_Updated == NUM_CONFIGURABLE_ITEMS)
       {
-        BLYNK_LOG1(BLYNK_F("handleRequest: Updating data to EEPROM"));
-
+        #if USE_SPIFFS     
+          BLYNK_LOG2(BLYNK_F("handleRequest: Updating data to SPIFFS file "), CONFIG_FILENAME);
+        #else
+          BLYNK_LOG1(BLYNK_F("handleRequest: Updating data to EEPROM"));
+        #endif
+        
         saveConfigData();
 
         BLYNK_LOG1(BLYNK_F("handleRequest: Resetting"));
@@ -815,6 +833,10 @@ private:
     void startConfigurationMode()
     {   
       #define CONFIG_TIMEOUT			60000L
+      
+      // turn the LED_BUILTIN ON to tell us we are in configuration mode.
+      digitalWrite(LED_BUILTIN, LOW);
+      
       
       String chipID = String(ESP.getChipId(), HEX);
       chipID.toUpperCase();
