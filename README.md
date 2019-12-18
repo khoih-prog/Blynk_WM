@@ -1,10 +1,10 @@
 ## Blynk_ESP_WM
-I'm inspired by .[EasyBlynk8266] (https://github.com/Barbayar/EasyBlynk8266)
+I'm inspired by [`EasyBlynk8266`] (https://github.com/Barbayar/EasyBlynk8266)
  
 To help you to eliminate `hardcoding` your Wifi and Blynk credentials for ESP8266 and ESP32 (with / wwithout SSL), and updating/reflashing every time when you need to change them.
 
 ### Installation
-1. Navigate to .[Blynk_WM] (https://github.com/khoih-prog/Blynk_WM) page.
+1. Navigate to [Blynk_WM] (https://github.com/khoih-prog/Blynk_WM) page.
 2. Download the latest release `Blynk_WM-master.zip`.
 3. Extract the zip file to `Blynk_WM-master` directory 
 4. Copy whole `Blynk_WM-master/src` folder to Arduino libraries' `src` directory such as `.Arduino/libraries/Blynk/src`.
@@ -29,7 +29,7 @@ to use SPIFFS or
 #define USE_SPIFFS    false
 ```
 to use EEPROM ( 172 bytes from address EEPROM_START ) to save your configuration data.
-EEPROM_SIZE can be specified from 256 to 4096 bytes. See examples .[ESP32WM_Config] (https://github.com/khoih-prog/Blynk_WM/tree/master/examples/ESP32WM_Config) and .[ESP8266WM_Config] (https://github.com/khoih-prog/Blynk_WM/tree/master/examples/ESP8266WM_Config).
+EEPROM_SIZE can be specified from 256 to 4096 bytes. See examples [ESP32WM_Config] (examples/ESP32WM_Config) and [ESP8266WM_Config] (examples/ESP8266WM_Config).
 
 
 ```
