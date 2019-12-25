@@ -155,13 +155,17 @@ void loop()
 ***Features***
 
 1. This release of very-easy-to-use will help you to eliminate hardcoding your Wifi and Blynk credentials for ESP8266 and ESP32 (with / without SSL), and updating/reflashing every time when you need to change them.
+
 2. Configuration data are stored in either SPIFFS or EEPROM.
+
 3. When WiFi and/or Blynk connection is lost, the WM will try auto-reconnect.
 
 ***New in this version***
 
 1.Fix bug
+
 2. If the config data not entered completely (SSID, password, Server and Blynk token), entering config portal
+
 3. Correct the operation of BUILTIN_LED
 
 ## Contributing
