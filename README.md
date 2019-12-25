@@ -4,6 +4,11 @@ I'm inspired by [`EasyBlynk8266`] (https://github.com/Barbayar/EasyBlynk8266)
 To help you to eliminate `hardcoding` your Wifi and Blynk credentials for ESP8266 and ESP32 (with / wwithout SSL), and updating/reflashing every time when you need to change them.
 
 ### Installation
+
+The easiest way is to use `Arduino Library Manager`. Search for `Blynk_WiFiManager`, then select / install the latest version.
+
+Another way to install is to:
+
 1. Navigate to [Blynk_WM] (https://github.com/khoih-prog/Blynk_WM) page.
 2. Download the latest release `Blynk_WM-master.zip`.
 3. Extract the zip file to `Blynk_WM-master` directory 
