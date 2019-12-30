@@ -1,3 +1,29 @@
+/****************************************************************************************************************************
+ * ESP8266WM_Config.ino
+ * For ESP8266 boards
+ *
+ * Blynk_WM is a library for the ESP8266/ESP32 Arduino platform (https://github.com/esp8266/Arduino) to enable easy
+ * configuration/reconfiguration and autoconnect/autoreconnect of WiFi/Blynk
+ * Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
+ * Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
+ * Licensed under MIT license
+ * Version: 1.0.2
+ *
+ * Original Blynk Library author:
+ * @file       BlynkSimpleEsp8266.h
+ * @author     Volodymyr Shymanskyy
+ * @license    This project is released under the MIT License (MIT)
+ * @copyright  Copyright (c) 2015 Volodymyr Shymanskyy
+ * @date       Jan 2015
+ * @brief
+ *
+ * Version Modified By   Date      Comments
+ * ------- -----------  ---------- -----------
+ *  1.0.0   K Hoang      28/10/2019 Initial coding
+ *  1.0.1   K Hoang      28/10/2019 Add features
+ *  1.0.2   K Hoang      21/11/2019 Fix bug. Add features.
+ *****************************************************************************************************************************/
+
 #define BLYNK_PRINT Serial
 
 // Not use #define USE_SPIFFS  => using EEPROM for configuration data in WiFiManager
