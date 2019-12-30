@@ -1,4 +1,7 @@
-## Blynk_ESP_WM
+## Blynk_WM
+
+[![arduino-library-badge](https://www.ardu-badge.com/badge/Blynk_WM.svg?)](https://www.ardu-badge.com/Blynk_WM)
+
 I'm inspired by [`EasyBlynk8266`] (https://github.com/Barbayar/EasyBlynk8266)
  
 To help you to eliminate `hardcoding` your Wifi and Blynk credentials for ESP8266 and ESP32 (with / wwithout SSL), and updating/reflashing every time when you need to change them.
