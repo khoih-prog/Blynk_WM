@@ -7,7 +7,7 @@
  * Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
  * Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
  * Licensed under MIT license
- * Version: 1.0.2
+ * Version: 1.0.3
  *
  * Original Blynk Library author:
  * @file       BlynkSimpleEsp8266.h
@@ -22,6 +22,7 @@
  *  1.0.0   K Hoang      28/10/2019 Initial coding
  *  1.0.1   K Hoang      28/10/2019 Add features
  *  1.0.2   K Hoang      21/11/2019 Fix bug. Add features.
+ *  1.0.3   K Hoang      31/11/2019 Fix compiler errors for ESP8266 core pre-2.5.2. Add examples. 
  *****************************************************************************************************************************/
 
 #ifndef BlynkSimpleEsp8266_SSL_WM_h
