@@ -92,8 +92,8 @@ void loop()
 ```
 
 ## Prerequisite
-* ESP8266 core for Arduino https://github.com/esp8266/Arduino#installing-with-boards-manager
-* Blynk library https://www.arduino.cc/en/guide/libraries#toc3
+* `ESP8266 core 2.5.2 or later` for Arduino (https://github.com/esp8266/Arduino#installing-with-boards-manager)
+* `Blynk library 0.6.1 or later` (https://www.arduino.cc/en/guide/libraries#toc3)
 
 ## TO DO
 
@@ -106,6 +106,7 @@ void loop()
 3. For fresh config data, don't need to wait for connecting timeout before entering config portal.
 4. If the config data not entered completely (SSID, password, Server and Blynk token), entering config portal
 5. Correct the operation of BUILTIN_LED
+6. Modify code to be compatible with ESP8266 core pre-2.5.2.
 
 ## Example
 Please take a look at examples, as well.
@@ -153,6 +154,14 @@ void loop()
 }
 ```
 
+### Releases v1.0.3
+
+***New in this version***
+
+1. Modify code to be compatible with ESP8266 core pre-2.5.2. But it's still advisable to update to the latest stable core, such as 2.6.3
+
+2. Add examples
+
 ### Releases v1.0.2
 
 ***Features***
@@ -165,7 +174,7 @@ void loop()
 
 ***New in this version***
 
-1.Fix bug
+1. Fix bug
 
 2. If the config data not entered completely (SSID, password, Server and Blynk token), entering config portal
 

@@ -1,14 +1,10 @@
-/****************************************************************************************************************************
- * BlynkSimpleEsp8266_WM.h
- * For ESP8266 boards
- *
+/**
  * Blynk_WM is a library for the ESP8266/ESP32 Arduino platform (https://github.com/esp8266/Arduino) to enable easy
  * configuration/reconfiguration and autoconnect/autoreconnect of WiFi/Blynk
  * Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
  * Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
  * Licensed under MIT license
  * Version: 1.0.2
- *
  * Original Blynk Library author:
  * @file       BlynkSimpleEsp8266.h
  * @author     Volodymyr Shymanskyy
@@ -17,12 +13,7 @@
  * @date       Jan 2015
  * @brief
  *
- * Version Modified By   Date      Comments
- * ------- -----------  ---------- -----------
- *  1.0.0   K Hoang      28/10/2019 Initial coding
- *  1.0.1   K Hoang      28/10/2019 Add features
- *  1.0.2   K Hoang      21/11/2019 Fix bug. Add features.
- *****************************************************************************************************************************/
+ */
 
 #ifndef BlynkSimpleEsp8266_WM_h
 #define BlynkSimpleEsp8266_WM_h
@@ -435,7 +426,7 @@ private:
       
       if (file) 
       {
-        file.write((char*) &Blynk8266_WM_config, sizeof(Blynk8266_WM_config));  
+        file.write((uint8_t*) &Blynk8266_WM_config, sizeof(Blynk8266_WM_config));  
         file.close();     
         BLYNK_LOG1(BLYNK_F("OK"));
       }
@@ -450,7 +441,7 @@ private:
       
       if (file)
       {
-        file.write((char*) &Blynk8266_WM_config, sizeof(Blynk8266_WM_config));
+        file.write((uint8_t*) &Blynk8266_WM_config, sizeof(Blynk8266_WM_config));
         file.close();  
         BLYNK_LOG1(BLYNK_F("OK"));      
       }
@@ -753,7 +744,7 @@ private:
       IPAddress apIP(192, 168, 4, 1);
 
       WiFi.mode(WIFI_AP);
-      WiFi.softAP(ssid, pass);
+      WiFi.softAP(ssid.c_str(), pass.c_str());
       
       delay(100); // ref: https://github.com/espressif/arduino-esp32/issues/985#issuecomment-359157428
       WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));

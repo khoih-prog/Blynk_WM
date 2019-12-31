@@ -541,7 +541,7 @@ private:
       
       if (file) 
       {
-        file.write((char*) &Blynk8266_WM_config, sizeof(Blynk8266_WM_config));  
+        file.write((uint8_t*) &Blynk8266_WM_config, sizeof(Blynk8266_WM_config));  
         file.close();     
         BLYNK_LOG1(BLYNK_F("OK"));
       }
@@ -556,7 +556,7 @@ private:
       
       if (file)
       {
-        file.write((char*) &Blynk8266_WM_config, sizeof(Blynk8266_WM_config));
+        file.write((uint8_t*) &Blynk8266_WM_config, sizeof(Blynk8266_WM_config));
         file.close();  
         BLYNK_LOG1(BLYNK_F("OK"));      
       }
@@ -859,7 +859,7 @@ private:
       IPAddress apIP(192, 168, 4, 1);
 
       WiFi.mode(WIFI_AP);
-      WiFi.softAP(ssid, pass);
+      WiFi.softAP(ssid.c_str(), pass.c_str());
       
       delay(100); // ref: https://github.com/espressif/arduino-esp32/issues/985#issuecomment-359157428
       WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
