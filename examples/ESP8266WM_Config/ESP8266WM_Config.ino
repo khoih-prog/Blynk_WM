@@ -47,7 +47,7 @@
 #define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET    5
 // Those above #define's must be placed before #include <BlynkSimpleEsp8266_WM.h>
 
-#define USE_SSL   true
+#define USE_SSL   false
 
 #if USE_SSL
   #include <BlynkSimpleEsp8266_SSL_WM.h>
