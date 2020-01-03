@@ -8,16 +8,16 @@ To help you to eliminate `hardcoding` your Wifi and Blynk credentials for ESP826
 
 ### Installation
 
-The easiest way is to use `Arduino Library Manager`. Search for `Blynk_WiFiManager`, then select / install the latest version.
-
-Another way to install is to:
+The suggested way to install is to:
 
 1. Navigate to [Blynk_WM] (https://github.com/khoih-prog/Blynk_WM) page.
 2. Download the latest release `Blynk_WM-master.zip`.
 3. Extract the zip file to `Blynk_WM-master` directory 
-4. Copy whole `Blynk_WM-master/src` folder to Arduino libraries' `src` directory such as `.Arduino/libraries/Blynk/src`.
+4. Copy whole `Blynk_WM-master/src` folder to Arduino libraries' `src` directory such as `~/Arduino/libraries/Blynk/src`.
 
-The file BlynkSimpleEsp8266_WM.h, BlynkSimpleEsp8266_SSL_WM.h, BlynkSimpleEsp32_WM.h and BlynkSimpleEsp32_SSL_WM.h must be placed in Blynk libraries `src` directory (normally ./Arduino/libraries/Blynk/src)
+The file BlynkSimpleEsp8266_WM.h, BlynkSimpleEsp8266_SSL_WM.h, BlynkSimpleEsp32_WM.h and BlynkSimpleEsp32_SSL_WM.h must be placed in Blynk libraries `src` directory (normally `~/Arduino/libraries/Blynk/src`)
+
+Another way is to use `Arduino Library Manager`. Search for `Blynk_WiFiManager`, then select / install the latest version. Then move the 2 files `BlynkSimpleEsp8266_SSL_WM.h` and `BlynkSimpleEsp32_SSL_WM.h` from directory `~/Arduino/libraries/Blynk_WiFiManager/src` into Blynk libraries `src` directory (normally `~/Arduino/libraries/Blynk/src`)
 
 ### How to use
 
