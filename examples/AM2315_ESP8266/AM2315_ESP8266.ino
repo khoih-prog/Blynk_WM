@@ -7,7 +7,7 @@
  * Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
  * Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
  * Licensed under MIT license
- * Version: 1.0.2
+ * Version: 1.0.4
  *
  * Original Blynk Library author:
  * @file       BlynkSimpleEsp8266.h
@@ -22,8 +22,13 @@
  *  1.0.0   K Hoang      28/10/2019 Initial coding
  *  1.0.1   K Hoang      28/10/2019 Add features
  *  1.0.2   K Hoang      21/11/2019 Fix bug. Add features.
+ *  1.0.4   K Hoang      07/01/2020 Use configurable personalized RFC-952 DHCP hostname in Blynk_WM v1.0.4
  *****************************************************************************************************************************/
- 
+
+#ifndef ESP8266
+#error This code is intended to run on the ESP8266 platform! Please check your Tools->Board setting.
+#endif
+
 #define BLYNK_PRINT Serial
 
 #include <ESP8266WiFi.h>
@@ -54,7 +59,7 @@
     #define BLYNK_HARDWARE_PORT     9443
   #else
     #include <BlynkSimpleEsp8266.h>
-    #define BLYNK_HARDWARE_PORT     8080   
+    #define BLYNK_HARDWARE_PORT     8080
   #endif
 #endif
 
@@ -127,7 +132,11 @@ void setup()
   }
 
   #if USE_BLYNK_WM
-    Blynk.begin();
+    // Use this to default DHCP hostname to ESP8266-XXXXXX or ESP32-XXXXXX
+    //Blynk.begin();
+    // Use this to personalize DHCP hostname (RFC952 conformed)
+    // 24 chars max,- only a..z A..Z 0..9 '-' and no '-' as last char
+    Blynk.begin("AM2315_ESP8266");
   #else
     WiFi.begin(ssid, pass);
     

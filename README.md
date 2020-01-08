@@ -48,11 +48,29 @@ EEPROM_SIZE can be specified from 256 to 4096 bytes. See examples [ESP32WM_Confi
 
 ```
 
-Then replace
+Then replace `Blynk.begin(...)` with :
 
-, `Blynk.begin(...)` with `Blynk.begin()` in your code. Keep `Blynk.run()`.
+1. `Blynk.begin()` to use default DHCP hostname `ESP8266-XXXXXX` or `ESP32-XXXXXX`
+
+or to have a personalized hostname `(RFC952-conformed,- 24 chars max,- only a..z A..Z 0..9 '-' and no '-' as last char)`
+
+2. `Blynk.begin("Personalized-HostName")`
+
+in your code. Keep `Blynk.run()` intact.
 
 That's it.
+
+Also see examples: 
+1. [AM2315_ESP32_SSL](examples/AM2315_ESP32_SSL)
+2. [AM2315_ESP8266](examples/AM2315_ESP8266)
+3. [DHT11ESP32](examples/DHT11ESP32) 
+4. [DHT11ESP32_SSL](examples/DHT11ESP32_SSL) 
+5. [DHT11ESP8266](examples/DHT11ESP8266)
+6. [DHT11ESP8266_Debug](examples/DHT11ESP8266_Debug)
+7. [DHT11ESP8266_SSL](examples/DHT11ESP82662_SSL) 
+8. [ESP32WM_Config](examples/ESP32WM_Config)
+9. [ESP82WM_Config](examples/ESP8266WM_Config)
+
 
 ## So, how it works?
 If it cannot connect to the Blynk server in 30 seconds, it will switch to `Configuration Mode`. You will see your built-in LED turned ON. In `Configuration Mode`, it starts an access point called `ESP_xxxxxx`. Connect to it using password `MyESP_xxxxxx` .
@@ -73,7 +91,8 @@ This `Blynk.begin()` is not a blocking call, so you can use it for critical func
 Anyway, this is better for projects using Blynk just for GUI (graphical user interface).
 
 In operation, if WiFi or Blynk connection is lost, `Blynk.run()` will try reconnecting automatically. Therefore, `Blynk.run()` must be called in the `loop()` function. Don't use:
-```
+
+```cpp
 void loop()
 {
   if (Blynk.connected())
@@ -83,7 +102,8 @@ void loop()
 }
 ```
 just
-```
+
+```cpp
 void loop()
 {
   Blynk.run();
@@ -144,15 +164,31 @@ Please take a look at examples, as well.
 
 void setup() 
 {
-    Blynk.begin();
+  // Use this to default DHCP hostname to ESP8266-XXXXXX or ESP32-XXXXXX
+  //Blynk.begin();
+  // Use this to personalize DHCP hostname (RFC952 conformed)
+  // 24 chars max,- only a..z A..Z 0..9 '-' and no '-' as last char
+  Blynk.begin("Personalized-HostName");
 }
-
 
 void loop() 
 {
     Blynk.run();
 }
 ```
+### Releases v1.0.4
+
+***Why this version***
+
+I'm really fed-up with the unfriendly, confusing and cryptic DHCP hostnames such as `ESP_XXXXXX`, `espressif` using ChipID. Thanks to an issue opened in library ESP_WiFiManager, I decided to add this option to have built-in, yet configurable DHCP hostname to these libraries.
+
+Now you can easily specify and have the friendly, identifiable, RFC-952-conformed DHP hostnames associated with your boards, such as `SmartFarm-1`, `Irrigation`, `Master-Controller`, etc. You'll be happier to have a look at your WiFi Router DHCP list.
+
+***New in this version***
+
+1. Add configurable personalized RFC-952 DHCP hostname and setHostname()
+
+2. Modify examples to use new feature
 
 ### Releases v1.0.3
 

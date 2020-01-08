@@ -38,6 +38,7 @@ connectToWifi KEYWORD2
 handleRequest KEYWORD2
 startConfigurationMode  KEYWORD2
 getBoardName  KEYWORD2
+setHostname KEYWORD2
 
 
 # Handler helpers

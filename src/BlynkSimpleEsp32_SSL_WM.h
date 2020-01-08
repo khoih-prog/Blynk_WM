@@ -7,7 +7,7 @@
  * Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
  * Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
  * Licensed under MIT license
- * Version: 1.0.3
+ * Version: 1.0.4
  *
  * Original Blynk Library author:
  * @file       BlynkSimpleEsp8266.h
@@ -22,7 +22,8 @@
  *  1.0.0   K Hoang      28/10/2019 Initial coding
  *  1.0.1   K Hoang      28/10/2019 Add features
  *  1.0.2   K Hoang      21/11/2019 Fix bug. Add features.
- *  1.0.3   K Hoang      31/11/2019 Fix compiler errors for ESP8266 core pre-2.5.2. Add examples. 
+ *  1.0.3   K Hoang      31/11/2019 Fix compiler errors for ESP8266 core pre-2.5.2. Add examples.
+ *  1.0.4   K Hoang      07/01/2020 Add configurable personalized RFC-952 DHCP hostname
  *****************************************************************************************************************************/
 
 #ifndef BlynkSimpleEsp32_SSL_WM_h
@@ -200,6 +201,8 @@ public:
     {
         BLYNK_LOG2(BLYNK_F("Connecting to "), ssid);
         WiFi.mode(WIFI_STA);
+        setHostname();
+        
         if (pass && strlen(pass)) {
             WiFi.begin(ssid, pass);
         } else {
@@ -262,13 +265,33 @@ public:
     #define LED_BUILTIN       2         // Pin D2 mapped to pin GPIO2/ADC12 of ESP32, control on-board LED
     #endif
        
-    void begin(void) 
+		void begin(const char *iHostname = "")
     {
         #define TIMEOUT_CONNECT_WIFI			30000
 
         //Turn OFF
         pinMode(LED_BUILTIN, OUTPUT);
         digitalWrite(LED_BUILTIN, LOW);
+        
+				if (iHostname[0] == 0)
+				{
+					#ifdef ESP8266
+						String _hostname = "ESP8266-" + String(ESP.getChipId(), HEX);
+					#else		//ESP32
+						String _hostname = "ESP32-" + String((uint32_t)ESP.getEfuseMac(), HEX);
+					#endif
+					_hostname.toUpperCase();
+
+					getRFC952_hostname(_hostname.c_str());		
+					
+				}
+				else
+				{
+					// Prepare and store the hostname only not NULL
+					getRFC952_hostname(iHostname);
+				}
+
+				BLYNK_LOG2(BLYNK_F("RFC925 Hostname = "), RFC952_hostname);             
                
         if (getConfigData())
         {
@@ -431,11 +454,47 @@ public:
     {
       return (String(BlynkESP32_WM_config.board_name));
     }
-    
+
+		void setHostname(void)
+		{
+			if (RFC952_hostname[0] != 0)
+			{
+        // See https://github.com/espressif/arduino-esp32/issues/2537
+        WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE);
+        WiFi.setHostname(RFC952_hostname);
+			}
+		}    
+		    
 private:
     WebServer server;
     boolean configuration_mode = false;
     struct Configuration BlynkESP32_WM_config;
+
+		#define RFC952_HOSTNAME_MAXLEN      24
+		char RFC952_hostname[RFC952_HOSTNAME_MAXLEN + 1];
+
+		char* getRFC952_hostname(const char* iHostname)
+		{ 
+			memset(RFC952_hostname, 0, sizeof(RFC952_hostname));
+			
+			size_t len = ( RFC952_HOSTNAME_MAXLEN < strlen(iHostname) ) ? RFC952_HOSTNAME_MAXLEN : strlen(iHostname);
+			
+			size_t j = 0;
+			
+			for (size_t i = 0; i < len - 1; i++)
+			{
+				if ( isalnum(iHostname[i]) || iHostname[i] == '-' )
+				{
+				  RFC952_hostname[j] = iHostname[i];
+				  j++;
+				}  
+			}
+			// no '-' as last char
+			if ( isalnum(iHostname[len - 1]) || (iHostname[len - 1] != '-') )
+				RFC952_hostname[j] = iHostname[len - 1];
+
+			return RFC952_hostname;
+		}  
     
     unsigned long configTimeout;
     bool hadConfigData;        
@@ -646,6 +705,7 @@ private:
       int sleep_time = 250;
 
       WiFi.mode(WIFI_STA);
+      setHostname();
 
 	    BLYNK_LOG1(BLYNK_F("connectToWifi: start"));
 	
