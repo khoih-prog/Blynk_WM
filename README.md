@@ -180,7 +180,7 @@ void loop()
 
 ***Why this version***
 
-I'm really fed-up with the unfriendly, confusing and cryptic DHCP hostnames such as `ESP_XXXXXX`, `espressif` using ChipID. Thanks to an issue opened in library ESP_WiFiManager, I decided to add this option to have built-in, yet configurable DHCP hostname to these libraries.
+I'm really fed-up with the unfriendly, confusing and cryptic DHCP hostnames such as `ESP_XXXXXX`, `espressif` using ChipID. Thanks to an issue opened in library [ESP_WiFiManager] (https://github.com/khoih-prog/ESP_WiFiManager), I decided to add this option to have built-in, yet configurable DHCP hostname to these libraries.
 
 Now you can easily specify and have the friendly, identifiable, RFC-952-conformed DHP hostnames associated with your boards, such as `SmartFarm-1`, `Irrigation`, `Master-Controller`, etc. You'll be happier to have a look at your WiFi Router DHCP list.
 
