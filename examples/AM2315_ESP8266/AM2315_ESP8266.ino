@@ -78,6 +78,7 @@ char pass[]     = "***";
 
 #endif
 
+#include <Ticker.h>
 #include <Wire.h>
 #include <Adafruit_AM2315.h>        // To install Adafruit AM2315 library
 
@@ -94,6 +95,7 @@ Adafruit_AM2315 AM2315;
 #define AM2315_DEBUG     true
 
 BlynkTimer timer;
+Ticker     led_ticker;
 
 #define READ_INTERVAL        30000          //read AM2315 interval 30s
 
@@ -118,6 +120,53 @@ void ReadData()
   //V1 and V2 are Blynk Display widgets' VPIN
   Blynk.virtualWrite(V1, temperature);
   Blynk.virtualWrite(V2, humidity);
+}
+
+void set_led(byte status)
+{
+  digitalWrite(LED_BUILTIN, status);
+}
+
+void heartBeatPrint(void)
+{
+  static int num = 1;
+
+  if (Blynk.connected())
+  {
+    set_led(LOW);
+    led_ticker.once_ms(111, set_led, (byte) HIGH);    
+    Serial.print("B");
+  }
+  else
+  {
+    Serial.print("F");
+  }
+  
+  if (num == 80) 
+  {
+    Serial.println();
+    num = 1;
+  }
+  else if (num++ % 10 == 0) 
+  {
+    Serial.print(" ");
+  }
+} 
+
+void check_status()
+{
+  static unsigned long checkstatus_timeout = 0;
+
+#define STATUS_CHECK_INTERVAL     60000L
+
+  // Send status report every STATUS_REPORT_INTERVAL (60) seconds: we don't need to send updates frequently if there is no status change.
+  if ((millis() > checkstatus_timeout) || (checkstatus_timeout == 0))
+  {
+    // report status to Blynk
+    heartBeatPrint();
+
+    checkstatus_timeout = millis() + STATUS_CHECK_INTERVAL;
+  }
 }
 
 void setup()
@@ -159,4 +208,5 @@ void loop()
 {  
   Blynk.run();
   timer.run();
+  check_status();
 }
