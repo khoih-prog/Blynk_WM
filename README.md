@@ -6,10 +6,10 @@ I'm inspired by [`EasyBlynk8266`] (https://github.com/Barbayar/EasyBlynk8266)
  
 To help you to eliminate `hardcoding` your Wifi and Blynk credentials for ESP8266 and ESP32 (with / wwithout SSL), and updating/reflashing every time when you need to change them.
 
-With version v1.0.5 or later, you now can configure:
+With version `v1.0.5` or later, you now can configure:
 
-1. Config Portal Static IP address, Name and Password.
-2. Static IP address, Gateway, Subnet Mask and 2 DNS Servers IP addresses.
+1. `Config Portal Static IP address, Name and Password.`
+2. `Static IP address, Gateway, Subnet Mask and 2 DNS Servers IP addresses.`
 
 ### Installation
 
@@ -157,12 +157,15 @@ void loop()
 
 ## DONE
 
-1. Permit EEPROM size and location configurable to avoid conflict with others.
-2. More flexible to configure reconnection timeout.
-3. For fresh config data, don't need to wait for connecting timeout before entering config portal.
-4. If the config data not entered completely (SSID, password, Server and Blynk token), entering config portal
-5. Correct the operation of BUILTIN_LED
-6. Modify code to be compatible with ESP8266 core pre-2.5.2.
+ 1. Permit EEPROM size and location configurable to avoid conflict with others.
+ 2. More flexible to configure reconnection timeout.
+ 3. For fresh config data, don't need to wait for connecting timeout before entering config portal.
+ 4. If the config data not entered completely (SSID, password, Server and Blynk token), entering config portal
+ 5. Correct the operation of BUILTIN_LED
+ 6. Modify code to be compatible with ESP8266 core pre-2.5.2.
+ 7. Add RFC952 hostname
+ 8. Add configurable Config Portal IP, SSID and Password
+ 9. Add configurable Static IP, GW, Subnet Mask and 2 DNS Servers' IP Addresses.
 
 ## Example
 Please take a look at examples, as well.
@@ -232,8 +235,8 @@ void loop()
 
 ***Why this version***
 
-Normally, the default Portal IP (192.168.4.1), SSID and PW as well as the dynamically allocated board's IP address are good enough.
-In special cases where there is conflict, if static IP is required or bad router's DNS settings, you can use the new features to force the configurable IP addresses. But please use with care to avoid potential issues.
+Normally, the `default Portal IP (192.168.4.1)`, SSID and PW as well as the `dynamically allocated` board's IP address are good enough.
+In special cases where there is conflict, if static IP is required or bad router's DNS settings, you can use the new features to force the configurable IP addresses. ***But please use with care to avoid potential issues.***
 
 ***New in this version***
 
