@@ -255,7 +255,7 @@ public:
           WiFi.config(static_IP, static_GW, static_SN, static_DNS1, static_DNS2);         
         }
         
-				setHostname();
+        setHostname();
 
         if (WiFi.status() != WL_CONNECTED) {
             if (pass && strlen(pass)) {
