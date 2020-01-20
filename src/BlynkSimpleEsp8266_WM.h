@@ -272,7 +272,7 @@ public:
             }
             else 
             {
-              BLYNK_LOG1(BLYNK_F("begin: WiFi connected but Bynk not connected"));
+              BLYNK_LOG1(BLYNK_F("begin: WiFi connected but Blynk not connected"));
               // failed to connect to Blynk server, will start configuration mode
               startConfigurationMode();
             }

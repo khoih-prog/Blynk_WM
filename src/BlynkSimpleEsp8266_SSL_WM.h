@@ -7,7 +7,7 @@
  * Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
  * Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
  * Licensed under MIT license
- * Version: 1.0.4
+ * Version: 1.0.5
  *
  * Original Blynk Library author:
  * @file       BlynkSimpleEsp8266.h
@@ -24,6 +24,7 @@
  *  1.0.2   K Hoang      21/11/2019 Fix bug. Add features.
  *  1.0.3   K Hoang      31/11/2019 Fix compiler errors for ESP8266 core pre-2.5.2. Add examples.
  *  1.0.4   K Hoang      07/01/2020 Add configurable personalized RFC-952 DHCP hostname
+ *  1.0.5   K Hoang      20/01/2020 Add configurable static IP, GW, SN, DNS1, DNS2 and Config Portal static IP and Credentials
  *****************************************************************************************************************************/
 
 #ifndef BlynkSimpleEsp8266_SSL_WM_h
@@ -246,6 +247,14 @@ public:
     {
         BLYNK_LOG2(BLYNK_F("Connecting to "), ssid);
         WiFi.mode(WIFI_STA);
+        
+        // New from v1.0.5
+        if (static_IP != IPAddress(0, 0, 0, 0))
+        {
+          BLYNK_LOG1(BLYNK_F("Use static IP"));
+          WiFi.config(static_IP, static_GW, static_SN, static_DNS1, static_DNS2);         
+        }
+        
 				setHostname();
 
         if (WiFi.status() != WL_CONNECTED) {
@@ -259,9 +268,9 @@ public:
             BlynkDelay(500);
         }
         BLYNK_LOG1(BLYNK_F("Connected to WiFi"));
-
-        IPAddress myip = WiFi.localIP();
-        BLYNK_LOG_IP("IP: ", myip);
+        BLYNK_LOG6(BLYNK_F("IP = "), WiFi.localIP().toString(), BLYNK_F(", GW = "), WiFi.gatewayIP().toString(), 
+                   BLYNK_F(", SN = "), WiFi.subnetMask().toString());
+        BLYNK_LOG4(BLYNK_F("DNS1 = "), WiFi.dnsIP(0).toString(), BLYNK_F(", DNS2 = "), WiFi.dnsIP(1).toString());
     }
 
     void config(const char* auth,
@@ -523,11 +532,56 @@ public:
 				WiFi.hostname(RFC952_hostname);
 			}
 		}
-   
+
+		void setConfigPortalIP(IPAddress portalIP = IPAddress(192, 168, 4, 1))
+		{
+			portal_apIP = portalIP;
+		}
+		
+		void setConfigPortal(String ssid = "", String pass = "")
+		{
+			portal_ssid = ssid;
+			portal_pass = pass;
+		}		
+
+    void setSTAStaticIPConfig(IPAddress ip, IPAddress gw, IPAddress sn = IPAddress(255, 255, 255, 0), 
+                              IPAddress dns_address_1 = IPAddress(0, 0, 0, 0), 
+                              IPAddress dns_address_2 = IPAddress(0, 0, 0, 0))
+    {
+      static_IP     = ip;
+      static_GW     = gw;
+      static_SN     = sn;
+      
+      // Default to local GW
+      if (dns_address_1 == IPAddress(0, 0, 0, 0))
+        static_DNS1   = gw;
+      else
+        static_DNS1   = dns_address_1;
+        
+      // Default to Google DNS (8, 8, 8, 8)  
+      if (dns_address_2 == IPAddress(0, 0, 0, 0))
+        static_DNS2   = IPAddress(8, 8, 8, 8);
+      else
+        static_DNS2   = dns_address_2;
+    }
+       
 private:
     ESP8266WebServer server;
     bool configuration_mode = false;
     struct Configuration Blynk8266_WM_config;
+    
+    // For Config Portal, from v1.0.5     
+    IPAddress portal_apIP = IPAddress(192, 168, 4, 1);
+    
+    String portal_ssid = "";
+    String portal_pass = "";
+    
+    // For static IP, from v1.0.5 
+    IPAddress static_IP   = IPAddress(0, 0, 0, 0);
+    IPAddress static_GW   = IPAddress(0, 0, 0, 0);
+    IPAddress static_SN   = IPAddress(255, 255, 255, 0);
+    IPAddress static_DNS1 = IPAddress(0, 0, 0, 0);
+    IPAddress static_DNS2 = IPAddress(0, 0, 0, 0);    
 
 		#define RFC952_HOSTNAME_MAXLEN      24
 		char RFC952_hostname[RFC952_HOSTNAME_MAXLEN + 1];
@@ -763,6 +817,14 @@ private:
       WiFi.mode(WIFI_STA);
 			setHostname();
 
+			// New from v1.0.5
+      if (static_IP != IPAddress(0, 0, 0, 0))
+      {
+        BLYNK_LOG1(BLYNK_F("Use static IP"));
+        WiFi.config(static_IP, static_GW, static_SN, static_DNS1, static_DNS2);         
+      }			
+			
+
 	    BLYNK_LOG1(BLYNK_F("connectToWifi: start"));
 	
       if (Blynk8266_WM_config.wifi_passphrase && strlen(Blynk8266_WM_config.wifi_passphrase))
@@ -783,8 +845,9 @@ private:
 	    if (WiFi.status() == WL_CONNECTED)
 	    {
 		    BLYNK_LOG1(BLYNK_F("connectToWifi: connected OK"));
-        IPAddress myip = WiFi.localIP();
-        BLYNK_LOG_IP("IP: ", myip);		    
+        BLYNK_LOG6(BLYNK_F("IP = "), WiFi.localIP().toString(), BLYNK_F(", GW = "), WiFi.gatewayIP().toString(), 
+                   BLYNK_F(", SN = "), WiFi.subnetMask().toString());
+        BLYNK_LOG4(BLYNK_F("DNS1 = "), WiFi.dnsIP(0).toString(), BLYNK_F(", DNS2 = "), WiFi.dnsIP(1).toString());   
 		  }
 	    else
 	    {
@@ -905,23 +968,24 @@ private:
       // turn the LED_BUILTIN ON to tell us we are in configuration mode.
       digitalWrite(LED_BUILTIN, LOW);
       
-      
-      String chipID = String(ESP.getChipId(), HEX);
-      chipID.toUpperCase();
-      
-	    String ssid = "ESP_" + chipID;
+      if ( (portal_ssid == "") || portal_pass == "" )
+      {      
+        String chipID = String(ESP.getChipId(), HEX);
+        chipID.toUpperCase();
+        
+	      portal_ssid = "ESP_" + chipID;
 
-	    String pass = "MyESP_" + chipID;
+	      portal_pass = "MyESP_" + chipID;
+	    }
 	    
-	    BLYNK_LOG4(BLYNK_F("startConfigurationMode with SSID = "), ssid, BLYNK_F(" and PW = "), pass);
-	
-      IPAddress apIP(192, 168, 4, 1);
+	    BLYNK_LOG6(BLYNK_F("startConfigMode with SSID = "), portal_ssid, BLYNK_F(", PW = "), portal_pass,
+	               BLYNK_F(" and IP = "), portal_apIP.toString());
 
       WiFi.mode(WIFI_AP);
-      WiFi.softAP(ssid.c_str(), pass.c_str());
+      WiFi.softAP(portal_ssid.c_str(), portal_pass.c_str());
       
       delay(100); // ref: https://github.com/espressif/arduino-esp32/issues/985#issuecomment-359157428
-      WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
+      WiFi.softAPConfig(portal_apIP, portal_apIP, IPAddress(255, 255, 255, 0));
       
       //See https://stackoverflow.com/questions/39803135/c-unresolved-overloaded-function-type?rq=1
       server.on("/", [this](){ handleRequest(); });

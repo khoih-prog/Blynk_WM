@@ -7,7 +7,7 @@
  * Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
  * Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
  * Licensed under MIT license
- * Version: 1.0.4
+ * Version: 1.0.5
  *
  * Original Blynk Library author:
  * @file       BlynkSimpleEsp8266.h
@@ -23,6 +23,7 @@
  *  1.0.1   K Hoang      28/10/2019 Add features
  *  1.0.2   K Hoang      21/11/2019 Fix bug. Add features.
  *  1.0.4   K Hoang      07/01/2020 Use configurable personalized RFC-952 DHCP hostname in Blynk_WM v1.0.4
+ *  1.0.5   K Hoang      20/01/2020 Add configurable static IP, GW, SN, DNS1, DNS2 and Config Portal static IP and Credentials
  *****************************************************************************************************************************/
 
 #ifndef ESP32
@@ -182,6 +183,20 @@ void setup()
   }
 
   #if USE_BLYNK_WM
+
+    // From v1.0.5
+    // Set config portal SSID and Password
+    Blynk.setConfigPortal("TestPortal", "TestPortalPass");
+    // Set config portal IP address
+    Blynk.setConfigPortalIP(IPAddress(192, 168, 200, 1));
+
+    // From v1.0.5, select either one of these to set static IP + DNS
+    Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 220), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0));
+    //Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 220), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0), 
+    //                           IPAddress(192, 168, 2, 1), IPAddress(8, 8, 8, 8));
+    //Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 220), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0), 
+    //                           IPAddress(4, 4, 4, 4), IPAddress(8, 8, 8, 8));  
+       
     // Use this to default DHCP hostname to ESP8266-XXXXXX or ESP32-XXXXXX
     //Blynk.begin();
     // Use this to personalize DHCP hostname (RFC952 conformed)

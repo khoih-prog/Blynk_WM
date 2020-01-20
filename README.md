@@ -6,6 +6,11 @@ I'm inspired by [`EasyBlynk8266`] (https://github.com/Barbayar/EasyBlynk8266)
  
 To help you to eliminate `hardcoding` your Wifi and Blynk credentials for ESP8266 and ESP32 (with / wwithout SSL), and updating/reflashing every time when you need to change them.
 
+With version v1.0.5 or later, you now can configure:
+
+1. Config Portal Static IP address, Name and Password.
+2. Static IP address, Gateway, Subnet Mask and 2 DNS Servers IP addresses.
+
 ### Installation
 
 The suggested way to install is to:
@@ -87,6 +92,37 @@ After you connected, please, go to http://192.168.4.1.
 
 Enter your credentials, then click `Save`. After you restarted, you will see your built-in LED turned OFF. That means, it connected to your Blynk server successfully.
 
+The following is the sample terminal output when running example [ESP32WM_Config](examples/ESP32WM_Config)
+
+```
+Starting ...
+[34] RFC925 Hostname = ESP32-WM-Config
+[46] Header = SSL_ESP32, SSID = ***, PW = ***
+[46] Server = account.duckdns.org, Port = 9443, Token = ***
+[47] Board Name = ESP32-WM-SSL-Config
+[50] 
+    ___  __          __
+   / _ )/ /_ _____  / /__
+  / _  / / // / _ \/  '_/
+ /____/_/\_, /_//_/_/\_\
+        /___/ v0.6.1 on ESP32
+
+[146] Use static IP
+[151] connectToWifi: start
+[402] connectToWifi: connected OK
+[402] IP = 192.168.2.230, GW = 192.168.2.1, SN = 255.255.255.0
+[402] DNS1 = 192.168.2.1, DNS2 = 8.8.8.8
+[403] begin: WiFi connected. Try connecting to Blynk
+[408] BlynkArduinoClient.connect: Connecting to account.duckdns.org:9443
+[3684] Certificate OK
+[3696] Ready (ping: 10ms).
+[3763] begin: WiFi and Blynk connected
+
+Blynk ESP32 using EEPROM connected. Board Name : ESP32-WM-SSL-Config
+EEPROM size = 4096 bytes, EEPROM start address = 1024 / 0x400
+
+```
+
 This `Blynk.begin()` is not a blocking call, so you can use it for critical functions requiring in loop(). 
 Anyway, this is better for projects using Blynk just for GUI (graphical user interface).
 
@@ -154,7 +190,7 @@ Please take a look at examples, as well.
 #define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET    5
 // Those above #define's must be placed before #include <BlynkSimpleEsp8266_WM.h>
 
-#define USE_SSL   true
+#define USE_SSL   false
 
 #if USE_SSL
   #include <BlynkSimpleEsp8266_SSL_WM.h>
@@ -164,6 +200,21 @@ Please take a look at examples, as well.
 
 void setup() 
 {
+    ....
+    
+    // From v1.0.5
+    // Set config portal SSID and Password
+    Blynk.setConfigPortal("TestPortal", "TestPortalPass");
+    // Set config portal IP address
+    Blynk.setConfigPortalIP(IPAddress(192, 168, 220, 1));
+
+    // From v1.0.5, select either one of these to set static IP + DNS
+    Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 230), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0));
+    //Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 220), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0), 
+    //                           IPAddress(192, 168, 2, 1), IPAddress(8, 8, 8, 8));
+    //Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 220), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0), 
+    //                           IPAddress(4, 4, 4, 4), IPAddress(8, 8, 8, 8));   
+    
   // Use this to default DHCP hostname to ESP8266-XXXXXX or ESP32-XXXXXX
   //Blynk.begin();
   // Use this to personalize DHCP hostname (RFC952 conformed)
@@ -176,6 +227,21 @@ void loop()
     Blynk.run();
 }
 ```
+
+### Releases v1.0.5
+
+***Why this version***
+
+Normally, the default Portal IP (192.168.4.1), SSID and PW as well as the dynamically allocated board's IP address are good enough.
+In special cases where there is conflict, if static IP is required or bad router's DNS settings, you can use the new features to force the configurable IP addresses. But please use with care to avoid potential issues.
+
+***New in this version***
+
+Add new features to enable :
+
+1. configuring Portal Static IP address, Name and Password.
+2. configuring Static IP address, Gateway, Subnet Mask and 2 DNS Servers IP addresses.
+
 ### Releases v1.0.4
 
 ***Why this version***
