@@ -2,7 +2,7 @@
 
 [![arduino-library-badge](https://www.ardu-badge.com/badge/Blynk_WiFiManager.svg?)](https://www.ardu-badge.com/Blynk_WiFiManager)
 
-I'm inspired by [`EasyBlynk8266`] (https://github.com/Barbayar/EasyBlynk8266)
+I'm inspired by [`EasyBlynk8266`](https://github.com/Barbayar/EasyBlynk8266)
  
 To help you to eliminate `hardcoding` your Wifi and Blynk credentials for ESP8266 and ESP32 (with / wwithout SSL), and updating/reflashing every time when you need to change them.
 
@@ -15,7 +15,7 @@ With version `v1.0.5` or later, you now can configure:
 
 The suggested way to install is to:
 
-1. Navigate to [Blynk_WM] (https://github.com/khoih-prog/Blynk_WM) page.
+1. Navigate to [Blynk_WM](https://github.com/khoih-prog/Blynk_WM) page.
 2. Download the latest release `Blynk_WM-master.zip`.
 3. Extract the zip file to `Blynk_WM-master` directory 
 4. Copy whole `Blynk_WM-master/src` folder to Arduino libraries' `src` directory such as `~/Arduino/libraries/Blynk/src`.
@@ -41,8 +41,8 @@ to use SPIFFS or
 ```
 #define USE_SPIFFS    false
 ```
-to use EEPROM ( 172 bytes from address EEPROM_START ) to save your configuration data.
-EEPROM_SIZE can be specified from 256 to 4096 bytes. See examples [ESP32WM_Config] (https://github.com/khoih-prog/Blynk_WM/tree/master/examples/ESP32WM_Config) and [ESP8266WM_Config] (https://github.com/khoih-prog/Blynk_WM/tree/master/examples/ESP8266WM_Config).
+to use EEPROM ( 176 bytes from address EEPROM_START ) to save your configuration data.
+EEPROM_SIZE can be specified from 256 to 4096 bytes. See examples [ESP32WM_Config](https://github.com/khoih-prog/Blynk_WM/tree/master/examples/ESP32WM_Config) and [ESP8266WM_Config](https://github.com/khoih-prog/Blynk_WM/tree/master/examples/ESP8266WM_Config).
 
 
 ```
@@ -148,8 +148,8 @@ void loop()
 ```
 
 ## Prerequisite
-* `ESP8266 core 2.5.2 or later` for Arduino (https://github.com/esp8266/Arduino#installing-with-boards-manager)
-* `Blynk library 0.6.1 or later` (https://www.arduino.cc/en/guide/libraries#toc3)
+* [`ESP8266 core 2.5.2 or later` for Arduino](https://github.com/esp8266/Arduino#installing-with-boards-manager)
+* [`Blynk library 0.6.1 or later`](https://www.arduino.cc/en/guide/libraries#toc3)
 
 ## TO DO
 
@@ -216,7 +216,7 @@ void setup()
     //Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 220), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0), 
     //                           IPAddress(192, 168, 2, 1), IPAddress(8, 8, 8, 8));
     //Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 220), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0), 
-    //                           IPAddress(4, 4, 4, 4), IPAddress(8, 8, 8, 8));   
+    //                           IPAddress(4, 4, 4, 4), IPAddress(8, 8, 8, 8));
     
   // Use this to default DHCP hostname to ESP8266-XXXXXX or ESP32-XXXXXX
   //Blynk.begin();
@@ -230,6 +230,12 @@ void loop()
     Blynk.run();
 }
 ```
+
+### Releases v1.0.6
+
+***Why this version***
+
+Optimize, fix ESP32 EEPROM size to 2K from 4K, shorten code size, add functions, use dynamically allocated Config Portal WebServer.
 
 ### Releases v1.0.5
 

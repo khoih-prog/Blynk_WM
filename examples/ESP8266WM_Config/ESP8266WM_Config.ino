@@ -7,7 +7,7 @@
  * Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
  * Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
  * Licensed under MIT license
- * Version: 1.0.5
+ * Version: 1.0.6
  *
  * Original Blynk Library author:
  * @file       BlynkSimpleEsp8266.h
@@ -24,6 +24,7 @@
  *  1.0.2   K Hoang      21/11/2019 Fix bug. Add features.
  *  1.0.4   K Hoang      07/01/2020 Use configurable personalized RFC-952 DHCP hostname in Blynk_WM v1.0.4
  *  1.0.5   K Hoang      20/01/2020 Add configurable static IP, GW, SN, DNS1, DNS2 and Config Portal static IP and Credentials
+ *  1.0.6   K Hoang      05/02/2020 Optimize, fix ESP32 EEPROM size to 2K from 4K, shorten code size, add functions
  *****************************************************************************************************************************/
  
 #ifndef ESP8266
@@ -38,14 +39,14 @@
 // #define USE_SPIFFS    true  => using SPIFFS for configuration data in WiFiManager
 // Be sure to define USE_SPIFFS before #include <BlynkSimpleEsp8266_WM.h>
 
-//#define USE_SPIFFS                  true
-#define USE_SPIFFS                  false
+#define USE_SPIFFS                  true
+//#define USE_SPIFFS                  false
 
 #if (!USE_SPIFFS)
   // EEPROM_SIZE must be <= 4096 and >= CONFIG_DATA_SIZE (currently 172 bytes)
   #define EEPROM_SIZE    (4 * 1024)
   // EEPROM_START + CONFIG_DATA_SIZE must be <= EEPROM_SIZE
-  #define EEPROM_START  1024
+  #define EEPROM_START  256
 #endif
 
 // Force some params in Blynk, only valid for library version 1.0.1 and later
@@ -54,6 +55,7 @@
 #define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET    5
 // Those above #define's must be placed before #include <BlynkSimpleEsp8266_WM.h>
 
+//#define USE_SSL   true
 #define USE_SSL   false
 
 #if USE_SSL

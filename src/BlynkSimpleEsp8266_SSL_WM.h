@@ -7,7 +7,7 @@
  * Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
  * Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
  * Licensed under MIT license
- * Version: 1.0.5
+ * Version: 1.0.6
  *
  * Original Blynk Library author:
  * @file       BlynkSimpleEsp8266.h
@@ -25,6 +25,7 @@
  *  1.0.3   K Hoang      31/11/2019 Fix compiler errors for ESP8266 core pre-2.5.2. Add examples.
  *  1.0.4   K Hoang      07/01/2020 Add configurable personalized RFC-952 DHCP hostname
  *  1.0.5   K Hoang      20/01/2020 Add configurable static IP, GW, SN, DNS1, DNS2 and Config Portal static IP and Credentials
+ *  1.0.6   K Hoang      05/02/2020 Optimize, fix EEPROM size to 2K from 4K, shorten code size, add functions
  *****************************************************************************************************************************/
 
 #ifndef BlynkSimpleEsp8266_SSL_WM_h
@@ -145,93 +146,99 @@ private:
 
 // Configurable items besides fixed Header
 #define NUM_CONFIGURABLE_ITEMS    6
-struct Configuration 
+typedef struct Configuration 
 {
     char header         [16];
     char wifi_ssid      [32];
-    char wifi_passphrase[32];
+    char wifi_pw        [32];
     char blynk_server   [32];
     int  blynk_port;
     char blynk_token    [36];
     char board_name     [24];
-};
+} Blynk_WF_Configuration;
 
-String root_html_template = " \
+// Currently CONFIG_DATA_SIZE  =   176
+uint16_t CONFIG_DATA_SIZE = sizeof(Blynk_WF_Configuration);
+
+#define root_html_template " \
 <!DOCTYPE html> \
 <meta name=\"robots\" content=\"noindex\"> \
 <html> \
 <head> \
-  <meta charset=\"utf-8\"> \
-  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> \
-  <title>BlynkSimpleEsp8266_SSL_WM</title> \
+<meta charset=\"utf-8\"> \
+<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> \
+<title>BlynkSimpleEsp8266_SSL_WM</title> \
 </head> \
 <body> \
-  <div align=\"center\"> \
-    <table> \
-      <tbody> \
-        <tr> \
-          <th colspan=\"2\">WiFi</th> \
-        </tr> \
-        <tr> \
-          <td>SSID</td> \
-          <td><input type=\"text\" value=\"[[wifi_ssid]]\" size=20 maxlength=64 id=\"wifi_ssid\"></td> \
-        </tr> \
-        <tr> \
-          <td>Passphrase</td> \
-          <td><input type=\"text\" value=\"[[wifi_passphrase]]\" size=20 maxlength=64 id=\"wifi_passphrase\"></td> \
-        </tr> \
-        <tr> \
-          <th colspan=\"2\">Blynk</th> \
-        </tr> \
-        <tr> \
-          <td>Server</td> \
-          <td><input type=\"text\" value=\"[[blynk_server]]\" size=20 maxlength=64 id=\"blynk_server\"></td> \
-        </tr> \
-        <tr> \
-          <td>Port</td> \
-          <td><input type=\"text\" value=\"[[blynk_port]]\" id=\"blynk_port\"></td> \
-        </tr> \
-        <tr> \
-          <td>Token</td> \
-          <td><input type=\"text\" value=\"[[blynk_token]]\" size=20 maxlength=64 id=\"blynk_token\"></td> \
-        </tr> \
-        <tr> \
-          <th colspan=\"2\">Hardware</th> \
-        </tr> \
-        <tr> \
-          <td>Name</td> \
-          <td><input type=\"text\" value=\"[[board_name]]\" size=20 maxlength=32 id=\"board_name\"></td> \
-        </tr> \
-        <tr> \
-          <td colspan=\"2\" align=\"center\"> \
-            <button onclick=\"save()\">Save</button> \
-          </td> \
-        </tr> \
-      </tbody> \
-    </table> \
-  </div> \
+<div align=\"center\"> \
+<table> \
+<tbody> \
+<tr> \
+<th colspan=\"2\">WiFi</th> \
+</tr> \
+<tr> \
+<td>SSID</td> \
+<td><input type=\"text\" value=\"[[wf_id]]\" size=20 maxlength=64 id=\"wf_id\"></td> \
+</tr> \
+<tr> \
+<td>Password</td> \
+<td><input type=\"text\" value=\"[[wf_pw]]\" size=20 maxlength=64 id=\"wf_pw\"></td> \
+</tr> \
+<tr> \
+<th colspan=\"2\">Blynk</th> \
+</tr> \
+<tr> \
+<td>Server</td> \
+<td><input type=\"text\" value=\"[[b_svr]]\" size=20 maxlength=64 id=\"b_svr\"></td> \
+</tr> \
+<tr> \
+<td>Port</td> \
+<td><input type=\"text\" value=\"[[b_pt]]\" id=\"b_pt\"></td> \
+</tr> \
+<tr> \
+<td>Token</td> \
+<td><input type=\"text\" value=\"[[b_tok]]\" size=20 maxlength=32 id=\"b_tok\"></td> \
+</tr> \
+<tr> \
+<th colspan=\"2\">Hardware</th> \
+</tr> \
+<tr> \
+<td>Name</td> \
+<td><input type=\"text\" value=\"[[bd_nm]]\" size=20 maxlength=32 id=\"bd_nm\"></td> \
+</tr> \
+<tr> \
+<td colspan=\"2\" align=\"center\"> \
+<button onclick=\"save()\">Save</button> \
+</td> \
+</tr> \
+</tbody> \
+</table> \
+</div> \
 <script id=\"jsbin-javascript\"> \
-function updateValue(key, value) { \
-  var request = new XMLHttpRequest(); \
-  var url = '/?key=' + key + '&value=' + value; \
-  console.log('calling ' + url + '...'); \
-  request.open('GET', url, false); \
-  request.send(null); \
+function udVal(key, value) { \
+var request = new XMLHttpRequest(); \
+var url = '/?key=' + key + '&value=' + value; \
+console.log('call ' + url + '...'); \
+request.open('GET', url, false); \
+request.send(null); \
 } \
 function save() { \
-  updateValue('wifi_ssid', document.getElementById('wifi_ssid').value); \
-  updateValue('wifi_passphrase', document.getElementById('wifi_passphrase').value); \
-  updateValue('blynk_server', document.getElementById('blynk_server').value); \
-  updateValue('blynk_port', document.getElementById('blynk_port').value); \
-  updateValue('blynk_token', document.getElementById('blynk_token').value); \
-  updateValue('board_name', document.getElementById('board_name').value); \
-  alert('Updated Configurations. Resetting board'); \
+udVal('wf_id', document.getElementById('wf_id').value); \
+udVal('wf_pw', document.getElementById('wf_pw').value); \
+udVal('b_svr', document.getElementById('b_svr').value); \
+udVal('b_pt', document.getElementById('b_pt').value); \
+udVal('b_tok', document.getElementById('b_tok').value); \
+udVal('bd_nm', document.getElementById('bd_nm').value); \
+alert('Updated. Reset'); \
 } \
 </script> \
 </body> \
-</html>";
+</html>"
 
 #define BLYNK_SERVER_HARDWARE_PORT    9443
+
+#define BOARD_TYPE      "SSL_ESP8266"  
+#define NO_CONFIG       "nothing"  
 
 template <typename Transport>
 class BlynkWifi
@@ -248,7 +255,7 @@ public:
         BLYNK_LOG2(BLYNK_F("Connecting to "), ssid);
         WiFi.mode(WIFI_STA);
         
-        // New from v1.0.5
+        // New from Blynk_WM v1.0.5
         if (static_IP != IPAddress(0, 0, 0, 0))
         {
           BLYNK_LOG1(BLYNK_F("Use static IP"));
@@ -268,9 +275,7 @@ public:
             BlynkDelay(500);
         }
         BLYNK_LOG1(BLYNK_F("Connected to WiFi"));
-        BLYNK_LOG6(BLYNK_F("IP = "), WiFi.localIP().toString(), BLYNK_F(", GW = "), WiFi.gatewayIP().toString(), 
-                   BLYNK_F(", SN = "), WiFi.subnetMask().toString());
-        BLYNK_LOG4(BLYNK_F("DNS1 = "), WiFi.dnsIP(0).toString(), BLYNK_F(", DNS2 = "), WiFi.dnsIP(1).toString());
+        displayWiFiData();
     }
 
     void config(const char* auth,
@@ -373,7 +378,7 @@ public:
 
           if (connectToWifi(TIMEOUT_CONNECT_WIFI)) 
           {
-            BLYNK_LOG1(BLYNK_F("begin: WiFi connected. Try connecting to Blynk"));
+            BLYNK_LOG1(BLYNK_F("bg: WiFi connected. Try Blynk"));
             
             int i = 0;
             while ( (i++ < 10) && !this->connect() )
@@ -382,25 +387,25 @@ public:
             
             if  (this->connected())
             {
-              BLYNK_LOG1(BLYNK_F("begin: WiFi and Blynk connected"));
+              BLYNK_LOG1(BLYNK_F("bg: WiFi+Blynk connected"));
             }
             else 
             {
-              BLYNK_LOG1(BLYNK_F("begin: WiFi connected but Bynk not connected"));
+              BLYNK_LOG1(BLYNK_F("bg: WiFi connected, Blynk not"));
               // failed to connect to Blynk server, will start configuration mode
               startConfigurationMode();
             }
           } 
           else 
           {
-              BLYNK_LOG1(BLYNK_F("begin: Fail to connect WiFi and Blynk"));
+              BLYNK_LOG1(BLYNK_F("bg: Fail2connect WiFi+Blynk"));
               // failed to connect to Blynk server, will start configuration mode
               startConfigurationMode();
           }
         }
         else
         {
-            BLYNK_LOG1(BLYNK_F("begin: No stored config data. Will forever stay in config mode until getting data"));
+            BLYNK_LOG1(BLYNK_F("bg: No configdat. Stay forever in config portal"));
             // failed to connect to Blynk server, will start configuration mode
             hadConfigData = false;
             startConfigurationMode();                  
@@ -453,7 +458,10 @@ public:
 		    if ( configuration_mode && ( configTimeout == 0 ||  millis() < configTimeout ) )
 		    {
 		      retryTimes = 0;
-			    server.handleClient();		
+		      
+			    if (server)
+			      server->handleClient();	
+			      
 			    return;
 		    }
 		    else
@@ -465,7 +473,7 @@ public:
 		      {	        
 		        if (++retryTimes <= CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET)
 		        {
-		          BLYNK_LOG2(BLYNK_F("run: WiFi lost but config Timeout. Try connecting WiFi and Blynk. RetryTimes : "), retryTimes);
+		           BLYNK_LOG2(BLYNK_F("run: WiFi lost & config Timeout. Connect WiFi+Blynk. Retry# : "), retryTimes);
 		        }
 		        else
 		        {
@@ -477,23 +485,23 @@ public:
 			    // Not in config mode, try reconnecting before forcing to config mode
 			    if ( WiFi.status() != WL_CONNECTED )
 			    {
-				    BLYNK_LOG1(BLYNK_F("run: WiFi lost. Try reconnecting WiFi and Blynk"));
+				    BLYNK_LOG1(BLYNK_F("run: WiFi lost. Reconnect WiFi+Blynk"));
 				    if (connectToWifi(TIMEOUT_RECONNECT_WIFI)) 
 				    {
  				      // turn the LED_BUILTIN OFF to tell us we exit configuration mode.
               digitalWrite(LED_BUILTIN, HIGH);
 
-				      BLYNK_LOG1(BLYNK_F("run: WiFi reconnected. Trying connect to Blynk"));
+				      BLYNK_LOG1(BLYNK_F("run: WiFi reconnected. Connect to Blynk"));
 				      
 				      if (this->connect())
 				      {
-					      BLYNK_LOG1(BLYNK_F("run: WiFi and Blynk reconnected"));
+					      BLYNK_LOG1(BLYNK_F("run: WiFi+Blynk reconnected"));
 					    }
 				    }
 			    }
 			    else
 			    {
-				    BLYNK_LOG1(BLYNK_F("run: Blynk lost. Try connecting Blynk"));
+				    BLYNK_LOG1(BLYNK_F("run: Blynk lost. Connect Blynk"));
 				    if (this->connect()) 
 				    {
 				      // turn the LED_BUILTIN OFF to tell us we exit configuration mode.
@@ -509,7 +517,7 @@ public:
       else if (configuration_mode)
       {
       	configuration_mode = false;
-      	BLYNK_LOG1(BLYNK_F("run: got WiFi/Blynk back, great"));
+      	BLYNK_LOG1(BLYNK_F("run: got WiFi+Blynk back, great"));
       	// turn the LED_BUILTIN OFF to tell us we exit configuration mode.
         digitalWrite(LED_BUILTIN, HIGH);
       }
@@ -520,11 +528,6 @@ public:
       }
     }
     
-    String getBoardName()
-    {
-      return (String(Blynk8266_WM_config.board_name));
-    }
-
 		void setHostname(void)
 		{
 			if (RFC952_hostname[0] != 0)
@@ -564,19 +567,67 @@ public:
       else
         static_DNS2   = dns_address_2;
     }
-       
-private:
-    ESP8266WebServer server;
-    bool configuration_mode = false;
-    struct Configuration Blynk8266_WM_config;
+ 
+    String getServerName()
+    {
+      if (!hadConfigData)
+        getConfigData();
+
+      return (String(Blynk8266_WM_config.blynk_server));
+    }
+                       
+    String getToken()
+    {
+      if (!hadConfigData)
+        getConfigData();
+            
+      return (String(Blynk8266_WM_config.blynk_token));
+    }
+        
+    String getBoardName()
+    {
+      if (!hadConfigData)
+        getConfigData();
+
+      return (String(Blynk8266_WM_config.board_name));
+    }
     
-    // For Config Portal, from v1.0.5     
+    int getHWPort()
+    {
+      if (!hadConfigData)
+        getConfigData();
+
+      return (Blynk8266_WM_config.blynk_port);
+    }    
+          
+    Blynk_WF_Configuration* getFullConfigData(Blynk_WF_Configuration *configData)
+    {
+      if (!hadConfigData)
+        getConfigData();
+        
+      // Check if NULL pointer
+      if (configData)
+        memcpy(configData, &Blynk8266_WM_config, sizeof(Blynk_WF_Configuration));
+
+      return (configData);
+    }
+           
+private:
+    ESP8266WebServer *server;
+    bool configuration_mode = false;
+    
+    unsigned long configTimeout;
+    bool hadConfigData = false;     
+    
+    Blynk_WF_Configuration Blynk8266_WM_config;
+    
+    // For Config Portal, from Blynk_WM v1.0.5     
     IPAddress portal_apIP = IPAddress(192, 168, 4, 1);
     
     String portal_ssid = "";
     String portal_pass = "";
     
-    // For static IP, from v1.0.5 
+    // For static IP, from Blynk_WM v1.0.5 
     IPAddress static_IP   = IPAddress(0, 0, 0, 0);
     IPAddress static_GW   = IPAddress(0, 0, 0, 0);
     IPAddress static_SN   = IPAddress(255, 255, 255, 0);
@@ -608,13 +659,23 @@ private:
 
 			return RFC952_hostname;
 		}
-    
-    unsigned long configTimeout;
-    bool hadConfigData;   
 
-#define BOARD_TYPE      "SSL_ESP8266"
-#define NO_CONFIG       "nothing"     
-
+		void displayConfigData(void)
+		{
+		    BLYNK_LOG6(BLYNK_F("Header = "), Blynk8266_WM_config.header, BLYNK_F(", SSID = "), Blynk8266_WM_config.wifi_ssid, 
+                   BLYNK_F(", PW = "),   Blynk8266_WM_config.wifi_pw);
+        BLYNK_LOG6(BLYNK_F("Server = "), Blynk8266_WM_config.blynk_server, BLYNK_F(", Port = "), Blynk8266_WM_config.blynk_port, 
+                   BLYNK_F(", Token = "),  Blynk8266_WM_config.blynk_token);     
+        BLYNK_LOG2(BLYNK_F("Board Name = "), Blynk8266_WM_config.board_name);   
+		}  		
+ 
+    void displayWiFiData(void)
+		{
+        BLYNK_LOG6(BLYNK_F("IP = "), WiFi.localIP().toString(), BLYNK_F(", GW = "), WiFi.gatewayIP().toString(), 
+                   BLYNK_F(", SN = "), WiFi.subnetMask().toString());
+        BLYNK_LOG4(BLYNK_F("DNS1 = "), WiFi.dnsIP(0).toString(), BLYNK_F(", DNS2 = "), WiFi.dnsIP(1).toString());
+    } 
+       
 #if USE_SPIFFS     
 
     #define  CONFIG_FILENAME         BLYNK_F("/wmssl_conf.dat")
@@ -623,19 +684,19 @@ private:
     void loadConfigData(void)
     {
       File file = SPIFFS.open(CONFIG_FILENAME, "r");
-      BLYNK_LOG1(BLYNK_F("Loading config file..."));
+      BLYNK_LOG1(BLYNK_F("Load configfile "));
       
       if (!file) 
       {
-        BLYNK_LOG1(BLYNK_F(" failed"));
+        BLYNK_LOG1(BLYNK_F("failed"));
         
         // Trying open redundant config file
         file = SPIFFS.open(CONFIG_FILENAME_BACKUP, "r");
-        BLYNK_LOG1(BLYNK_F("Loading backup config file...")); 
+        BLYNK_LOG1(BLYNK_F("Load backup configfile ")); 
         
         if (!file)
         {
-          BLYNK_LOG1(BLYNK_F(" also failed"));
+          BLYNK_LOG1(BLYNK_F("also failed"));
           return;
         }
       }
@@ -649,7 +710,7 @@ private:
     void saveConfigData(void)
     {
       File file = SPIFFS.open(CONFIG_FILENAME, "w");
-      BLYNK_LOG1(BLYNK_F("Saving config file..."));
+      BLYNK_LOG1(BLYNK_F("Save configfile "));
       
       if (file) 
       {
@@ -659,12 +720,12 @@ private:
       }
       else
       {
-        BLYNK_LOG1(BLYNK_F(" failed"));        
+        BLYNK_LOG1(BLYNK_F("failed"));        
       }  
       
       // Trying open redundant Auth file
       file = SPIFFS.open(CONFIG_FILENAME_BACKUP, "w");
-      BLYNK_LOG1(BLYNK_F("Saving backup config file...")); 
+      BLYNK_LOG1(BLYNK_F("Save backup configfile ")); 
       
       if (file)
       {
@@ -674,7 +735,7 @@ private:
       }
       else
       {
-        BLYNK_LOG1(BLYNK_F(" failed"));       
+        BLYNK_LOG1(BLYNK_F("failed"));       
       }              
     }
     
@@ -682,7 +743,7 @@ private:
     {      
       if (!SPIFFS.begin()) 
       {
-        BLYNK_LOG1(BLYNK_F("SPIFFS failed!. Please use EEPROM."));
+        BLYNK_LOG1(BLYNK_F("SPIFFS failed! Pls use EEPROM."));
         return false;
       }
       
@@ -692,6 +753,8 @@ private:
         loadConfigData();
       }
 
+      displayConfigData();
+      
       if (strncmp(Blynk8266_WM_config.header, BOARD_TYPE, strlen(BOARD_TYPE)) != 0) 
       {
           memset(&Blynk8266_WM_config, 0, sizeof(Blynk8266_WM_config));
@@ -700,7 +763,7 @@ private:
           // doesn't have any configuration
           strcpy(Blynk8266_WM_config.header,           BOARD_TYPE);
           strcpy(Blynk8266_WM_config.wifi_ssid,        NO_CONFIG);
-          strcpy(Blynk8266_WM_config.wifi_passphrase,  NO_CONFIG);
+          strcpy(Blynk8266_WM_config.wifi_pw,          NO_CONFIG);
           strcpy(Blynk8266_WM_config.blynk_server,     NO_CONFIG);
           Blynk8266_WM_config.blynk_port = BLYNK_SERVER_HARDWARE_PORT;
           strcpy(Blynk8266_WM_config.blynk_token,      NO_CONFIG);
@@ -711,7 +774,7 @@ private:
           return false;       
       }
       else if ( !strncmp(Blynk8266_WM_config.wifi_ssid,       NO_CONFIG, strlen(NO_CONFIG))   ||
-                !strncmp(Blynk8266_WM_config.wifi_passphrase, NO_CONFIG, strlen(NO_CONFIG) )  ||
+                !strncmp(Blynk8266_WM_config.wifi_pw,         NO_CONFIG, strlen(NO_CONFIG) )  ||
                 !strncmp(Blynk8266_WM_config.blynk_server,    NO_CONFIG, strlen(NO_CONFIG) )  ||
                 !strncmp(Blynk8266_WM_config.blynk_token,     NO_CONFIG, strlen(NO_CONFIG) ) ) 
       {
@@ -720,11 +783,7 @@ private:
       }  
       else
       {
-        BLYNK_LOG6(BLYNK_F("Header = "), Blynk8266_WM_config.header, BLYNK_F(", SSID = "), Blynk8266_WM_config.wifi_ssid, 
-                   BLYNK_F(", PW = "),     Blynk8266_WM_config.wifi_passphrase);
-        BLYNK_LOG6(BLYNK_F("Server = "), Blynk8266_WM_config.blynk_server, BLYNK_F(", Port = "), Blynk8266_WM_config.blynk_port, 
-                   BLYNK_F(", Token = "),  Blynk8266_WM_config.blynk_token);
-        BLYNK_LOG2(BLYNK_F("Board Name = "), Blynk8266_WM_config.board_name);               
+        displayConfigData();               
       }
       
       return true;
@@ -732,8 +791,6 @@ private:
      
 
 #else
-
-#define  CONFIG_DATA_SIZE     172
 
 #ifndef EEPROM_SIZE
   #define EEPROM_SIZE     512
@@ -771,7 +828,7 @@ private:
           // doesn't have any configuration
           strcpy(Blynk8266_WM_config.header,           BOARD_TYPE);
           strcpy(Blynk8266_WM_config.wifi_ssid,        NO_CONFIG);
-          strcpy(Blynk8266_WM_config.wifi_passphrase,  NO_CONFIG);
+          strcpy(Blynk8266_WM_config.wifi_pw,          NO_CONFIG);
           strcpy(Blynk8266_WM_config.blynk_server,     NO_CONFIG);
           Blynk8266_WM_config.blynk_port = BLYNK_SERVER_HARDWARE_PORT;
           strcpy(Blynk8266_WM_config.blynk_token,      NO_CONFIG);
@@ -783,7 +840,7 @@ private:
           return false;
       }
       else if ( !strncmp(Blynk8266_WM_config.wifi_ssid,       NO_CONFIG, strlen(NO_CONFIG))   ||
-                !strncmp(Blynk8266_WM_config.wifi_passphrase, NO_CONFIG, strlen(NO_CONFIG) )  ||
+                !strncmp(Blynk8266_WM_config.wifi_pw,         NO_CONFIG, strlen(NO_CONFIG) )  ||
                 !strncmp(Blynk8266_WM_config.blynk_server,    NO_CONFIG, strlen(NO_CONFIG) )  ||
                 !strncmp(Blynk8266_WM_config.blynk_token,     NO_CONFIG, strlen(NO_CONFIG) ) ) 
       {
@@ -792,11 +849,7 @@ private:
       }  
       else
       {
-        BLYNK_LOG6(BLYNK_F("Header = "), Blynk8266_WM_config.header, BLYNK_F(", SSID = "), Blynk8266_WM_config.wifi_ssid, 
-                   BLYNK_F(", PW = "),     Blynk8266_WM_config.wifi_passphrase);
-        BLYNK_LOG6(BLYNK_F("Server = "), Blynk8266_WM_config.blynk_server, BLYNK_F(", Port = "), Blynk8266_WM_config.blynk_port, 
-                   BLYNK_F(", Token = "),  Blynk8266_WM_config.blynk_token);
-        BLYNK_LOG2(BLYNK_F("Board Name = "), Blynk8266_WM_config.board_name);               
+        displayConfigData();               
       }
       
       return true;
@@ -804,6 +857,7 @@ private:
     
     void saveConfigData()
     {      
+      BLYNK_LOG2(BLYNK_F("Save EEPROM, size = "), EEPROM_SIZE /*EEPROM.length()*/);
       EEPROM.put(EEPROM_START, Blynk8266_WM_config);
       EEPROM.commit();
     }
@@ -817,19 +871,18 @@ private:
       WiFi.mode(WIFI_STA);
 			setHostname();
 
-			// New from v1.0.5
+			// New from Blynk_WM v1.0.5
       if (static_IP != IPAddress(0, 0, 0, 0))
       {
         BLYNK_LOG1(BLYNK_F("Use static IP"));
         WiFi.config(static_IP, static_GW, static_SN, static_DNS1, static_DNS2);         
       }			
 			
-
-	    BLYNK_LOG1(BLYNK_F("connectToWifi: start"));
+	    BLYNK_LOG1(BLYNK_F("con2WF: start"));
 	
-      if (Blynk8266_WM_config.wifi_passphrase && strlen(Blynk8266_WM_config.wifi_passphrase))
+      if (Blynk8266_WM_config.wifi_pw && strlen(Blynk8266_WM_config.wifi_pw))
       {
-          WiFi.begin(Blynk8266_WM_config.wifi_ssid, Blynk8266_WM_config.wifi_passphrase);
+          WiFi.begin(Blynk8266_WM_config.wifi_ssid, Blynk8266_WM_config.wifi_pw);
       } 
       else 
       {
@@ -844,14 +897,12 @@ private:
 
 	    if (WiFi.status() == WL_CONNECTED)
 	    {
-		    BLYNK_LOG1(BLYNK_F("connectToWifi: connected OK"));
-        BLYNK_LOG6(BLYNK_F("IP = "), WiFi.localIP().toString(), BLYNK_F(", GW = "), WiFi.gatewayIP().toString(), 
-                   BLYNK_F(", SN = "), WiFi.subnetMask().toString());
-        BLYNK_LOG4(BLYNK_F("DNS1 = "), WiFi.dnsIP(0).toString(), BLYNK_F(", DNS2 = "), WiFi.dnsIP(1).toString());   
+		    BLYNK_LOG1(BLYNK_F("con2WF: con OK"));
+        displayWiFiData();   
 		  }
 	    else
 	    {
-		    BLYNK_LOG1(BLYNK_F("connectToWifi: connected failed"));
+		    BLYNK_LOG1(BLYNK_F("con2WF: con failed"));
 		  }
 	
       return WiFi.status() == WL_CONNECTED;    
@@ -860,105 +911,106 @@ private:
     
     void handleRequest()
     {
-      String key = server.arg("key");
-      String value = server.arg("value");
-      
-      static int number_items_Updated = 0;
-
-      if (key == "" && value == "") 
+      if (server)
       {
+        String key = server->arg("key");
+        String value = server->arg("value");
+        
+        static int number_items_Updated = 0;
+
+        if (key == "" && value == "") 
+        {
           String result = root_html_template;
           
-          BLYNK_LOG1(BLYNK_F("handleRequest: replacing result"));
+          BLYNK_LOG1(BLYNK_F("hR: replace result"));
           
           // Reset configTimeout to stay here until finished.
           configTimeout = 0;
 
-          result.replace("[[wifi_ssid]]",       Blynk8266_WM_config.wifi_ssid);
-          result.replace("[[wifi_passphrase]]", Blynk8266_WM_config.wifi_passphrase);
-          result.replace("[[blynk_server]]",    Blynk8266_WM_config.blynk_server);
-          result.replace("[[blynk_port]]",      String(Blynk8266_WM_config.blynk_port));
-          result.replace("[[blynk_token]]",     Blynk8266_WM_config.blynk_token);
-          result.replace("[[board_name]]",      Blynk8266_WM_config.board_name);
+          result.replace("[[wf_id]]",     Blynk8266_WM_config.wifi_ssid);
+          result.replace("[[wf_pw]]",     Blynk8266_WM_config.wifi_pw);
+          result.replace("[[b_svr]]",     Blynk8266_WM_config.blynk_server);
+          result.replace("[[b_pt]]",      String(Blynk8266_WM_config.blynk_port));
+          result.replace("[[b_tok]]",     Blynk8266_WM_config.blynk_token);
+          result.replace("[[bd_nm]]",     Blynk8266_WM_config.board_name);
 
-          server.send(200, "text/html", result);
+          server->send(200, "text/html", result);
 
           return;
-      }
-      
-      if (number_items_Updated == 0)
-      {
-        memset(&Blynk8266_WM_config, 0, sizeof(Blynk8266_WM_config));
-        strcpy(Blynk8266_WM_config.header, BOARD_TYPE);
-      }
-     
-      if (key == "wifi_ssid")
-      {
-          number_items_Updated++;
-          if (strlen(value.c_str()) < sizeof(Blynk8266_WM_config.wifi_ssid) -1)
-            strcpy(Blynk8266_WM_config.wifi_ssid, value.c_str());
-          else
-            strncpy(Blynk8266_WM_config.wifi_ssid, value.c_str(), sizeof(Blynk8266_WM_config.wifi_ssid) -1);    
-      }
-      else if (key == "wifi_passphrase") 
-      {
-          number_items_Updated++;
-          if (strlen(value.c_str()) < sizeof(Blynk8266_WM_config.wifi_passphrase) -1)
-            strcpy(Blynk8266_WM_config.wifi_passphrase, value.c_str());
-          else
-            strncpy(Blynk8266_WM_config.wifi_passphrase, value.c_str(), sizeof(Blynk8266_WM_config.wifi_passphrase) -1);  
-      }
-
-      else if (key == "blynk_server") 
-      {
-          number_items_Updated++;
-          if (strlen(value.c_str()) < sizeof(Blynk8266_WM_config.blynk_server) -1)
-            strcpy(Blynk8266_WM_config.blynk_server, value.c_str());
-          else
-            strncpy(Blynk8266_WM_config.blynk_server, value.c_str(), sizeof(Blynk8266_WM_config.blynk_server) -1);    
-      }
-      else if (key == "blynk_port") 
-      {
-          number_items_Updated++;
-          Blynk8266_WM_config.blynk_port = value.toInt();
-      }
-      else if (key == "blynk_token") 
-      {
-          number_items_Updated++;
-          if (strlen(value.c_str()) < sizeof(Blynk8266_WM_config.blynk_token) -1)
-            strcpy(Blynk8266_WM_config.blynk_token, value.c_str());
-          else
-            strncpy(Blynk8266_WM_config.blynk_token, value.c_str(), sizeof(Blynk8266_WM_config.blynk_token) -1);   
-            
-      }
-      else if (key == "board_name") 
-      {
-          number_items_Updated++;
-          if (strlen(value.c_str()) < sizeof(Blynk8266_WM_config.board_name) -1)
-            strcpy(Blynk8266_WM_config.board_name, value.c_str());
-          else
-            strncpy(Blynk8266_WM_config.board_name, value.c_str(), sizeof(Blynk8266_WM_config.board_name) -1);
-      }
-
-      server.send(200, "text/html", "OK");
-      
-      if (number_items_Updated == NUM_CONFIGURABLE_ITEMS)
-      {
-        #if USE_SPIFFS     
-          BLYNK_LOG2(BLYNK_F("handleRequest: Updating data to SPIFFS file "), CONFIG_FILENAME);
-        #else
-          BLYNK_LOG1(BLYNK_F("handleRequest: Updating data to EEPROM"));
-        #endif
+        }
+       
+        if (number_items_Updated == 0)
+        {
+          memset(&Blynk8266_WM_config, 0, sizeof(Blynk8266_WM_config));
+          strcpy(Blynk8266_WM_config.header, BOARD_TYPE);
+        }
         
-        saveConfigData();
+        if (key == "wf_id")
+        {
+            number_items_Updated++;
+            if (strlen(value.c_str()) < sizeof(Blynk8266_WM_config.wifi_ssid) -1)
+              strcpy(Blynk8266_WM_config.wifi_ssid, value.c_str());
+            else
+              strncpy(Blynk8266_WM_config.wifi_ssid, value.c_str(), sizeof(Blynk8266_WM_config.wifi_ssid) -1);    
+        }
+        else if (key == "wf_pw") 
+        {
+            number_items_Updated++;
+            if (strlen(value.c_str()) < sizeof(Blynk8266_WM_config.wifi_pw) -1)
+              strcpy(Blynk8266_WM_config.wifi_pw, value.c_str());
+            else
+              strncpy(Blynk8266_WM_config.wifi_pw, value.c_str(), sizeof(Blynk8266_WM_config.wifi_pw) -1);    
+        }
 
-        BLYNK_LOG1(BLYNK_F("handleRequest: Resetting"));
+        else if (key == "b_svr") 
+        {
+            number_items_Updated++;
+            if (strlen(value.c_str()) < sizeof(Blynk8266_WM_config.blynk_server) -1)
+              strcpy(Blynk8266_WM_config.blynk_server, value.c_str());
+            else
+              strncpy(Blynk8266_WM_config.blynk_server, value.c_str(), sizeof(Blynk8266_WM_config.blynk_server) -1);      
+        }
+        else if (key == "b_pt") 
+        {
+            number_items_Updated++;
+            Blynk8266_WM_config.blynk_port = value.toInt();
+        }
+        else if (key == "b_tok") 
+        {
+            number_items_Updated++;
+            if (strlen(value.c_str()) < sizeof(Blynk8266_WM_config.blynk_token) -1)
+              strcpy(Blynk8266_WM_config.blynk_token, value.c_str());
+            else
+              strncpy(Blynk8266_WM_config.blynk_token, value.c_str(), sizeof(Blynk8266_WM_config.blynk_token) -1);    
+        }
+        else if (key == "bd_nm") 
+        {
+            number_items_Updated++;
+            if (strlen(value.c_str()) < sizeof(Blynk8266_WM_config.board_name) -1)
+              strcpy(Blynk8266_WM_config.board_name, value.c_str());
+            else
+              strncpy(Blynk8266_WM_config.board_name, value.c_str(), sizeof(Blynk8266_WM_config.board_name) -1);  
+        }
         
-        // Delay then reset the ESP8266 after save data
-        delay(1000);
-        ESP.reset();    
-      }
-    
+        server->send(200, "text/html", "OK");
+        
+        if (number_items_Updated == NUM_CONFIGURABLE_ITEMS)
+        {
+          #if USE_SPIFFS     
+            BLYNK_LOG2(BLYNK_F("hR: Update SPIFFS "), CONFIG_FILENAME);
+          #else
+            BLYNK_LOG1(BLYNK_F("hR: Update EEPROM"));
+          #endif
+
+          saveConfigData();
+
+          BLYNK_LOG1(BLYNK_F("hR: Reset"));
+          
+          // Delay then reset the ESP8266 after save data
+          delay(1000);
+          ESP.reset();    
+        }
+      }    // if (server)
     }
         
     void startConfigurationMode()
@@ -980,21 +1032,27 @@ private:
 	    
 	    BLYNK_LOG6(BLYNK_F("startConfigMode with SSID = "), portal_ssid, BLYNK_F(", PW = "), portal_pass,
 	               BLYNK_F(" and IP = "), portal_apIP.toString());
-
+	
       WiFi.mode(WIFI_AP);
       WiFi.softAP(portal_ssid.c_str(), portal_pass.c_str());
       
       delay(100); // ref: https://github.com/espressif/arduino-esp32/issues/985#issuecomment-359157428
       WiFi.softAPConfig(portal_apIP, portal_apIP, IPAddress(255, 255, 255, 0));
       
+      if (!server)
+	      server = new ESP8266WebServer;
+	      
       //See https://stackoverflow.com/questions/39803135/c-unresolved-overloaded-function-type?rq=1
-      server.on("/", [this](){ handleRequest(); });
-
-      server.begin();
-      
+      if (server)
+      {
+        server->on("/", [this](){ handleRequest(); });
+        server->begin();
+      }
+                           
       // If there is no saved config Data, stay in config mode forever until having config Data.
-      if (hadConfigData)      
-        configTimeout = millis() + CONFIG_TIMEOUT;
+      // or SSID, PW, Server,Token ="nothing"
+      if (hadConfigData)
+        configTimeout = millis() + CONFIG_TIMEOUT;                        
       else
         configTimeout = 0;
        

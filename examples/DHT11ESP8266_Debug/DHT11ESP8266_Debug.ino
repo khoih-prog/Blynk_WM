@@ -7,7 +7,7 @@
  * Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
  * Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
  * Licensed under MIT license
- * Version: 1.0.5
+ * Version: 1.0.6
  *
  * Original Blynk Library author:
  * @file       BlynkSimpleEsp8266.h
@@ -24,6 +24,7 @@
  *  1.0.2   K Hoang      21/11/2019 Fix bug. Add features.
  *  1.0.4   K Hoang      07/01/2020 Use configurable personalized RFC-952 DHCP hostname in Blynk_WM v1.0.4
  *  1.0.5   K Hoang      20/01/2020 Add configurable static IP, GW, SN, DNS1, DNS2 and Config Portal static IP and Credentials
+ *  1.0.6   K Hoang      05/02/2020 Optimize, fix ESP32 EEPROM size to 2K from 4K, shorten code size, add functions
  *****************************************************************************************************************************/
  
 #ifndef ESP8266

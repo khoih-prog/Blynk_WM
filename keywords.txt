@@ -37,12 +37,17 @@ getConfigData KEYWORD2
 connectToWifi KEYWORD2
 handleRequest KEYWORD2
 startConfigurationMode  KEYWORD2
-getBoardName  KEYWORD2
 setHostname KEYWORD2
 setConfigPortalIP KEYWORD2
 setConfigPortal KEYWORD2
 setSTAStaticIPConfig  KEYWORD2
-
+getServerName KEYWORD2
+getToken  KEYWORD2
+getBlynkBTToken KEYWORD2
+getBlynkBLEToken  KEYWORD2
+getBoardName  KEYWORD2
+getHWPort KEYWORD2
+getFullConfigData KEYWORD2
 
 # Handler helpers
 BLYNK_READ	KEYWORD2
