@@ -6,6 +6,11 @@ I'm inspired by [`EasyBlynk8266`](https://github.com/Barbayar/EasyBlynk8266)
  
 To help you to eliminate `hardcoding` your Wifi and Blynk credentials for ESP8266 and ESP32 (with / wwithout SSL), and updating/reflashing every time when you need to change them.
 
+With version `v1.0.7` or later, you now can configure:
+
+1. `Multiple WiFi Credentials (SSID, Password) and system will autoconnect to the best and available WiFi SSID.`
+2. `Multiple Blynk Credentials (Server, Token) and system will autoconnect to the available Blynk Servers.`
+
 With version `v1.0.5` or later, you now can configure:
 
 1. `Config Portal Static IP address, Name and Password.`
@@ -81,49 +86,86 @@ Also see examples:
 If it cannot connect to the Blynk server in 30 seconds, it will switch to `Configuration Mode`. You will see your built-in LED turned ON. In `Configuration Mode`, it starts an access point called `ESP_xxxxxx`. Connect to it using password `MyESP_xxxxxx` .
 
 <p align="center">
-    <img src="https://github.com/khoih-prog/Blynk_WM/blob/master/pics/Selection_004.jpg">
+    <img src="https://github.com/khoih-prog/Blynk_WM/blob/master/pics/PortalAuth.jpg">
 </p>
 
 After you connected, please, go to http://192.168.4.1.
 
 <p align="center">
-    <img src="https://github.com/khoih-prog/Blynk_WM/blob/master/pics/Selection_005.jpg">
+    <img src="https://github.com/khoih-prog/Blynk_WM/blob/master/pics/ConfigPortal.png">
 </p>
 
 Enter your credentials, then click `Save`. After you restarted, you will see your built-in LED turned OFF. That means, it connected to your Blynk server successfully.
 
-The following is the sample terminal output when running example [ESP32WM_Config](examples/ESP32WM_Config)
+The following is the sample terminal output when running example [ESP8266WM_Config](examples/ESP8266WM_Config)
 
 ```
 Starting ...
-[34] RFC925 Hostname = ESP32-WM-Config
-[46] Header = SSL_ESP32, SSID = ***, PW = ***
-[46] Server = account.duckdns.org, Port = 9443, Token = ***
-[47] Board Name = ESP32-WM-SSL-Config
-[50] 
+[65] RFC925 Hostname = ESP8266-WM-Config
+[66] Calc Cksum = 0x309d, Read Cksum = 0x309d
+[66] Header = ESP8266, Board Name = ESP8266-Multi-WM
+[67] SSID = ****, PW = ****
+[70] SSID1 = ****1, PW1 = ****1
+[74] Server = 192.168.2.112, Token = ****
+[80] Server1 = account.duckdns.org, Token1 = ****
+[86] Port = 8080
+[88] Connecting MultiWifi...
+[11276] WiFi connected after time: 2
+[11276] SSID: ****, RSSI = -45                                      <= Connected to SSID
+[11276] Channel: 2, IP address: 192.168.2.91
+[11277] bg: WiFi connected. Try Blynk
+[11279] 
     ___  __          __
    / _ )/ /_ _____  / /__
   / _  / / // / _ \/  '_/
  /____/_/\_, /_//_/_/\_\
-        /___/ v0.6.1 on ESP32
+        /___/ v0.6.1 on NodeMCU
 
-[146] Use static IP
-[151] connectToWifi: start
-[402] connectToWifi: connected OK
-[402] IP = 192.168.2.230, GW = 192.168.2.1, SN = 255.255.255.0
-[402] DNS1 = 192.168.2.1, DNS2 = 8.8.8.8
-[403] begin: WiFi connected. Try connecting to Blynk
-[408] BlynkArduinoClient.connect: Connecting to account.duckdns.org:9443
-[3684] Certificate OK
-[3696] Ready (ping: 10ms).
-[3763] begin: WiFi and Blynk connected
+[11292] BlynkArduinoClient.connect: Connecting to 192.168.2.112:8080  <= Try Server
+[11325] Ready (ping: 19ms).                                           <= Connected to Server
+[11392] Connected to Blynk Server = 192.168.2.112, Token  = ****
+[11392] bg: WiFi+Blynk connected
+Blynk ESP8288 using EEPROM connected. Board Name : ESP8266-Multi-WM
+EEPROM size = 4096 bytes, EEPROM start address = 512 / 0x200
+BRB
+[101232] run: WiFi lost. Reconnect WiFi+Blynk                           <= Lost SSID
+[101232] Connecting MultiWifi...
+[106316] WiFi connected after time: 1
+[106317] SSID: ****1, RSSI = -62                                        <= Connected to SSID1
+[106317] Channel: 4, IP address: 192.168.2.91
+[106317] run: WiFi reconnected. Connect to Blynk
+[106320] BlynkArduinoClient.connect: Connecting to 192.168.2.112:8080   <= Try Server
+[106352] Ready (ping: 11ms).                                            <= Connected to Server
+[106419] run: WiFi+Blynk reconnected
+RB
+[165434] Heartbeat timeout                                              <= Lost Server
+[165735] run: Blynk lost. Connect Blynk
+[165735] 
+    ___  __          __
+   / _ )/ /_ _____  / /__
+  / _  / / // / _ \/  '_/
+ /____/_/\_, /_//_/_/\_\
+        /___/ v0.6.1 on NodeMCU
 
-Blynk ESP32 using EEPROM connected. Board Name : ESP32-WM-SSL-Config
-EEPROM size = 4096 bytes, EEPROM start address = 1024 / 0x400
+[165741] BlynkArduinoClient.connect: Connecting to 192.168.2.112:8080        <= Try Server not OK
+[170741] 
+    ___  __          __
+   / _ )/ /_ _____  / /__
+  / _  / / // / _ \/  '_/
+ /____/_/\_, /_//_/_/\_\
+        /___/ v0.6.1 on NodeMCU
+
+[170743] BlynkArduinoClient.connect: Connecting to account.duckdns.org:8080   <= Try Server1
+[170781] Ready (ping: 9ms).
+[170848] Connected to Blynk Server = account.duckdns.org, Token  = ****       <= Connected to Server1
+[170848] run: Blynk reconnected
+RBRBRBRBRBRBRB RBRB
 
 ```
 
-This `Blynk.begin()` is not a blocking call, so you can use it for critical functions requiring in loop(). 
+You can see that the system automatically detect and connect to the best or avaiable WiFi APs and/or Blynk Servers, whenever interruption happens. This feature is very useful for systems requiring high degree of reliability.
+
+Moreover, this `Blynk.begin()` is not a blocking call, so you can use it for critical functions requiring in loop(). 
 Anyway, this is better for projects using Blynk just for GUI (graphical user interface).
 
 In operation, if WiFi or Blynk connection is lost, `Blynk.run()` will try reconnecting automatically. Therefore, `Blynk.run()` must be called in the `loop()` function. Don't use:
@@ -148,7 +190,7 @@ void loop()
 ```
 
 ## Prerequisite
-* [`ESP8266 core 2.5.2 or later` for Arduino](https://github.com/esp8266/Arduino#installing-with-boards-manager)
+* [`ESP8266 core 2.6.3 or later` for Arduino](https://github.com/esp8266/Arduino#installing-with-boards-manager)
 * [`Blynk library 0.6.1 or later`](https://www.arduino.cc/en/guide/libraries#toc3)
 
 ## TO DO
@@ -166,6 +208,9 @@ void loop()
  7. Add RFC952 hostname
  8. Add configurable Config Portal IP, SSID and Password
  9. Add configurable Static IP, GW, Subnet Mask and 2 DNS Servers' IP Addresses.
+10. Add checksum for more reliable data
+11. Add MultiWiFi feature to enable reconnect to the best / available WiFi AP.
+12. Add MultiBlynk feature to enable reconnect to the best / available Blynk Server.
 
 ## Example
 Please take a look at examples, as well.
@@ -230,6 +275,14 @@ void loop()
     Blynk.run();
 }
 ```
+
+### Releases v1.0.7
+
+***Why this version***
+
+1. Add checksum for more reliable data
+2. Add MultiWiFi feature to enable reconnect to the best / available WiFi AP.
+3. Add MultiBlynk feature to enable reconnect to the best / available Blynk Server.
 
 ### Releases v1.0.6
 
