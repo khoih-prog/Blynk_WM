@@ -13,9 +13,6 @@ WidgetMap	KEYWORD1
 WidgetTable	KEYWORD1
 BlynkParam	KEYWORD1
 BlynkParamAllocated	KEYWORD1
-WiFi_Credentials  KEYWORD1
-Blynk_Credentials KEYWORD1
-Blynk_WF_Configuration  KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
@@ -37,21 +34,12 @@ logEvent	KEYWORD2
 loadConfigData  KEYWORD2
 saveConfigData  KEYWORD2
 getConfigData KEYWORD2
-connectMultiWiFi  KEYWORD2
-connectMultiBlynk KEYWORD2
+connectToWifi KEYWORD2
 handleRequest KEYWORD2
 startConfigurationMode  KEYWORD2
-setHostname KEYWORD2
-setConfigPortalIP KEYWORD2
-setConfigPortal KEYWORD2
-setSTAStaticIPConfig  KEYWORD2
-getServerName KEYWORD2
-getToken  KEYWORD2
-getBlynkBTToken KEYWORD2
-getBlynkBLEToken  KEYWORD2
 getBoardName  KEYWORD2
-getHWPort KEYWORD2
-getFullConfigData KEYWORD2
+setHostname KEYWORD2
+
 
 # Handler helpers
 BLYNK_READ	KEYWORD2

@@ -7,7 +7,7 @@
  * Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
  * Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
  * Licensed under MIT license
- * Version: 1.0.7
+ * Version: 1.0.8
  *
  * Original Blynk Library author:
  * @file       BlynkSimpleEsp8266.h
@@ -27,6 +27,7 @@
  *  1.0.5   K Hoang      20/01/2020 Add configurable static IP, GW, SN, DNS1, DNS2 and Config Portal static IP and Credentials
  *  1.0.6   K Hoang      05/02/2020 Optimize, fix EEPROM size to 2K from 4K, shorten code size, add functions
  *  1.0.7   K Hoang      18/02/2020 Add checksum, enable AutoConnect to configurable MultiWiFi and MultiBlynk Credentials
+ *  1.0.8   K Hoang      24/02/2020 Fix AP-staying-open bug. Add clearConfigData()
  *****************************************************************************************************************************/
 
 #ifndef BlynkSimpleEsp32_WM_h
@@ -282,6 +283,8 @@ public:
         //Turn OFF
         pinMode(LED_BUILTIN, OUTPUT);
         digitalWrite(LED_BUILTIN, LED_OFF);
+        
+        WiFi.mode(WIFI_STA);
         
 				if (iHostname[0] == 0)
 				{
@@ -559,6 +562,12 @@ public:
         memcpy(configData, &BlynkESP32_WM_config, sizeof(Blynk_WF_Configuration));
 
       return (configData);
+    }
+    
+    void clearConfigData()
+    {
+      memset(&BlynkESP32_WM_config, 0, sizeof(BlynkESP32_WM_config));  
+      saveConfigData(); 
     }
                 
 private:
@@ -903,6 +912,8 @@ private:
       
       uint8_t status;
       BLYNK_LOG1(BLYNK_F("Connecting MultiWifi..."));
+      
+      //WiFi.mode(WIFI_STA);
 
       int i = 0;
       status = wifiMulti.run();
