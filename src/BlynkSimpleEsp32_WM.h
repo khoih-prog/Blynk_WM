@@ -7,7 +7,7 @@
    Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
    Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
    Licensed under MIT license
-   Version: 1.0.8
+   Version: 1.0.9
 
    Original Blynk Library author:
    @file       BlynkSimpleEsp8266.h
@@ -28,6 +28,7 @@
     1.0.6   K Hoang      05/02/2020 Optimize, fix EEPROM size to 2K from 4K, shorten code size, add functions
     1.0.7   K Hoang      18/02/2020 Add checksum, enable AutoConnect to configurable MultiWiFi and MultiBlynk Credentials
     1.0.8   K Hoang      24/02/2020 Fix AP-staying-open bug. Add clearConfigData()
+    1.0.9   K Hoang      12/03/2020 Enhance Config Portal GUI
  *****************************************************************************************************************************/
 
 #ifndef BlynkSimpleEsp32_WM_h
@@ -95,99 +96,80 @@ typedef struct Configuration
 
 uint16_t CONFIG_DATA_SIZE = sizeof(Blynk_WF_Configuration);
 
-#define root_html_template " \
-<!DOCTYPE html> \
-<meta name=\"robots\" content=\"noindex\"> \
-<html> \
-<head> \
-<meta charset=\"utf-8\"> \
-<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> \
-<title>BlynkSimpleEsp32_WM</title> \
-</head> \
-<body> \
-<div align=\"center\"> \
-<table> \
-<tbody> \
-<tr> \
-<th colspan=\"2\">WiFi</th> \
-</tr> \
-<tr> \
-<td>SSID</td> \
-<td><input type=\"text\" value=\"[[wf_id]]\" size=20 maxlength=64 id=\"wf_id\"></td> \
-</tr> \
-<tr> \
-<td>Password</td> \
-<td><input type=\"text\" value=\"[[wf_pw]]\" size=20 maxlength=64 id=\"wf_pw\"></td> \
-</tr> \
-<tr> \
-<td>SSID1</td> \
-<td><input type=\"text\" value=\"[[wf_id1]]\" size=20 maxlength=64 id=\"wf_id1\"></td> \
-</tr> \
-<tr> \
-<td>Password1</td> \
-<td><input type=\"text\" value=\"[[wf_pw1]]\" size=20 maxlength=64 id=\"wf_pw1\"></td> \
-</tr> \
-<tr> \
-<th colspan=\"2\">Blynk</th> \
-</tr> \
-<tr> \
-<td>Server</td> \
-<td><input type=\"text\" value=\"[[b_svr]]\" size=20 maxlength=64 id=\"b_svr\"></td> \
-</tr> \
-<tr> \
-<td>Token</td> \
-<td><input type=\"text\" value=\"[[b_tok]]\" size=20 maxlength=32 id=\"b_tok\"></td> \
-</tr> \
-<tr> \
-<td>Server1</td> \
-<td><input type=\"text\" value=\"[[b_svr1]]\" size=20 maxlength=64 id=\"b_svr1\"></td> \
-</tr> \
-<tr> \
-<td>Token1</td> \
-<td><input type=\"text\" value=\"[[b_tok1]]\" size=20 maxlength=32 id=\"b_tok1\"></td> \
-</tr> \
-<tr> \
-<td>Port</td> \
-<td><input type=\"text\" value=\"[[b_pt]]\" id=\"b_pt\"></td> \
-</tr> \
-<tr> \
-<th colspan=\"2\">Hardware</th> \
-</tr> \
-<tr> \
-<td>Name</td> \
-<td><input type=\"text\" value=\"[[bd_nm]]\" size=20 maxlength=32 id=\"bd_nm\"></td> \
-</tr> \
-<tr> \
-<td colspan=\"2\" align=\"center\"> \
-<button onclick=\"save()\">Save</button> \
-</td> \
-</tr> \
-</tbody> \
-</table> \
-</div> \
-<script id=\"jsbin-javascript\"> \
-function udVal(key, value) { \
-var request = new XMLHttpRequest(); \
-var url = '/?key=' + key + '&value=' + value; \
-console.log('call ' + url + '...'); \
-request.open('GET', url, false); \
-request.send(null); \
-} \
-function save() { \
-udVal('wf_id', document.getElementById('wf_id').value); \
-udVal('wf_pw', document.getElementById('wf_pw').value); \
-udVal('wf_id1', document.getElementById('wf_id1').value); \
-udVal('wf_pw1', document.getElementById('wf_pw1').value); \
-udVal('b_svr', document.getElementById('b_svr').value); \
-udVal('b_tok', document.getElementById('b_tok').value); \
-udVal('b_svr1', document.getElementById('b_svr1').value); \
-udVal('b_tok1', document.getElementById('b_tok1').value); \
-udVal('b_pt', document.getElementById('b_pt').value); \
-udVal('bd_nm', document.getElementById('bd_nm').value); \
-alert('Updated. Reset'); \
-} \
-</script> \
-</body> \
+#define root_html_template "\
+<!DOCTYPE html>\
+<html><head><title>BlynkSimpleEsp32_WM</title><style>.em{padding-bottom:0px;}div,input{padding:5px;font-size:1em;}input{width:95%;}\
+body{text-align: center;}button{background-color:#16A1E7;color:#fff;line-height:2.4rem;font-size:1.2rem;width:100%;}fieldset{border-radius:0.3rem;margin:0px;}\
+</style></head><div style=\"text-align:left;display:inline-block;min-width:260px;\">\
+<fieldset>\
+<div class=\"\">\
+<label for=\"id\">SSID</label>\
+<input type=\"text\" value=\"[[id]]\" maxlength=64 id=\"id\">\
+<div class=\"em\"></div></div>\
+<div class=\"\">\
+<label for=\"pw\">Password</label>\
+<input type=\"text\" value=\"[[pw]]\" maxlength=64 id=\"pw\">\
+<div class=\"em\"></div></div>\
+<div class=\"\">\
+<label for=\"id1\">SSID1</label>\
+<input type=\"text\" value=\"[[id1]]\" maxlength=64 id=\"id1\">\
+<div class=\"em\"></div></div>\
+<div class=\"\">\
+<label for=\"pw1\">Password1</label>\
+<input type=\"text\" value=\"[[pw1]]\" maxlength=64 id=\"pw1\">\
+<div class=\"em\"></div></div>\
+</fieldset>\
+<fieldset>\
+<div class=\"\">\
+<label for=\"sv\">Blynk Server</label>\
+<input type=\"text\" value=\"[[sv]]\" maxlength=64 id=\"sv\">\
+<div class=\"em\"></div></div>\
+<div class=\"\">\
+<label for=\"tk\">Token</label>\
+<input type=\"text\" value=\"[[tk]]\" maxlength=32 id=\"tk\">\
+<div class=\"em\"></div></div>\
+<div class=\"\">\
+<label for=\"sv1\">Blynk Server1</label>\
+<input type=\"text\" value=\"[[sv1]]\" maxlength=64 id=\"sv1\">\
+<div class=\"em\"></div></div>\
+<div class=\"\">\
+<label for=\"tk1\">Token1</label>\
+<input type=\"text\" value=\"[[tk1]]\" maxlength=32 id=\"tk1\">\
+<div class=\"em\"></div></div>\
+<div class=\"\">\
+<label for=\"pt\">Port</label>\
+<input type=\"text\" value=\"[[pt]]\" maxlength=5 id=\"pt\">\
+<div class=\"em\"></div></div>\
+</fieldset>\
+<fieldset>\
+<div class=\"\">\
+<label for=\"nm\">Board Name</label>\
+<input type=\"text\" value=\"[[nm]]\" maxlength=24 id=\"nm\">\
+<div class=\"em\"></div></div>\
+</fieldset>\
+<button onclick=\"sv()\">Save</button></div>\
+<script id=\"jsbin-javascript\">\
+function udVal(key,val){\
+var request=new XMLHttpRequest();\
+var url='/?key='+key+'&value='+val;\
+request.open('GET',url,false);\
+request.send(null);\
+}\
+function sv(){\
+udVal('id',document.getElementById('id').value);\
+udVal('pw',document.getElementById('pw').value);\
+udVal('id1',document.getElementById('id1').value);\
+udVal('pw1',document.getElementById('pw1').value);\
+udVal('sv',document.getElementById('sv').value);\
+udVal('tk',document.getElementById('tk').value);\
+udVal('sv1',document.getElementById('sv1').value);\
+udVal('tk1',document.getElementById('tk1').value);\
+udVal('pt',document.getElementById('pt').value);\
+udVal('nm',document.getElementById('nm').value);\
+alert('Updated');\
+}\
+</script>\
+</body>\
 </html>"
 
 #define BLYNK_SERVER_HARDWARE_PORT    8080
@@ -959,16 +941,16 @@ class BlynkWifi
           // Reset configTimeout to stay here until finished.
           configTimeout = 0;
 
-          result.replace("[[wf_id]]",     BlynkESP32_WM_config.WiFi_Creds[0].wifi_ssid);
-          result.replace("[[wf_pw]]",     BlynkESP32_WM_config.WiFi_Creds[0].wifi_pw);
-          result.replace("[[wf_id1]]",    BlynkESP32_WM_config.WiFi_Creds[1].wifi_ssid);
-          result.replace("[[wf_pw1]]",    BlynkESP32_WM_config.WiFi_Creds[1].wifi_pw);
-          result.replace("[[b_svr]]",     BlynkESP32_WM_config.Blynk_Creds[0].blynk_server);
-          result.replace("[[b_tok]]",     BlynkESP32_WM_config.Blynk_Creds[0].blynk_token);
-          result.replace("[[b_svr1]]",    BlynkESP32_WM_config.Blynk_Creds[1].blynk_server);
-          result.replace("[[b_tok1]]",    BlynkESP32_WM_config.Blynk_Creds[1].blynk_token);
-          result.replace("[[b_pt]]",      String(BlynkESP32_WM_config.blynk_port));
-          result.replace("[[bd_nm]]",     BlynkESP32_WM_config.board_name);
+          result.replace("[[id]]",     BlynkESP32_WM_config.WiFi_Creds[0].wifi_ssid);
+          result.replace("[[pw]]",     BlynkESP32_WM_config.WiFi_Creds[0].wifi_pw);
+          result.replace("[[id1]]",    BlynkESP32_WM_config.WiFi_Creds[1].wifi_ssid);
+          result.replace("[[pw1]]",    BlynkESP32_WM_config.WiFi_Creds[1].wifi_pw);
+          result.replace("[[sv]]",     BlynkESP32_WM_config.Blynk_Creds[0].blynk_server);
+          result.replace("[[tk]]",     BlynkESP32_WM_config.Blynk_Creds[0].blynk_token);
+          result.replace("[[sv1]]",    BlynkESP32_WM_config.Blynk_Creds[1].blynk_server);
+          result.replace("[[tk1]]",    BlynkESP32_WM_config.Blynk_Creds[1].blynk_token);
+          result.replace("[[pt]]",      String(BlynkESP32_WM_config.blynk_port));
+          result.replace("[[nm]]",     BlynkESP32_WM_config.board_name);
 
           server->send(200, "text/html", result);
 
@@ -981,7 +963,7 @@ class BlynkWifi
           strcpy(BlynkESP32_WM_config.header, BLYNK_BOARD_TYPE);
         }
 
-        if (key == "wf_id")
+        if (key == "id")
         {
           number_items_Updated++;
           if (strlen(value.c_str()) < sizeof(BlynkESP32_WM_config.WiFi_Creds[0].wifi_ssid) - 1)
@@ -989,7 +971,7 @@ class BlynkWifi
           else
             strncpy(BlynkESP32_WM_config.WiFi_Creds[0].wifi_ssid, value.c_str(), sizeof(BlynkESP32_WM_config.WiFi_Creds[0].wifi_ssid) - 1);
         }
-        else if (key == "wf_pw")
+        else if (key == "pw")
         {
           number_items_Updated++;
           if (strlen(value.c_str()) < sizeof(BlynkESP32_WM_config.WiFi_Creds[0].wifi_pw) - 1)
@@ -997,7 +979,7 @@ class BlynkWifi
           else
             strncpy(BlynkESP32_WM_config.WiFi_Creds[0].wifi_pw, value.c_str(), sizeof(BlynkESP32_WM_config.WiFi_Creds[0].wifi_pw) - 1);
         }
-        else if (key == "wf_id1")
+        else if (key == "id1")
         {
           number_items_Updated++;
           if (strlen(value.c_str()) < sizeof(BlynkESP32_WM_config.WiFi_Creds[1].wifi_ssid) - 1)
@@ -1005,7 +987,7 @@ class BlynkWifi
           else
             strncpy(BlynkESP32_WM_config.WiFi_Creds[1].wifi_ssid, value.c_str(), sizeof(BlynkESP32_WM_config.WiFi_Creds[1].wifi_ssid) - 1);
         }
-        else if (key == "wf_pw1")
+        else if (key == "pw1")
         {
           number_items_Updated++;
           if (strlen(value.c_str()) < sizeof(BlynkESP32_WM_config.WiFi_Creds[1].wifi_pw) - 1)
@@ -1013,7 +995,7 @@ class BlynkWifi
           else
             strncpy(BlynkESP32_WM_config.WiFi_Creds[1].wifi_pw, value.c_str(), sizeof(BlynkESP32_WM_config.WiFi_Creds[1].wifi_pw) - 1);
         }
-        else if (key == "b_svr")
+        else if (key == "sv")
         {
           number_items_Updated++;
           if (strlen(value.c_str()) < sizeof(BlynkESP32_WM_config.Blynk_Creds[0].blynk_server) - 1)
@@ -1021,7 +1003,7 @@ class BlynkWifi
           else
             strncpy(BlynkESP32_WM_config.Blynk_Creds[0].blynk_server, value.c_str(), sizeof(BlynkESP32_WM_config.Blynk_Creds[0].blynk_server) - 1);
         }
-        else if (key == "b_tok")
+        else if (key == "tk")
         {
           number_items_Updated++;
           if (strlen(value.c_str()) < sizeof(BlynkESP32_WM_config.Blynk_Creds[0].blynk_token) - 1)
@@ -1029,7 +1011,7 @@ class BlynkWifi
           else
             strncpy(BlynkESP32_WM_config.Blynk_Creds[0].blynk_token, value.c_str(), sizeof(BlynkESP32_WM_config.Blynk_Creds[0].blynk_token) - 1);
         }
-        else if (key == "b_svr1")
+        else if (key == "sv1")
         {
           number_items_Updated++;
           if (strlen(value.c_str()) < sizeof(BlynkESP32_WM_config.Blynk_Creds[1].blynk_server) - 1)
@@ -1037,7 +1019,7 @@ class BlynkWifi
           else
             strncpy(BlynkESP32_WM_config.Blynk_Creds[1].blynk_server, value.c_str(), sizeof(BlynkESP32_WM_config.Blynk_Creds[1].blynk_server) - 1);
         }
-        else if (key == "b_tok1")
+        else if (key == "tk1")
         {
           number_items_Updated++;
           if (strlen(value.c_str()) < sizeof(BlynkESP32_WM_config.Blynk_Creds[1].blynk_token) - 1)
@@ -1045,12 +1027,12 @@ class BlynkWifi
           else
             strncpy(BlynkESP32_WM_config.Blynk_Creds[1].blynk_token, value.c_str(), sizeof(BlynkESP32_WM_config.Blynk_Creds[1].blynk_token) - 1);
         }
-        else if (key == "b_pt")
+        else if (key == "pt")
         {
           number_items_Updated++;
           BlynkESP32_WM_config.blynk_port = value.toInt();
         }
-        else if (key == "bd_nm")
+        else if (key == "nm")
         {
           number_items_Updated++;
           if (strlen(value.c_str()) < sizeof(BlynkESP32_WM_config.board_name) - 1)

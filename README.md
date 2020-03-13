@@ -3,8 +3,13 @@
 [![arduino-library-badge](https://www.ardu-badge.com/badge/Blynk_WiFiManager.svg?)](https://www.ardu-badge.com/Blynk_WiFiManager)
 
 I'm inspired by [`EasyBlynk8266`](https://github.com/Barbayar/EasyBlynk8266)
+This is a Blynk and WiFiManager Library for configuring/auto(re)connecting ESP8266/ESP32 modules to the best or available MultiWiFi APs and MultiBlynk servers at runtime. Connection is with or without SSL. Configuration data to be saved in either SPIFFS or EEPROM.
  
 To help you to eliminate `hardcoding` your Wifi and Blynk credentials for ESP8266 and ESP32 (with / wwithout SSL), and updating/reflashing every time when you need to change them.
+
+### Releases v1.0.9
+
+1. Enhance Config Portal GUI.
 
 With version `v1.0.7` or later, you now can configure:
 
@@ -15,6 +20,16 @@ With version `v1.0.5` or later, you now can configure:
 
 1. `Config Portal Static IP address, Name and Password.`
 2. `Static IP address, Gateway, Subnet Mask and 2 DNS Servers IP addresses.`
+
+## Prerequisite
+* [`ESP8266 core 2.6.3 or later` for Arduino](https://github.com/esp8266/Arduino#installing-with-boards-manager)
+* [`Blynk library 0.6.1 or later`](https://github.com/blynkkk/blynk-library/releases)
+
+## Prerequisite
+1. [`Arduino IDE 1.8.12 or later` for Arduino](https://www.arduino.cc/en/Main/Software)
+2. [`Blynk library 0.6.1 or later`](https://github.com/blynkkk/blynk-library/releases)
+3. [`ESP32 core 1.0.4 or later`](https://github.com/espressif/arduino-esp32/releases) for ESP32 boards
+4. [`ESP8266 core 2.6.3 or later` for Arduino](https://github.com/esp8266/Arduino#installing-with-boards-manager) for ESP8266 boards
 
 ### Installation
 
@@ -27,7 +42,10 @@ The suggested way to install is to:
 
 The file BlynkSimpleEsp8266_WM.h, BlynkSimpleEsp8266_SSL_WM.h, BlynkSimpleEsp32_WM.h and BlynkSimpleEsp32_SSL_WM.h must be placed in Blynk libraries `src` directory (normally `~/Arduino/libraries/Blynk/src`)
 
-Another way is to use `Arduino Library Manager`. Search for `Blynk_WiFiManager`, then select / install the latest version. Then move the 2 files `BlynkSimpleEsp8266_SSL_WM.h` and `BlynkSimpleEsp32_SSL_WM.h` from directory `~/Arduino/libraries/Blynk_WiFiManager/src` into Blynk libraries `src` directory (normally `~/Arduino/libraries/Blynk/src`)
+Another way is to use `Arduino Library Manager`. 
+1. Search for `Blynk_WiFiManager`, then select / install the latest version. 
+2. You can also use this link [![arduino-library-badge](https://www.ardu-badge.com/badge/Blynk_WiFiManager.svg?)](https://www.ardu-badge.com/Blynk_WiFiManager) for more detailed instructions.
+3. Then move the 2 files `BlynkSimpleEsp8266_SSL_WM.h` and `BlynkSimpleEsp32_SSL_WM.h` from directory `~/Arduino/libraries/Blynk_WiFiManager/src` into Blynk libraries `src` directory (normally `~/Arduino/libraries/Blynk/src`)
 
 ### How to use
 
@@ -46,8 +64,8 @@ to use SPIFFS or
 ```
 #define USE_SPIFFS    false
 ```
-to use EEPROM ( 176 bytes from address EEPROM_START ) to save your configuration data.
-EEPROM_SIZE can be specified from 256 to 4096 bytes. See examples [ESP32WM_Config](https://github.com/khoih-prog/Blynk_WM/tree/master/examples/ESP32WM_Config) and [ESP8266WM_Config](https://github.com/khoih-prog/Blynk_WM/tree/master/examples/ESP8266WM_Config).
+to use EEPROM ( 312 bytes from address EEPROM_START ) to save your configuration data.
+EEPROM_SIZE can be specified from 512 to 4096 bytes. See examples [ESP32WM_Config](https://github.com/khoih-prog/Blynk_WM/tree/master/examples/ESP32WM_Config) and [ESP8266WM_Config](https://github.com/khoih-prog/Blynk_WM/tree/master/examples/ESP8266WM_Config).
 
 
 ```
@@ -56,6 +74,26 @@ EEPROM_SIZE can be specified from 256 to 4096 bytes. See examples [ESP32WM_Confi
 #define RESET_IF_CONFIG_TIMEOUT                   true
 #define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET    5
 
+```
+
+To use personalized Config Portal AP SSID and Password, as well as IP Address, e.g. call :
+
+```
+// Set config portal SSID and Password
+  Blynk.setConfigPortal("TestPortal-ESP8266", "TestPortalPass");
+  // Set config portal IP address
+  Blynk.setConfigPortalIP(IPAddress(192, 168, 200, 1));
+```
+
+You can specify STA-mode Static IP address,  Gateway, Subnet Mask, as well as DNS server 1 and 2:
+
+```
+// From v1.0.5, select either one of these to set static IP + DNS
+  Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 220), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0));
+  //Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 220), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0),
+  //                           IPAddress(192, 168, 2, 1), IPAddress(8, 8, 8, 8));
+  //Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 220), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0),
+  //                           IPAddress(4, 4, 4, 4), IPAddress(8, 8, 8, 8));
 ```
 
 Then replace `Blynk.begin(...)` with :
@@ -83,19 +121,27 @@ Also see examples:
 
 
 ## So, how it works?
-If it cannot connect to the Blynk server in 30 seconds, it will switch to `Configuration Mode`. You will see your built-in LED turned ON. In `Configuration Mode`, it starts an access point called `ESP_xxxxxx`. Connect to it using password `MyESP_xxxxxx` .
+If it cannot connect to the Blynk server in 30 seconds, it will switch to `Configuration Mode`. You will see your built-in LED turned ON. In `Configuration Mode`, it starts an AP with default name `ESP_xxxxxx` and password `MyESP_xxxxxx` or configurable name amd password you specified. The AP IP address is default at `192.168.4.1` or configured IP (e.g. `192.168.200.1`).
+
+First, connect your (PC, Laptop, Tablet, phone, etc.) WiFi to Config Portal AP, then enter the WiFi password :
 
 <p align="center">
     <img src="https://github.com/khoih-prog/Blynk_WM/blob/master/pics/PortalAuth.jpg">
 </p>
 
-After you connected, please, go to http://192.168.4.1.
+After you connected, please, go to http://192.168.4.1 or the configured AP IP. The Config Portal screen will appear:
+
+<p align="center">
+    <img src="https://github.com/khoih-prog/Blynk_WM/blob/master/pics/Main.png">
+</p>
+
+Enter your WiFi and Blynk Credentials
 
 <p align="center">
     <img src="https://github.com/khoih-prog/Blynk_WM/blob/master/pics/ConfigPortal.png">
 </p>
 
-Enter your credentials, then click `Save`. After you restarted, you will see your built-in LED turned OFF. That means, it connected to your Blynk server successfully.
+Then click `Save`. The system will auto-restart. You will see the board's built-in LED turned OFF. That means, it's already connected to your Blynk server successfully.
 
 The following is the sample terminal output when running example [ESP8266WM_Config](examples/ESP8266WM_Config)
 
@@ -189,10 +235,6 @@ void loop()
 }
 ```
 
-## Prerequisite
-* [`ESP8266 core 2.6.3 or later` for Arduino](https://github.com/esp8266/Arduino#installing-with-boards-manager)
-* [`Blynk library 0.6.1 or later`](https://www.arduino.cc/en/guide/libraries#toc3)
-
 ## TO DO
 
 1. Same features for other boards with WiFi.
@@ -275,6 +317,13 @@ void loop()
     Blynk.run();
 }
 ```
+
+### Releases v1.0.9
+
+***Why this version***
+
+1. Enhance Config Portal GUI. Not using the terrible GUI of the original version. Finally had some time to get this out of the bucket list.
+
 ### Releases v1.0.8
 
 ***Why this version***
