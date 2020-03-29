@@ -22,10 +22,6 @@ With version `v1.0.5` or later, you now can configure:
 2. `Static IP address, Gateway, Subnet Mask and 2 DNS Servers IP addresses.`
 
 ## Prerequisite
-* [`ESP8266 core 2.6.3 or later` for Arduino](https://github.com/esp8266/Arduino#installing-with-boards-manager)
-* [`Blynk library 0.6.1 or later`](https://github.com/blynkkk/blynk-library/releases)
-
-## Prerequisite
 1. [`Arduino IDE 1.8.12 or later` for Arduino](https://www.arduino.cc/en/Main/Software)
 2. [`Blynk library 0.6.1 or later`](https://github.com/blynkkk/blynk-library/releases)
 3. [`ESP32 core 1.0.4 or later`](https://github.com/espressif/arduino-esp32/releases) for ESP32 boards
@@ -135,7 +131,11 @@ After you connected, please, go to http://192.168.4.1 or the configured AP IP. T
     <img src="https://github.com/khoih-prog/Blynk_WM/blob/master/pics/Main.png">
 </p>
 
-Enter your WiFi and Blynk Credentials
+Enter your WiFi and Blynk Credentials:
+
+### Important notes
+1. Don't use hash tag ***#*** as it's currently interpreted as end of input. See [Issue 3](https://github.com/khoih-prog/Blynk_WM/issues/3). Thanks to [ianturo](https://github.com/ianturo) to report.
+2. The SSIDs, Passwords, BlynkServers and Tokens must be input (or to make them different from ***nothing***). Otherwise, the Config Portal will re-open until those fields have been changed. If you don't need any field, just input anything or use duplicated data from similar field.
 
 <p align="center">
     <img src="https://github.com/khoih-prog/Blynk_WM/blob/master/pics/ConfigPortal.png">
