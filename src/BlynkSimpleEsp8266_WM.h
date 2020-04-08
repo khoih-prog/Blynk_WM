@@ -7,7 +7,7 @@
    Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
    Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
    Licensed under MIT license
-   Version: 1.0.9
+   Version: 1.0.10
 
    Original Blynk Library author:
    @file       BlynkSimpleEsp8266.h
@@ -29,6 +29,7 @@
     1.0.7   K Hoang      18/02/2020 Add checksum, enable AutoConnect to configurable MultiWiFi and MultiBlynk Credentials
     1.0.8   K Hoang      24/02/2020 Fix AP-staying-open bug. Add clearConfigData()
     1.0.9   K Hoang      12/03/2020 Enhance Config Portal GUI
+    1.0.10  K Hoang      08/04/2020 SSID password maxlen is 63 now. Permit special chars # and % in input data.
  *****************************************************************************************************************************/
 
 
@@ -62,7 +63,8 @@
 #endif
 
 #define SSID_MAX_LEN      32
-#define PASS_MAX_LEN      32
+//From v1.0.10, WPA2 passwords can be up to 63 characters long.
+#define PASS_MAX_LEN      64
 
 typedef struct
 {
@@ -93,9 +95,11 @@ typedef struct Configuration
   char board_name     [24];
   int  checkSum;
 } Blynk_WF_Configuration;
-// Currently CONFIG_DATA_SIZE  =  ( 48 + (64 * NUM_WIFI_CREDENTIALS) + (68 * NUM_BLYNK_CREDENTIALS) ) = 312
+// Currently CONFIG_DATA_SIZE  =  ( 48 + (96 * NUM_WIFI_CREDENTIALS) + (68 * NUM_BLYNK_CREDENTIALS) ) = 376
 
 uint16_t CONFIG_DATA_SIZE = sizeof(Blynk_WF_Configuration);
+
+//From v1.0.10, Permit special chars such as # and %
 
 #define root_html_template "\
 <!DOCTYPE html>\
@@ -152,7 +156,7 @@ body{text-align: center;}button{background-color:#16A1E7;color:#fff;line-height:
 <script id=\"jsbin-javascript\">\
 function udVal(key,val){\
 var request=new XMLHttpRequest();\
-var url='/?key='+key+'&value='+val;\
+var url='/?key='+key+'&value='+encodeURIComponent(val);\
 request.open('GET',url,false);\
 request.send(null);\
 }\
@@ -176,7 +180,7 @@ alert('Updated');\
 #define BLYNK_SERVER_HARDWARE_PORT    8080
 
 #define BLYNK_BOARD_TYPE    "ESP8266"
-#define NO_CONFIG           "nothing"
+#define NO_CONFIG           "blank"
 
 class BlynkWifi
   : public BlynkProtocol<BlynkArduinoClient>
@@ -1046,6 +1050,10 @@ class BlynkWifi
             strcpy(Blynk8266_WM_config.board_name, value.c_str());
           else
             strncpy(Blynk8266_WM_config.board_name, value.c_str(), sizeof(Blynk8266_WM_config.board_name) - 1);
+          #if 0  
+          Serial.println("nm: value = " + value);
+          Serial.println("nm: bname = " + String(Blynk8266_WM_config.board_name));
+          #endif
         }
 
         server->send(200, "text/html", "OK");

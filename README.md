@@ -7,9 +7,10 @@ This is a Blynk and WiFiManager Library for configuring/auto(re)connecting ESP82
  
 To help you to eliminate `hardcoding` your Wifi and Blynk credentials for ESP8266 and ESP32 (with / wwithout SSL), and updating/reflashing every time when you need to change them.
 
-### Releases v1.0.9
+### Releases v1.0.10
 
-1. Enhance Config Portal GUI.
+1. WiFi Password max length is 63, according to WPA2 standard
+2. Permit to input special chars such as ***%*** and ***#*** into data fields. Thanks to [brondolin](https://github.com/brondolin) to provide the amazing fix.
 
 With version `v1.0.7` or later, you now can configure:
 
@@ -84,7 +85,7 @@ To use personalized Config Portal AP SSID and Password, as well as IP Address, e
 You can specify STA-mode Static IP address,  Gateway, Subnet Mask, as well as DNS server 1 and 2:
 
 ```
-// From v1.0.5, select either one of these to set static IP + DNS
+// From v1.0.5, select either one of these to set static IP
   Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 220), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0));
   //Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 220), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0),
   //                           IPAddress(192, 168, 2, 1), IPAddress(8, 8, 8, 8));
@@ -134,8 +135,9 @@ After you connected, please, go to http://192.168.4.1 or the configured AP IP. T
 Enter your WiFi and Blynk Credentials:
 
 ### Important notes
-1. Don't use hash tag ***#*** as it's currently interpreted as end of input. See [Issue 3](https://github.com/khoih-prog/Blynk_WM/issues/3). Thanks to [ianturo](https://github.com/ianturo) to report.
+1. Now you can use hash tag ***#*** or ***%*** thanks to [brondolin](https://github.com/brondolin) to provide the amazing fix in v1.0.10 to permit input special chars such as ***%*** and ***#*** into data fields. See [Issue 3](https://github.com/khoih-prog/Blynk_WM/issues/3).
 2. The SSIDs, Passwords, BlynkServers and Tokens must be input (or to make them different from ***nothing***). Otherwise, the Config Portal will re-open until those fields have been changed. If you don't need any field, just input anything or use duplicated data from similar field.
+3. WiFi password max length now is 63 chars according to WPA2 standard.
 
 <p align="center">
     <img src="https://github.com/khoih-prog/Blynk_WM/blob/master/pics/ConfigPortal.png">
@@ -237,7 +239,7 @@ void loop()
 
 ## TO DO
 
-1. Same features for other boards with WiFi.
+1. Dynamic custom parameters in Config Portal, similar to [BlynkGSM_Manager](https://github.com/khoih-prog/BlynkGSM_Manager)
 
 ## DONE
 
@@ -318,15 +320,18 @@ void loop()
 }
 ```
 
-### Releases v1.0.9
+### Releases v1.0.10
 
 ***Why this version***
+
+1. WiFi Password max length is 63, according to WPA2 standard.
+2. Permit to input special chars such as ***%*** and ***#*** into data fields. Thanks to [brondolin](https://github.com/brondolin) to provide the amazing fix.
+
+### Releases v1.0.9
 
 1. Enhance Config Portal GUI. Not using the terrible GUI of the original version. Finally had some time to get this out of the bucket list.
 
 ### Releases v1.0.8
-
-***Why this version***
 
 1. Fix [AP-staying-open bug](https://github.com/khoih-prog/Blynk_WM/issues/2). Thanks to [chriskio](https://github.com/chriskio) to report.
 2. Add clearConfigData().
@@ -341,13 +346,9 @@ void loop()
 
 ### Releases v1.0.6
 
-***Why this version***
-
 Optimize, fix ESP32 EEPROM size to 2K from 4K, shorten code size, add functions, use dynamically allocated Config Portal WebServer.
 
 ### Releases v1.0.5
-
-***Why this version***
 
 Normally, the `default Portal IP (192.168.4.1)`, SSID and PW as well as the `dynamically allocated` board's IP address are good enough.
 In special cases where there is conflict, if static IP is required or bad router's DNS settings, you can use the new features to force the configurable IP addresses. ***But please use with care to avoid potential issues.***
@@ -361,8 +362,6 @@ Add new features to enable :
 
 ### Releases v1.0.4
 
-***Why this version***
-
 I'm really fed-up with the unfriendly, confusing and cryptic DHCP hostnames such as `ESP_XXXXXX`, `espressif` using ChipID. Thanks to an issue opened in library [ESP_WiFiManager](https://github.com/khoih-prog/ESP_WiFiManager), I decided to add this option to have built-in, yet configurable DHCP hostname to these libraries.
 
 Now you can easily specify and have the friendly, identifiable, RFC-952-conformed DHP hostnames associated with your boards, such as `SmartFarm-1`, `Irrigation`, `Master-Controller`, etc. You'll be happier to have a look at your WiFi Router DHCP list.
@@ -374,8 +373,6 @@ Now you can easily specify and have the friendly, identifiable, RFC-952-conforme
 2. Modify examples to use new feature
 
 ### Releases v1.0.3
-
-***New in this version***
 
 1. Modify code to be compatible with ESP8266 core pre-2.5.2. But it's still advisable to update to the latest stable core, such as 2.6.3
 
@@ -402,7 +399,7 @@ Now you can easily specify and have the friendly, identifiable, RFC-952-conforme
 ### Contributions and thanks
 
 1. Thanks to [chriskio](https://github.com/chriskio) to report [AP-staying-open bug](https://github.com/khoih-prog/Blynk_WM/issues/2). 
-
+2. Thanks to [brondolin](https://github.com/brondolin) to provide the amazing fix in v1.0.10 to permit input special chars such as ***%*** and ***#*** into data fields. See [Issue 3](https://github.com/khoih-prog/Blynk_WM/issues/3).
 
 ## Contributing
 

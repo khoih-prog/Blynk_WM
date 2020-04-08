@@ -1,13 +1,13 @@
 /****************************************************************************************************************************
- * ESP32WM_Config.ino
- * For ESP32 boards
- *
- * Blynk_WM is a library for the ESP8266/ESP32 Arduino platform (https://github.com/esp8266/Arduino) to enable easy
- * configuration/reconfiguration and autoconnect/autoreconnect of WiFi/Blynk
- * Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
- * Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
- * Licensed under MIT license
- Version: 1.0.9
+   ESP32WM_Config.ino
+   For ESP32 boards
+
+   Blynk_WM is a library for the ESP8266/ESP32 Arduino platform (https://github.com/esp8266/Arduino) to enable easy
+   configuration/reconfiguration and autoconnect/autoreconnect of WiFi/Blynk
+   Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
+   Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
+   Licensed under MIT license
+   Version: 1.0.10
 
    Original Blynk Library author:
    @file       BlynkSimpleEsp8266.h
@@ -29,6 +29,7 @@
     1.0.7   K Hoang      18/02/2020 Add checksum, enable AutoConnect to configurable MultiWiFi and MultiBlynk Credentials
     1.0.8   K Hoang      24/02/2020 Fix AP-staying-open bug. Add clearConfigData()
     1.0.9   K Hoang      12/03/2020 Enhance Config Portal GUI
+    1.0.10  K Hoang      08/04/2020 SSID password maxlen is 63 now. Permit special chars # and % in input data.
  *****************************************************************************************************************************/
 
 #ifndef ESP32
@@ -46,10 +47,10 @@
 #define USE_SPIFFS                  false
 
 #if (!USE_SPIFFS)
-  // EEPROM_SIZE must be <= 2048 and >= CONFIG_DATA_SIZE (currently 172 bytes)
-  #define EEPROM_SIZE    (2 * 1024)
-  // EEPROM_START + CONFIG_DATA_SIZE must be <= EEPROM_SIZE
-  #define EEPROM_START   512
+// EEPROM_SIZE must be <= 2048 and >= CONFIG_DATA_SIZE (currently 172 bytes)
+#define EEPROM_SIZE    (2 * 1024)
+// EEPROM_START + CONFIG_DATA_SIZE must be <= EEPROM_SIZE
+#define EEPROM_START   512
 #endif
 
 // Force some params in Blynk, only valid for library version 1.0.1 and later
@@ -58,20 +59,20 @@
 #define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET    5
 // Those above #define's must be placed before #include <BlynkSimpleEsp8266_WM.h>
 
-//#define USE_SSL   true
-#define USE_SSL   false
+#define USE_SSL   true
+//#define USE_SSL   false
 
 #if USE_SSL
-  #include <BlynkSimpleEsp32_SSL_WM.h>
+#include <BlynkSimpleEsp32_SSL_WM.h>
 #else
-  #include <BlynkSimpleEsp32_WM.h>
+#include <BlynkSimpleEsp32_WM.h>
 #endif
 
 #include <Ticker.h>
 #include <DHT.h>
 
 #define PIN_D22   22            // Pin D22 mapped to pin GPIO22/SCL of ESP32
-  
+
 #define DHT_PIN     PIN_D22     // pin DATA @ D22 / GPIO22
 #define DHT_TYPE    DHT11
 
@@ -79,24 +80,24 @@ DHT dht(DHT_PIN, DHT_TYPE);
 BlynkTimer timer;
 Ticker     led_ticker;
 
-void readAndSendData() 
+void readAndSendData()
 {
-    float temperature = dht.readTemperature();
-    float humidity    = dht.readHumidity();
-    
-    if (!isnan(temperature) && !isnan(humidity)) 
-    {
-      Blynk.virtualWrite(V17, String(temperature, 1));
-      Blynk.virtualWrite(V18, String(humidity, 1));    
-    }
-    else
-    {
-      Blynk.virtualWrite(V17, "NAN");
-      Blynk.virtualWrite(V18, "NAN");
-    }
+  float temperature = dht.readTemperature();
+  float humidity    = dht.readHumidity();
 
-    // Blynk Timer uses millis() and is still working even if WiFi/Blynk not connected
-    Serial.println("R");    
+  if (!isnan(temperature) && !isnan(humidity))
+  {
+    Blynk.virtualWrite(V17, String(temperature, 1));
+    Blynk.virtualWrite(V18, String(humidity, 1));
+  }
+  else
+  {
+    Blynk.virtualWrite(V17, "NAN");
+    Blynk.virtualWrite(V18, "NAN");
+  }
+
+  // Blynk Timer uses millis() and is still working even if WiFi/Blynk not connected
+  Serial.println("R");
 }
 
 void set_led(byte status)
@@ -111,24 +112,24 @@ void heartBeatPrint(void)
   if (Blynk.connected())
   {
     set_led(HIGH);
-    led_ticker.once_ms(111, set_led, (byte) LOW); 
+    led_ticker.once_ms(111, set_led, (byte) LOW);
     Serial.print("B");
   }
   else
   {
     Serial.print("F");
   }
-  
-  if (num == 80) 
+
+  if (num == 80)
   {
     Serial.println();
     num = 1;
   }
-  else if (num++ % 10 == 0) 
+  else if (num++ % 10 == 0)
   {
     Serial.print(" ");
   }
-} 
+}
 
 void check_status()
 {
@@ -146,51 +147,51 @@ void check_status()
   }
 }
 
-void setup() 
+void setup()
 {
-    // Debug console
-    Serial.begin(115200);
-    pinMode(LED_BUILTIN, OUTPUT);
+  // Debug console
+  Serial.begin(115200);
+  pinMode(LED_BUILTIN, OUTPUT);
 
-    Serial.println("\nStarting ...");
-    
-    dht.begin();
+  Serial.println("\nStarting ...");
 
-    // From v1.0.5
-    // Set config portal SSID and Password
-    Blynk.setConfigPortal("TestPortal-ESP32", "TestPortalPass");
-    // Set config portal IP address
-    Blynk.setConfigPortalIP(IPAddress(192, 168, 220, 1));
+  dht.begin();
 
-    // From v1.0.5, select either one of these to set static IP + DNS
-    Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 230), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0));
-    //Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 220), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0), 
-    //                           IPAddress(192, 168, 2, 1), IPAddress(8, 8, 8, 8));
-    //Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 220), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0), 
-    //                           IPAddress(4, 4, 4, 4), IPAddress(8, 8, 8, 8));   
-    
-    // Use this to default DHCP hostname to ESP8266-XXXXXX or ESP32-XXXXXX
-    //Blynk.begin();
-    // Use this to personalize DHCP hostname (RFC952 conformed)
-    // 24 chars max,- only a..z A..Z 0..9 '-' and no '-' as last char
-    Blynk.begin("ESP32-WM-Config");
-    
-    timer.setInterval(60 * 1000, readAndSendData);
+  // From v1.0.5
+  // Set config portal SSID and Password
+  Blynk.setConfigPortal("TestPortal-ESP32", "TestPortalPass");
+  // Set config portal IP address
+  Blynk.setConfigPortalIP(IPAddress(192, 168, 220, 1));
 
-    if (Blynk.connected())
-    {
-       #if USE_SPIFFS     
-        Serial.println("\nBlynk ESP32 using SPIFFS connected. Board Name : " + Blynk.getBoardName());
-      #else
-        Serial.println("\nBlynk ESP32 using EEPROM connected. Board Name : " + Blynk.getBoardName());
-        Serial.printf("EEPROM size = %d bytes, EEPROM start address = %d / 0x%X\n", EEPROM_SIZE, EEPROM_START, EEPROM_START);      
-      #endif  
-    }
+  // From v1.0.5, select either one of these to set static IP + DNS
+  Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 230), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0));
+  //Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 220), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0),
+  //                           IPAddress(192, 168, 2, 1), IPAddress(8, 8, 8, 8));
+  //Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 220), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0),
+  //                           IPAddress(4, 4, 4, 4), IPAddress(8, 8, 8, 8));
+
+  // Use this to default DHCP hostname to ESP8266-XXXXXX or ESP32-XXXXXX
+  //Blynk.begin();
+  // Use this to personalize DHCP hostname (RFC952 conformed)
+  // 24 chars max,- only a..z A..Z 0..9 '-' and no '-' as last char
+  Blynk.begin("ESP32-WM-Config");
+
+  timer.setInterval(60 * 1000, readAndSendData);
+
+  if (Blynk.connected())
+  {
+#if USE_SPIFFS
+    Serial.println("\nBlynk ESP32 using SPIFFS connected. Board Name : " + Blynk.getBoardName());
+#else
+    Serial.println("\nBlynk ESP32 using EEPROM connected. Board Name : " + Blynk.getBoardName());
+    Serial.printf("EEPROM size = %d bytes, EEPROM start address = %d / 0x%X\n", EEPROM_SIZE, EEPROM_START, EEPROM_START);
+#endif
+  }
 }
 
-void loop() 
+void loop()
 {
-    Blynk.run();
-    timer.run();
-    check_status();
+  Blynk.run();
+  timer.run();
+  check_status();
 }
