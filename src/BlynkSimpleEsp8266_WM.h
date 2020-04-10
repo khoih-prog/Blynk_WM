@@ -7,7 +7,7 @@
    Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
    Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
    Licensed under MIT license
-   Version: 1.0.10
+   Version: 1.0.11
 
    Original Blynk Library author:
    @file       BlynkSimpleEsp8266.h
@@ -30,6 +30,7 @@
     1.0.8   K Hoang      24/02/2020 Fix AP-staying-open bug. Add clearConfigData()
     1.0.9   K Hoang      12/03/2020 Enhance Config Portal GUI
     1.0.10  K Hoang      08/04/2020 SSID password maxlen is 63 now. Permit special chars # and % in input data.
+    1.0.11  K Hoang      09/04/2020 Enable adding dynamic custom parameters from sketch
  *****************************************************************************************************************************/
 
 
@@ -61,6 +62,23 @@
 #else
 #include <EEPROM.h>
 #endif
+
+//NEW
+#define MAX_ID_LEN                5
+#define MAX_DISPLAY_NAME_LEN      16
+
+typedef struct
+{
+  char id             [MAX_ID_LEN + 1];
+  char displayName    [MAX_DISPLAY_NAME_LEN + 1];
+  char *pdata;
+  uint8_t maxlen;
+} MenuItem;
+//
+
+///NEW
+extern uint16_t NUM_MENU_ITEMS;
+extern MenuItem myMenuItems [];
 
 #define SSID_MAX_LEN      32
 //From v1.0.10, WPA2 passwords can be up to 63 characters long.
@@ -94,88 +112,43 @@ typedef struct Configuration
   int  blynk_port;
   char board_name     [24];
   int  checkSum;
-} Blynk_WF_Configuration;
+} Blynk_WM_Configuration;
 // Currently CONFIG_DATA_SIZE  =  ( 48 + (96 * NUM_WIFI_CREDENTIALS) + (68 * NUM_BLYNK_CREDENTIALS) ) = 376
 
-uint16_t CONFIG_DATA_SIZE = sizeof(Blynk_WF_Configuration);
+uint16_t CONFIG_DATA_SIZE = sizeof(Blynk_WM_Configuration);
 
 //From v1.0.10, Permit special chars such as # and %
 
-#define root_html_template "\
-<!DOCTYPE html>\
-<html><head><title>BlynkSimpleEsp8266_WM</title><style>.em{padding-bottom:0px;}div,input{padding:5px;font-size:1em;}input{width:95%;}\
-body{text-align: center;}button{background-color:#16A1E7;color:#fff;line-height:2.4rem;font-size:1.2rem;width:100%;}fieldset{border-radius:0.3rem;margin:0px;}\
+// -- HTML page fragments
+const char BLYNK_WM_HTML_HEAD[]     /*PROGMEM*/ = "<!DOCTYPE html><html><head><title>BlynkSimpleEsp8266_WM</title><style>div,input{padding:2px;font-size:1em;}input{width:95%;}\
+body{text-align: center;}button{background-color:#16A1E7;color:#fff;line-height:2.4rem;font-size:1.2rem;width:100%;}fieldset{border-radius:0.5rem;margin:0px;}\
 </style></head><div style=\"text-align:left;display:inline-block;min-width:260px;\">\
-<fieldset>\
-<div class=\"\">\
-<label for=\"id\">SSID</label>\
-<input type=\"text\" value=\"[[id]]\" maxlength=64 id=\"id\">\
-<div class=\"em\"></div></div>\
-<div class=\"\">\
-<label for=\"pw\">Password</label>\
-<input type=\"text\" value=\"[[pw]]\" maxlength=64 id=\"pw\">\
-<div class=\"em\"></div></div>\
-<div class=\"\">\
-<label for=\"id1\">SSID1</label>\
-<input type=\"text\" value=\"[[id1]]\" maxlength=64 id=\"id1\">\
-<div class=\"em\"></div></div>\
-<div class=\"\">\
-<label for=\"pw1\">Password1</label>\
-<input type=\"text\" value=\"[[pw1]]\" maxlength=64 id=\"pw1\">\
-<div class=\"em\"></div></div>\
-</fieldset>\
-<fieldset>\
-<div class=\"\">\
-<label for=\"sv\">Blynk Server</label>\
-<input type=\"text\" value=\"[[sv]]\" maxlength=64 id=\"sv\">\
-<div class=\"em\"></div></div>\
-<div class=\"\">\
-<label for=\"tk\">Token</label>\
-<input type=\"text\" value=\"[[tk]]\" maxlength=32 id=\"tk\">\
-<div class=\"em\"></div></div>\
-<div class=\"\">\
-<label for=\"sv1\">Blynk Server1</label>\
-<input type=\"text\" value=\"[[sv1]]\" maxlength=64 id=\"sv1\">\
-<div class=\"em\"></div></div>\
-<div class=\"\">\
-<label for=\"tk1\">Token1</label>\
-<input type=\"text\" value=\"[[tk1]]\" maxlength=32 id=\"tk1\">\
-<div class=\"em\"></div></div>\
-<div class=\"\">\
-<label for=\"pt\">Port</label>\
-<input type=\"text\" value=\"[[pt]]\" maxlength=5 id=\"pt\">\
-<div class=\"em\"></div></div>\
-</fieldset>\
-<fieldset>\
-<div class=\"\">\
-<label for=\"nm\">Board Name</label>\
-<input type=\"text\" value=\"[[nm]]\" maxlength=24 id=\"nm\">\
-<div class=\"em\"></div></div>\
-</fieldset>\
-<button onclick=\"sv()\">Save</button></div>\
-<script id=\"jsbin-javascript\">\
-function udVal(key,val){\
-var request=new XMLHttpRequest();\
-var url='/?key='+key+'&value='+encodeURIComponent(val);\
-request.open('GET',url,false);\
-request.send(null);\
-}\
-function sv(){\
-udVal('id',document.getElementById('id').value);\
-udVal('pw',document.getElementById('pw').value);\
-udVal('id1',document.getElementById('id1').value);\
-udVal('pw1',document.getElementById('pw1').value);\
-udVal('sv',document.getElementById('sv').value);\
-udVal('tk',document.getElementById('tk').value);\
-udVal('sv1',document.getElementById('sv1').value);\
-udVal('tk1',document.getElementById('tk1').value);\
-udVal('pt',document.getElementById('pt').value);\
-udVal('nm',document.getElementById('nm').value);\
-alert('Updated');\
-}\
-</script>\
-</body>\
-</html>"
+<fieldset><div><label>WiFi SSID</label><input value=\"[[id]]\"id=\"id\"><div></div></div>\
+<div><label>PWD</label><input value=\"[[pw]]\"id=\"pw\"><div></div></div>\
+<div><label>WiFi SSID1</label><input value=\"[[id1]]\"id=\"id1\"><div></div></div>\
+<div><label>PWD1</label><input value=\"[[pw1]]\"id=\"pw1\"><div></div></div></fieldset>\
+<fieldset><div><label>Blynk Server</label><input value=\"[[sv]]\"id=\"sv\"><div></div></div>\
+<div><label>Token</label><input value=\"[[tk]]\"id=\"tk\"><div></div></div>\
+<div><label>Blynk Server1</label><input value=\"[[sv1]]\"id=\"sv1\"><div></div></div>\
+<div><label>Token1</label><input value=\"[[tk1]]\"id=\"tk1\"><div></div></div>\
+<div><label>Port</label><input value=\"[[pt]]\"id=\"pt\"><div></div></div></fieldset>\
+<fieldset><div><label>Board Name</label><input value=\"[[nm]]\"id=\"nm\"><div></div></div></fieldset>";
+const char BLYNK_WM_FLDSET_START[]  /*PROGMEM*/ = "<fieldset>";
+const char BLYNK_WM_FLDSET_END[]    /*PROGMEM*/ = "</fieldset>";
+const char BLYNK_WM_HTML_PARAM[]    /*PROGMEM*/ = "<div><label>{b}</label><input value='[[{v}]]'id='{i}'><div></div></div>";
+const char BLYNK_WM_HTML_BUTTON[]   /*PROGMEM*/ = "<button onclick=\"sv()\">Save</button></div>";
+const char BLYNK_WM_HTML_SCRIPT[]   /*PROGMEM*/ = "<script id=\"jsbin-javascript\">\
+function udVal(key,val){var request=new XMLHttpRequest();var url='/?key='+key+'&value='+encodeURIComponent(val);request.open('GET',url,false);request.send(null);}\
+function sv(){udVal('id',document.getElementById('id').value);udVal('pw',document.getElementById('pw').value);\
+udVal('id1',document.getElementById('id1').value);udVal('pw1',document.getElementById('pw1').value);\
+udVal('sv',document.getElementById('sv').value);udVal('tk',document.getElementById('tk').value);\
+udVal('sv1',document.getElementById('sv1').value);udVal('tk1',document.getElementById('tk1').value);\
+udVal('pt',document.getElementById('pt').value);udVal('nm',document.getElementById('nm').value);";
+
+const char BLYNK_WM_HTML_SCRIPT_ITEM[]  /*PROGMEM*/ = "udVal('{d}',document.getElementById('{d}').value);";
+const char BLYNK_WM_HTML_SCRIPT_END[]   /*PROGMEM*/ = "alert('Updated');}</script>";
+const char BLYNK_WM_HTML_END[]          /*PROGMEM*/ = "</html>";
+///
 
 #define BLYNK_SERVER_HARDWARE_PORT    8080
 
@@ -189,19 +162,17 @@ class BlynkWifi
   public:
     BlynkWifi(BlynkArduinoClient& transp)
       : Base(transp)
-    {
-
-    }
+    {}
 
     void connectWiFi(const char* ssid, const char* pass)
     {
-      BLYNK_LOG2(BLYNK_F("Connecting to "), ssid);
+      BLYNK_LOG2(BLYNK_F("Con2:"), ssid);
       WiFi.mode(WIFI_STA);
 
       // New from Blynk_WM v1.0.5
       if (static_IP != IPAddress(0, 0, 0, 0))
       {
-        BLYNK_LOG1(BLYNK_F("Use static IP"));
+        BLYNK_LOG1(BLYNK_F("UseStatIP"));
         WiFi.config(static_IP, static_GW, static_SN, static_DNS1, static_DNS2);
       }
 
@@ -222,7 +193,7 @@ class BlynkWifi
         BlynkDelay(500);
       }
 
-      BLYNK_LOG1(BLYNK_F("Connected to WiFi"));
+      BLYNK_LOG1(BLYNK_F("Conn2WiFi"));
       displayWiFiData();
     }
 
@@ -280,15 +251,10 @@ class BlynkWifi
 
       if (iHostname[0] == 0)
       {
-#ifdef ESP8266
         String _hostname = "ESP8266-" + String(ESP.getChipId(), HEX);
-#else		//ESP32
-        String _hostname = "ESP32-" + String((uint32_t)ESP.getEfuseMac(), HEX);
-#endif
         _hostname.toUpperCase();
 
         getRFC952_hostname(_hostname.c_str());
-
       }
       else
       {
@@ -296,7 +262,7 @@ class BlynkWifi
         getRFC952_hostname(iHostname);
       }
 
-      BLYNK_LOG2(BLYNK_F("RFC925 Hostname = "), RFC952_hostname);
+      BLYNK_LOG2(BLYNK_F("Hostname="), RFC952_hostname);
 
       if (getConfigData())
       {
@@ -307,12 +273,9 @@ class BlynkWifi
           wifiMulti.addAP(Blynk8266_WM_config.WiFi_Creds[i].wifi_ssid, Blynk8266_WM_config.WiFi_Creds[i].wifi_pw);
         }
 
-        //Base::begin(Blynk8266_WM_config.blynk_token);
-        //this->conn.begin(Blynk8266_WM_config.blynk_server, Blynk8266_WM_config.blynk_port);
-
         if (connectMultiWiFi())
         {
-          BLYNK_LOG1(BLYNK_F("bg: WiFi connected. Try Blynk"));
+          BLYNK_LOG1(BLYNK_F("bg: WiFi OK. Try Blynk"));
 
           int i = 0;
           while ( (i++ < 10) && !connectMultiBlynk() )
@@ -321,11 +284,11 @@ class BlynkWifi
 
           if  (connected())
           {
-            BLYNK_LOG1(BLYNK_F("bg: WiFi+Blynk connected"));
+            BLYNK_LOG1(BLYNK_F("bg: WiFi+Blynk OK"));
           }
           else
           {
-            BLYNK_LOG1(BLYNK_F("bg: WiFi connected, Blynk not"));
+            BLYNK_LOG1(BLYNK_F("bg: WiFi OK, Blynk not"));
             // failed to connect to Blynk server, will start configuration mode
             startConfigurationMode();
           }
@@ -407,7 +370,7 @@ class BlynkWifi
           {
             if (++retryTimes <= CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET)
             {
-              BLYNK_LOG2(BLYNK_F("run: WiFi lost & config Timeout. Connect WiFi+Blynk. Retry# : "), retryTimes);
+              BLYNK_LOG2(BLYNK_F("run: WiFi lost, configTimeout. Connect WiFi+Blynk. Retry#:"), retryTimes);
             }
             else
             {
@@ -435,7 +398,7 @@ class BlynkWifi
           }
           else
           {
-            BLYNK_LOG1(BLYNK_F("run: Blynk lost. Connect Blynk"));
+            BLYNK_LOG1(BLYNK_F("run: Blynk lost. Try Blynk"));
 
             if (connectMultiBlynk())
             {
@@ -452,7 +415,7 @@ class BlynkWifi
       else if (configuration_mode)
       {
         configuration_mode = false;
-        BLYNK_LOG1(BLYNK_F("run: got WiFi+Blynk back, great"));
+        BLYNK_LOG1(BLYNK_F("run: got WiFi+Blynk back"));
         // turn the LED_BUILTIN OFF to tell us we exit configuration mode.
         digitalWrite(LED_BUILTIN, LED_OFF);
       }
@@ -482,6 +445,22 @@ class BlynkWifi
       portal_pass = pass;
     }
 
+#define MIN_WIFI_CHANNEL      1
+#define MAX_WIFI_CHANNEL      13
+
+    int setConfigPortalChannel(int channel = 1)
+    {
+      // If channel < MIN_WIFI_CHANNEL - 1 or channel > MAX_WIFI_CHANNEL => channel = 1
+      // If channel == 0 => will use random channel from MIN_WIFI_CHANNEL to MAX_WIFI_CHANNEL
+      // If (MIN_WIFI_CHANNEL <= channel <= MAX_WIFI_CHANNEL) => use it
+      if ( (channel < MIN_WIFI_CHANNEL - 1) || (channel > MAX_WIFI_CHANNEL) )
+        WiFiAPChannel = 1;
+      else if ( (channel >= MIN_WIFI_CHANNEL - 1) && (channel <= MAX_WIFI_CHANNEL) )
+        WiFiAPChannel = channel;
+
+      return WiFiAPChannel;
+    }
+    
     void setSTAStaticIPConfig(IPAddress ip, IPAddress gw, IPAddress sn = IPAddress(255, 255, 255, 0),
                               IPAddress dns_address_1 = IPAddress(0, 0, 0, 0),
                               IPAddress dns_address_2 = IPAddress(0, 0, 0, 0))
@@ -501,6 +480,28 @@ class BlynkWifi
         static_DNS2   = IPAddress(8, 8, 8, 8);
       else
         static_DNS2   = dns_address_2;
+    }
+
+    String getWiFiSSID(uint8_t index)
+    { 
+      if (index >= NUM_WIFI_CREDENTIALS)
+        return String("");
+        
+      if (!hadConfigData)
+        getConfigData();
+
+      return (String(Blynk8266_WM_config.WiFi_Creds[index].wifi_ssid));
+    }
+
+    String getWiFiPW(uint8_t index)
+    {
+      if (index >= NUM_WIFI_CREDENTIALS)
+        return String("");
+        
+      if (!hadConfigData)
+        getConfigData();
+
+      return (String(Blynk8266_WM_config.WiFi_Creds[index].wifi_pw));
     }
 
     String getServerName(uint8_t index)
@@ -541,14 +542,14 @@ class BlynkWifi
       return (Blynk8266_WM_config.blynk_port);
     }
 
-    Blynk_WF_Configuration* getFullConfigData(Blynk_WF_Configuration *configData)
+    Blynk_WM_Configuration* getFullConfigData(Blynk_WM_Configuration *configData)
     {
       if (!hadConfigData)
         getConfigData();
 
       // Check if NULL pointer
       if (configData)
-        memcpy(configData, &Blynk8266_WM_config, sizeof(Blynk_WF_Configuration));
+        memcpy(configData, &Blynk8266_WM_config, sizeof(Blynk_WM_Configuration));
 
       return (configData);
     }
@@ -568,8 +569,13 @@ class BlynkWifi
 
     unsigned long configTimeout;
     bool hadConfigData = false;
+    
+    // default to channel 1
+    int WiFiAPChannel = 1;
 
-    Blynk_WF_Configuration Blynk8266_WM_config;
+    Blynk_WM_Configuration Blynk8266_WM_config;
+    
+    uint16_t totalDataSize = 0;
 
     // For Config Portal, from Blynk_WM v1.0.5
     IPAddress portal_apIP = IPAddress(192, 168, 4, 1);
@@ -612,24 +618,24 @@ class BlynkWifi
 
     void displayConfigData(void)
     {
-      BLYNK_LOG4(BLYNK_F("Header = "), Blynk8266_WM_config.header,
-                 BLYNK_F(", Board Name = "), Blynk8266_WM_config.board_name);
-      BLYNK_LOG4(BLYNK_F("SSID = "), Blynk8266_WM_config.WiFi_Creds[0].wifi_ssid,
-                 BLYNK_F(", PW = "), Blynk8266_WM_config.WiFi_Creds[0].wifi_pw);
-      BLYNK_LOG4(BLYNK_F("SSID1 = "), Blynk8266_WM_config.WiFi_Creds[1].wifi_ssid,
-                 BLYNK_F(", PW1 = "), Blynk8266_WM_config.WiFi_Creds[1].wifi_pw);
-      BLYNK_LOG4(BLYNK_F("Server = "), Blynk8266_WM_config.Blynk_Creds[0].blynk_server,
-                 BLYNK_F(", Token = "),  Blynk8266_WM_config.Blynk_Creds[0].blynk_token);
-      BLYNK_LOG4(BLYNK_F("Server1 = "), Blynk8266_WM_config.Blynk_Creds[1].blynk_server,
-                 BLYNK_F(", Token1 = "),  Blynk8266_WM_config.Blynk_Creds[1].blynk_token);
-      BLYNK_LOG2(BLYNK_F("Port = "), Blynk8266_WM_config.blynk_port);
+      BLYNK_LOG4(BLYNK_F("Hdr="),       Blynk8266_WM_config.header,
+                 BLYNK_F(",BrdName="),  Blynk8266_WM_config.board_name);
+      BLYNK_LOG4(BLYNK_F("SSID="),      Blynk8266_WM_config.WiFi_Creds[0].wifi_ssid,
+                 BLYNK_F(",PW="),       Blynk8266_WM_config.WiFi_Creds[0].wifi_pw);
+      BLYNK_LOG4(BLYNK_F("SSID1="),     Blynk8266_WM_config.WiFi_Creds[1].wifi_ssid,
+                 BLYNK_F(",PW1="),      Blynk8266_WM_config.WiFi_Creds[1].wifi_pw);
+      BLYNK_LOG4(BLYNK_F("Server="),    Blynk8266_WM_config.Blynk_Creds[0].blynk_server,
+                 BLYNK_F(",Token="),    Blynk8266_WM_config.Blynk_Creds[0].blynk_token);
+      BLYNK_LOG4(BLYNK_F("Server1="),   Blynk8266_WM_config.Blynk_Creds[1].blynk_server,
+                 BLYNK_F(",Token1="),   Blynk8266_WM_config.Blynk_Creds[1].blynk_token);
+      BLYNK_LOG2(BLYNK_F("Port="),      Blynk8266_WM_config.blynk_port);
     }
 
     void displayWiFiData(void)
     {
-      BLYNK_LOG6(BLYNK_F("IP = "), WiFi.localIP().toString(), BLYNK_F(", GW = "), WiFi.gatewayIP().toString(),
-                 BLYNK_F(", SN = "), WiFi.subnetMask().toString());
-      BLYNK_LOG4(BLYNK_F("DNS1 = "), WiFi.dnsIP(0).toString(), BLYNK_F(", DNS2 = "), WiFi.dnsIP(1).toString());
+      BLYNK_LOG6(BLYNK_F("IP="), WiFi.localIP().toString(), BLYNK_F(",GW="), WiFi.gatewayIP().toString(),
+                 BLYNK_F(",SN="), WiFi.subnetMask().toString());
+      BLYNK_LOG4(BLYNK_F("DNS1="), WiFi.dnsIP(0).toString(), BLYNK_F(",DNS2="), WiFi.dnsIP(1).toString());
     }
 
     int calcChecksum()
@@ -645,13 +651,146 @@ class BlynkWifi
 
 #if USE_SPIFFS
 
-#define  CONFIG_FILENAME         BLYNK_F("/wm_config.dat")
-#define  CONFIG_FILENAME_BACKUP  BLYNK_F("/wm_config.bak")
+#define  CONFIG_FILENAME              BLYNK_F("/wm_config.dat")
+#define  CONFIG_FILENAME_BACKUP       BLYNK_F("/wm_config.bak")
+
+#define  CREDENTIALS_FILENAME         BLYNK_F("/wm_cred.dat")
+#define  CREDENTIALS_FILENAME_BACKUP  BLYNK_F("/wm_cred.bak")
+
+    bool loadCredentials(void)
+    {
+      int checkSum = 0;
+      int readCheckSum;
+      totalDataSize = sizeof(Blynk8266_WM_config) + sizeof(readCheckSum);
+      
+      File file = SPIFFS.open(CREDENTIALS_FILENAME, "r");
+      BLYNK_LOG1(BLYNK_F("LoadCredFile "));
+
+      if (!file)
+      {
+        BLYNK_LOG1(BLYNK_F("failed"));
+
+        // Trying open redundant config file
+        file = SPIFFS.open(CREDENTIALS_FILENAME_BACKUP, "r");
+        BLYNK_LOG1(BLYNK_F("LoadBkUpCredFile "));
+
+        if (!file)
+        {
+          BLYNK_LOG1(BLYNK_F("failed"));
+          return false;
+        }
+      }
+     
+      for (int i = 0; i < NUM_MENU_ITEMS; i++)
+      {       
+        char* _pointer = myMenuItems[i].pdata;
+        totalDataSize += myMenuItems[i].maxlen;
+        
+        file.readBytes(_pointer, myMenuItems[i].maxlen);
+               
+        for (uint16_t j = 0; j < myMenuItems[i].maxlen; j++,_pointer++)
+        {         
+          checkSum += *_pointer;  
+        }       
+      }
+
+      file.readBytes((char *) &readCheckSum, sizeof(readCheckSum));
+      
+      BLYNK_LOG1(BLYNK_F("OK"));
+      file.close();
+      
+      BLYNK_LOG4(F("CrCCsum="), checkSum, F(",CrRCsum="), readCheckSum);
+      
+      if ( checkSum != readCheckSum)
+      {
+        return false;
+      }
+      
+      return true;    
+    }
+
+    void saveCredentials(void)
+    {
+      int checkSum = 0;
+    
+      File file = SPIFFS.open(CREDENTIALS_FILENAME, "w");
+      BLYNK_LOG1(BLYNK_F("SaveCredFile "));
+
+      for (int i = 0; i < NUM_MENU_ITEMS; i++)
+      {       
+        char* _pointer = myMenuItems[i].pdata;
+        
+        //BLYNK_LOG4(F("pdata="), myMenuItems[i].pdata, F(",len="), myMenuItems[i].maxlen);
+        
+        if (file)
+        {
+          file.write((uint8_t*) _pointer, myMenuItems[i].maxlen);         
+        }
+        else
+        {
+          BLYNK_LOG1(BLYNK_F("failed"));
+        }        
+                     
+        for (uint16_t j = 0; j < myMenuItems[i].maxlen; j++,_pointer++)
+        {         
+          checkSum += *_pointer;     
+         }
+      }
+      
+      if (file)
+      {
+        file.write((uint8_t*) &checkSum, sizeof(checkSum));     
+        file.close();
+        BLYNK_LOG1(BLYNK_F("OK"));    
+      }
+      else
+      {
+        BLYNK_LOG1(BLYNK_F("failed"));
+      }   
+           
+      BLYNK_LOG2(F("CrCCSum="), checkSum);
+      
+      // Trying open redundant Auth file
+      file = SPIFFS.open(CREDENTIALS_FILENAME_BACKUP, "w");
+      BLYNK_LOG1(BLYNK_F("SaveBkUpCredFile "));
+
+      for (int i = 0; i < NUM_MENU_ITEMS; i++)
+      {       
+        char* _pointer = myMenuItems[i].pdata;
+        
+        //BLYNK_LOG4(F("pdata="), myMenuItems[i].pdata, F(",len="), myMenuItems[i].maxlen);
+        
+        if (file)
+        {
+          file.write((uint8_t*) _pointer, myMenuItems[i].maxlen);         
+        }
+        else
+        {
+          BLYNK_LOG1(BLYNK_F("failed"));
+        }        
+                     
+        for (uint16_t j = 0; j < myMenuItems[i].maxlen; j++,_pointer++)
+        {         
+          checkSum += *_pointer;     
+         }
+      }
+      
+      if (file)
+      {
+        file.write((uint8_t*) &checkSum, sizeof(checkSum));     
+        file.close();
+        BLYNK_LOG1(BLYNK_F("OK"));    
+      }
+      else
+      {
+        BLYNK_LOG1(BLYNK_F("failed"));
+      }   
+    }
 
     void loadConfigData(void)
     {
       File file = SPIFFS.open(CONFIG_FILENAME, "r");
-      BLYNK_LOG1(BLYNK_F("Load configfile "));
+      BLYNK_LOG1(BLYNK_F("LoadCfgFile "));
 
       if (!file)
       {
@@ -659,11 +798,11 @@ class BlynkWifi
 
         // Trying open redundant config file
         file = SPIFFS.open(CONFIG_FILENAME_BACKUP, "r");
-        BLYNK_LOG1(BLYNK_F("Load backup configfile "));
+        BLYNK_LOG1(BLYNK_F("LoadBkUpCfgFile "));
 
         if (!file)
         {
-          BLYNK_LOG1(BLYNK_F("also failed"));
+          BLYNK_LOG1(BLYNK_F("failed"));
           return;
         }
       }
@@ -677,11 +816,11 @@ class BlynkWifi
     void saveConfigData(void)
     {
       File file = SPIFFS.open(CONFIG_FILENAME, "w");
-      BLYNK_LOG1(BLYNK_F("Save configfile "));
+      BLYNK_LOG1(BLYNK_F("SaveCfgFile "));
 
       int calChecksum = calcChecksum();
       Blynk8266_WM_config.checkSum = calChecksum;
-      BLYNK_LOG2(BLYNK_F("chkSum = 0x"), String(calChecksum, HEX));
+      BLYNK_LOG2(BLYNK_F("CSum=0x"), String(calChecksum, HEX));
 
       if (file)
       {
@@ -696,7 +835,7 @@ class BlynkWifi
 
       // Trying open redundant Auth file
       file = SPIFFS.open(CONFIG_FILENAME_BACKUP, "w");
-      BLYNK_LOG1(BLYNK_F("Save backup configfile "));
+      BLYNK_LOG1(BLYNK_F("SaveBkUpCfgFile "));
 
       if (file)
       {
@@ -708,11 +847,17 @@ class BlynkWifi
       {
         BLYNK_LOG1(BLYNK_F(" failed"));
       }
+      
+      saveCredentials();
     }
 
     // Return false if init new EEPROM or SPIFFS. No more need trying to connect. Go directly to config mode
     bool getConfigData()
     {
+      bool credDataValid;   
+      
+      hadConfigData = false;
+      
       if (!SPIFFS.begin())
       {
         BLYNK_LOG1(BLYNK_F("SPIFFS failed! Pls use EEPROM."));
@@ -727,17 +872,23 @@ class BlynkWifi
 
       int calChecksum = calcChecksum();
 
-      BLYNK_LOG4(BLYNK_F("Calc Cksum = 0x"), String(calChecksum, HEX),
-                 BLYNK_F(", Read Cksum = 0x"), String(Blynk8266_WM_config.checkSum, HEX));
+      BLYNK_LOG4(BLYNK_F("CCSum=0x"), String(calChecksum, HEX),
+                 BLYNK_F(",RCSum=0x"), String(Blynk8266_WM_config.checkSum, HEX));
 
       //displayConfigData();
+      credDataValid = loadCredentials();
 
       if ( (strncmp(Blynk8266_WM_config.header, BLYNK_BOARD_TYPE, strlen(BLYNK_BOARD_TYPE)) != 0) ||
-           (calChecksum != Blynk8266_WM_config.checkSum) )
+           (calChecksum != Blynk8266_WM_config.checkSum) || !credDataValid )
       {
         memset(&Blynk8266_WM_config, 0, sizeof(Blynk8266_WM_config));
 
-        BLYNK_LOG2(BLYNK_F("Init new config file, size = "), sizeof(Blynk8266_WM_config));
+        for (int i = 0; i < NUM_MENU_ITEMS; i++)
+        {
+          memset(myMenuItems[i].pdata, 0, myMenuItems[i].maxlen);
+        }
+
+        BLYNK_LOG2(BLYNK_F("InitCfgFile,sz="), sizeof(Blynk8266_WM_config));
 
         // doesn't have any configuration
         strcpy(Blynk8266_WM_config.header,                        BLYNK_BOARD_TYPE);
@@ -751,6 +902,12 @@ class BlynkWifi
         strcpy(Blynk8266_WM_config.Blynk_Creds[1].blynk_token,    NO_CONFIG);
         Blynk8266_WM_config.blynk_port = BLYNK_SERVER_HARDWARE_PORT;
         strcpy(Blynk8266_WM_config.board_name,       NO_CONFIG);
+        
+        for (int i = 0; i < NUM_MENU_ITEMS; i++)
+        {
+          strncpy(myMenuItems[i].pdata, NO_CONFIG, myMenuItems[i].maxlen - 1);
+        }
+        
         // Don't need
         Blynk8266_WM_config.checkSum = 0;
 
@@ -778,7 +935,6 @@ class BlynkWifi
       return true;
     }
 
-
 #else
 
 #ifndef EEPROM_SIZE
@@ -804,23 +960,93 @@ class BlynkWifi
 #endif
 #endif
 
+    bool EEPROM_getCredentials(void)
+    {
+      int readCheckSum;
+      int checkSum = 0;
+      uint16_t offset = EEPROM_START + sizeof(Blynk8266_WM_config);
+           
+      totalDataSize = sizeof(Blynk8266_WM_config) + sizeof(readCheckSum);
+      
+      for (int i = 0; i < NUM_MENU_ITEMS; i++)
+      {       
+        char* _pointer = myMenuItems[i].pdata;
+        totalDataSize += myMenuItems[i].maxlen;
+               
+        for (uint16_t j = 0; j < myMenuItems[i].maxlen; j++,_pointer++,offset++)
+        {
+          *_pointer = EEPROM.read(offset);
+          
+          checkSum += *_pointer;  
+         }       
+      }
+      
+      EEPROM.get(offset, readCheckSum);
+      
+      BLYNK_LOG4(F("CrCCsum="), checkSum, F(",CrRCsum="), readCheckSum);
+      
+      if ( checkSum != readCheckSum)
+      {
+        return false;
+      }
+      
+      return true;
+    }
+
+    void EEPROM_putCredentials(void)
+    {
+      int checkSum = 0;
+      uint16_t offset = EEPROM_START + sizeof(Blynk8266_WM_config);
+                
+      for (int i = 0; i < NUM_MENU_ITEMS; i++)
+      {       
+        char* _pointer = myMenuItems[i].pdata;
+        
+        //BLYNK_LOG4(F("pdata="), myMenuItems[i].pdata, F(",len="), myMenuItems[i].maxlen);
+                            
+        for (uint16_t j = 0; j < myMenuItems[i].maxlen; j++,_pointer++,offset++)
+        {
+          EEPROM.write(offset, *_pointer);
+          
+          checkSum += *_pointer;     
+         }
+      }
+      
+      EEPROM.put(offset, checkSum);
+      //EEPROM.commit();
+      
+      BLYNK_LOG2(F("CrCCSum="), checkSum);
+    }
+
     // Return false if init new EEPROM or SPIFFS. No more need trying to connect. Go directly to config mode
     bool getConfigData()
     {
+      bool credDataValid;   
+      
+      hadConfigData = false; 
+      
       EEPROM.begin(EEPROM_SIZE);
       EEPROM.get(EEPROM_START, Blynk8266_WM_config);
 
       int calChecksum = calcChecksum();
 
-      BLYNK_LOG4(BLYNK_F("Calc Cksum = 0x"), String(calChecksum, HEX),
-                 BLYNK_F(", Read Cksum = 0x"), String(Blynk8266_WM_config.checkSum, HEX));
-
+      BLYNK_LOG4(BLYNK_F("CCSum=0x"), String(calChecksum, HEX),
+                 BLYNK_F(",RCSum=0x"), String(Blynk8266_WM_config.checkSum, HEX));
+                 
+      credDataValid = EEPROM_getCredentials();        
+      
       if ( (strncmp(Blynk8266_WM_config.header, BLYNK_BOARD_TYPE, strlen(BLYNK_BOARD_TYPE)) != 0) ||
-           (calChecksum != Blynk8266_WM_config.checkSum) )
+           (calChecksum != Blynk8266_WM_config.checkSum) || !credDataValid )
       {
         memset(&Blynk8266_WM_config, 0, sizeof(Blynk8266_WM_config));
 
-        BLYNK_LOG2(BLYNK_F("Init new EEPROM, size = "), EEPROM.length());
+        for (int i = 0; i < NUM_MENU_ITEMS; i++)
+        {
+          memset(myMenuItems[i].pdata, 0, myMenuItems[i].maxlen);
+        }
+        
+        // Including Credentials CSum
+        BLYNK_LOG4(F("InitEEPROM,sz="), EEPROM_SIZE, F(",Datasz="), totalDataSize);
 
         // doesn't have any configuration
         strcpy(Blynk8266_WM_config.header,                        BLYNK_BOARD_TYPE);
@@ -834,10 +1060,17 @@ class BlynkWifi
         strcpy(Blynk8266_WM_config.Blynk_Creds[1].blynk_token,    NO_CONFIG);
         Blynk8266_WM_config.blynk_port = BLYNK_SERVER_HARDWARE_PORT;
         strcpy(Blynk8266_WM_config.board_name,       NO_CONFIG);
+        
+        for (int i = 0; i < NUM_MENU_ITEMS; i++)
+        {
+          strncpy(myMenuItems[i].pdata, NO_CONFIG, myMenuItems[i].maxlen - 1);
+        }
+        
         // Don't need
         Blynk8266_WM_config.checkSum = 0;
 
         EEPROM.put(EEPROM_START, Blynk8266_WM_config);
+        EEPROM_putCredentials();
         EEPROM.commit();
 
         return false;
@@ -866,9 +1099,11 @@ class BlynkWifi
     {
       int calChecksum = calcChecksum();
       Blynk8266_WM_config.checkSum = calChecksum;
-      BLYNK_LOG4(BLYNK_F("Save EEPROM, size = "), EEPROM.length(), BLYNK_F(", chkSum = 0x"), String(calChecksum, HEX));
+      BLYNK_LOG4(BLYNK_F("SaveEEPROM,sz="), EEPROM.length(), BLYNK_F(",CSum=0x"), String(calChecksum, HEX))
 
       EEPROM.put(EEPROM_START, Blynk8266_WM_config);
+      EEPROM_putCredentials();
+      
       EEPROM.commit();
     }
 
@@ -886,7 +1121,7 @@ class BlynkWifi
         if (connect(BLYNK_CONNECT_TIMEOUT_MS) )
         {
           BLYNK_LOG4(BLYNK_F("Connected to Blynk Server = "), Blynk8266_WM_config.Blynk_Creds[i].blynk_server,
-                     BLYNK_F(", Token  = "), Blynk8266_WM_config.Blynk_Creds[i].blynk_token);
+                     BLYNK_F(", Token = "), Blynk8266_WM_config.Blynk_Creds[i].blynk_token);
           return true;
         }
       }
@@ -906,7 +1141,19 @@ class BlynkWifi
       BLYNK_LOG1(BLYNK_F("Connecting MultiWifi..."));
 
       //WiFi.mode(WIFI_STA);
-
+      //New v1.0.11
+      setHostname();
+      
+      /// New from Blynk_WM v1.0.5
+      if (static_IP != IPAddress(0, 0, 0, 0))
+      {
+        BLYNK_LOG1(BLYNK_F("UseStatIP"));
+        WiFi.config(static_IP, static_GW, static_SN, static_DNS1, static_DNS2);
+      }
+      
+      BLYNK_LOG1(BLYNK_F("con2WF:start"));
+      ///
+      
       int i = 0;
       status = wifiMulti.run();
       delay(WIFI_MULTI_CONNECT_WAITING_MS);
@@ -933,6 +1180,43 @@ class BlynkWifi
       return status;
     }
 
+    // NEW
+    String root_html_template;
+       
+    String createHTML(void)
+    {
+      String pitem;
+      
+      root_html_template = String(BLYNK_WM_HTML_HEAD)  + BLYNK_WM_FLDSET_START;
+      
+      for (int i = 0; i < NUM_MENU_ITEMS; i++)
+      {
+        pitem = String(BLYNK_WM_HTML_PARAM);
+
+        pitem.replace("{b}", myMenuItems[i].displayName);
+        pitem.replace("{v}", myMenuItems[i].id);
+        pitem.replace("{i}", myMenuItems[i].id);
+        
+        root_html_template += pitem;
+      }
+      
+      root_html_template += String(BLYNK_WM_FLDSET_END) + BLYNK_WM_HTML_BUTTON + BLYNK_WM_HTML_SCRIPT;     
+      
+      for (int i = 0; i < NUM_MENU_ITEMS; i++)
+      {
+        pitem = String(BLYNK_WM_HTML_SCRIPT_ITEM);
+        
+        pitem.replace("{d}", myMenuItems[i].id);
+        
+        root_html_template += pitem;
+      }
+      
+      root_html_template += String(BLYNK_WM_HTML_SCRIPT_END) + BLYNK_WM_HTML_END;
+      
+      return root_html_template;     
+    }
+    ////
+    
     void handleRequest()
     {
       if (server)
@@ -944,9 +1228,9 @@ class BlynkWifi
 
         if (key == "" && value == "")
         {
-          String result = root_html_template;
+          String result = createHTML();
 
-          BLYNK_LOG1(BLYNK_F("hR: replace result"));
+          //BLYNK_LOG1(BLYNK_F("h:repl"));
 
           // Reset configTimeout to stay here until finished.
           configTimeout = 0;
@@ -959,8 +1243,14 @@ class BlynkWifi
           result.replace("[[tk]]",     Blynk8266_WM_config.Blynk_Creds[0].blynk_token);
           result.replace("[[sv1]]",    Blynk8266_WM_config.Blynk_Creds[1].blynk_server);
           result.replace("[[tk1]]",    Blynk8266_WM_config.Blynk_Creds[1].blynk_token);
-          result.replace("[[pt]]",      String(Blynk8266_WM_config.blynk_port));
+          result.replace("[[pt]]",     String(Blynk8266_WM_config.blynk_port));
           result.replace("[[nm]]",     Blynk8266_WM_config.board_name);
+          
+          for (int i = 0; i < NUM_MENU_ITEMS; i++)
+          {
+            String toChange = String("[[") + myMenuItems[i].id + "]]";
+            result.replace(toChange, myMenuItems[i].pdata);
+          }
 
           server->send(200, "text/html", result);
 
@@ -1050,25 +1340,36 @@ class BlynkWifi
             strcpy(Blynk8266_WM_config.board_name, value.c_str());
           else
             strncpy(Blynk8266_WM_config.board_name, value.c_str(), sizeof(Blynk8266_WM_config.board_name) - 1);
-          #if 0  
-          Serial.println("nm: value = " + value);
-          Serial.println("nm: bname = " + String(Blynk8266_WM_config.board_name));
-          #endif
         }
 
+        for (int i = 0; i < NUM_MENU_ITEMS; i++)
+        {
+          if (key == myMenuItems[i].id)
+          {
+            //BLYNK_LOG4(F("h:"), myMenuItems[i].id, F("="), value.c_str() );
+            number_items_Updated++;
+
+            if ((int) strlen(value.c_str()) < myMenuItems[i].maxlen - 1)
+              strcpy(myMenuItems[i].pdata, value.c_str());
+            else
+              strncpy(myMenuItems[i].pdata, value.c_str(), myMenuItems[i].maxlen - 1);
+          }
+        }
+        
         server->send(200, "text/html", "OK");
 
-        if (number_items_Updated == NUM_CONFIGURABLE_ITEMS)
+        // NEW
+        if (number_items_Updated == NUM_CONFIGURABLE_ITEMS + NUM_MENU_ITEMS)
         {
 #if USE_SPIFFS
-          BLYNK_LOG2(BLYNK_F("hR: Update SPIFFS "), CONFIG_FILENAME);
+          BLYNK_LOG2(BLYNK_F("h:UpdSPIFFS:"), CONFIG_FILENAME);
 #else
-          BLYNK_LOG1(BLYNK_F("hR: Update EEPROM"));
+          BLYNK_LOG1(BLYNK_F("h:UpdEEPROM"));
 #endif
 
           saveConfigData();
 
-          BLYNK_LOG1(BLYNK_F("hR: Reset"));
+          BLYNK_LOG1(BLYNK_F("h:Rst"));
 
           // Delay then reset the ESP8266 after save data
           delay(1000);
@@ -1094,12 +1395,23 @@ class BlynkWifi
         portal_pass = "MyESP_" + chipID;
       }
 
-      BLYNK_LOG6(BLYNK_F("startConfigMode with SSID = "), portal_ssid, BLYNK_F(", PW = "), portal_pass,
-                 BLYNK_F(" and IP = "), portal_apIP.toString());
-
       WiFi.mode(WIFI_AP);
-      WiFi.softAP(portal_ssid.c_str(), portal_pass.c_str());
+      
+      // New
+      delay(100);
 
+      static int channel;
+      // Use random channel if  WiFiAPChannel == 0
+      if (WiFiAPChannel == 0)
+        channel = random(MAX_WIFI_CHANNEL) + 1;
+      else
+        channel = WiFiAPChannel;
+
+      WiFi.softAP(portal_ssid.c_str(), portal_pass.c_str(), channel);
+      
+      BLYNK_LOG4(BLYNK_F("\nstConf:SSID="), portal_ssid, BLYNK_F(",PW="), portal_pass);
+      BLYNK_LOG4(BLYNK_F("IP="), portal_apIP.toString(), ",ch=", channel);
+      
       delay(100); // ref: https://github.com/espressif/arduino-esp32/issues/985#issuecomment-359157428
       WiFi.softAPConfig(portal_apIP, portal_apIP, IPAddress(255, 255, 255, 0));
 
@@ -1109,9 +1421,7 @@ class BlynkWifi
       //See https://stackoverflow.com/questions/39803135/c-unresolved-overloaded-function-type?rq=1
       if (server)
       {
-        server->on("/", [this]() {
-          handleRequest();
-        });
+        server->on("/", [this]() { handleRequest(); });
         server->begin();
       }
 

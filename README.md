@@ -7,6 +7,11 @@ This is a Blynk and WiFiManager Library for configuring/auto(re)connecting ESP82
  
 To help you to eliminate `hardcoding` your Wifi and Blynk credentials for ESP8266 and ESP32 (with / wwithout SSL), and updating/reflashing every time when you need to change them.
 
+### Releases v1.0.11
+
+1. New ***powerful-yet-simple-to-use feature to enable adding dynamic custom parameters*** from sketch and input using the same Config Portal. Config Portal will be auto-adjusted to match the number of dynamic parameters.
+2. Dynamic custom parameters to be saved ***automatically in EEPROM, or SPIFFS***.
+
 ### Releases v1.0.10
 
 1. WiFi Password max length is 63, according to WPA2 standard
@@ -145,37 +150,193 @@ Enter your WiFi and Blynk Credentials:
 
 Then click `Save`. The system will auto-restart. You will see the board's built-in LED turned OFF. That means, it's already connected to your Blynk server successfully.
 
+### How to add dynamic parameters from sketch
+
+- To add custom parameters, just modify from the example below
+
+```
+/////////////// Start dynamic Credentials ///////////////
+
+//Defined in <BlynkSimpleEsp32_GSM_WFM.h>
+/**************************************
+  #define MAX_ID_LEN                5
+  #define MAX_DISPLAY_NAME_LEN      16
+
+  typedef struct
+  {
+  char id             [MAX_ID_LEN + 1];
+  char displayName    [MAX_DISPLAY_NAME_LEN + 1];
+  char *pdata;
+  uint8_t maxlen;
+  } MenuItem;
+**************************************/
+
+#define MAX_MQTT_SERVER_LEN      34
+char MQTT_Server  [MAX_MQTT_SERVER_LEN]   = "";
+
+#define MAX_MQTT_PORT_LEN        6
+char MQTT_Port   [MAX_MQTT_PORT_LEN]  = "";
+
+#define MAX_MQTT_USERNAME_LEN      34
+char MQTT_UserName  [MAX_MQTT_USERNAME_LEN]   = "";
+
+#define MAX_MQTT_PW_LEN        34
+char MQTT_PW   [MAX_MQTT_PW_LEN]  = "";
+
+#define MAX_MQTT_SUBS_TOPIC_LEN      34
+char MQTT_SubsTopic  [MAX_MQTT_SUBS_TOPIC_LEN]   = "";
+
+#define MAX_MQTT_PUB_TOPIC_LEN       34
+char MQTT_PubTopic   [MAX_MQTT_PUB_TOPIC_LEN]  = "";
+
+MenuItem myMenuItems [] =
+{
+  { "mqtt", "MQTT Server",      MQTT_Server,      MAX_MQTT_SERVER_LEN },
+  { "mqpt", "Port",             MQTT_Port,        MAX_MQTT_PORT_LEN   },
+  { "user", "MQTT UserName",    MQTT_UserName,    MAX_MQTT_USERNAME_LEN },
+  { "mqpw", "MQTT PWD",         MQTT_PW,          MAX_MQTT_PW_LEN },
+  { "subs", "Subs Topics",      MQTT_SubsTopic,   MAX_MQTT_SUBS_TOPIC_LEN },
+  { "pubs", "Pubs Topics",      MQTT_PubTopic,    MAX_MQTT_PUB_TOPIC_LEN },
+};
+
+uint16_t NUM_MENU_ITEMS = sizeof(myMenuItems) / sizeof(MenuItem);  //MenuItemSize;
+/////// // End dynamic Credentials ///////////
+
+```
+- If you don't need to add dynamic parameters, use the following in sketch
+
+```
+/////////////// Start dynamic Credentials ///////////////
+
+MenuItem myMenuItems [] = {};
+
+uint16_t NUM_MENU_ITEMS = sizeof(myMenuItems) / sizeof(MenuItem);  //MenuItemSize;
+/////// // End dynamic Credentials ///////////
+
+```
+
 The following is the sample terminal output when running example [ESP8266WM_Config](examples/ESP8266WM_Config)
+
+1. No Config Data => Config Portal
 
 ```
 Starting ...
-[65] RFC925 Hostname = ESP8266-WM-Config
-[66] Calc Cksum = 0x309d, Read Cksum = 0x309d
-[66] Header = ESP8266, Board Name = ESP8266-Multi-WM
-[67] SSID = ****, PW = ****
-[70] SSID1 = ****1, PW1 = ****1
-[74] Server = 192.168.2.112, Token = ****
-[80] Server1 = account.duckdns.org, Token1 = ****
-[86] Port = 8080
-[88] Connecting MultiWifi...
-[11276] WiFi connected after time: 2
-[11276] SSID: ****, RSSI = -45                                      <= Connected to SSID
-[11276] Channel: 2, IP address: 192.168.2.91
-[11277] bg: WiFi connected. Try Blynk
-[11279] 
+[150] Hostname=ESP8266-WM-Config
+[151] CCSum=0x58e0,RCSum=0xffffffff
+[151] CrCCsum=44880,CrRCsum=-1
+[151] InitEEPROM,sz=4096,Datasz=556
+[151] pdata=blank,len=34
+[153] pdata=blank,len=6
+[155] pdata=blank,len=34
+[158] pdata=blank,len=34
+[160] pdata=blank,len=34
+[162] pdata=blank,len=34
+[164] CrCCSum=3120
+[209] bg: No configdat. Stay forever in config portal
+[401] 
+stConf:SSID=TestPortal-ESP8266,PW=TestPortalPass
+[401] IP=192.168.200.1,ch=1
+FYour stored Credentials :
+MQTT Server = blank
+Port = blank
+MQTT UserName = blank
+MQTT PWD = blank
+Subs Topics = blank
+Pubs Topics = blank
+RFRFRFRFRFRFRFRF
+[523347] h:UpdEEPROM
+[523347] SaveEEPROM,sz=4096,CSum=0x32c1
+[523360] CrCCSum=6078
+[523406] h:Rst
+```
+
+2. Input valid credentials => reboot
+
+```
+Starting ...
+[143] Hostname=ESP8266-WM-Config
+[143] CCSum=0x32c1,RCSum=0x32c1
+[144] CrCCsum=6078,CrRCsum=6078
+[144] Hdr=ESP8266,BrdName=ESP8266-BlynkWM-v1.0.11
+[145] SSID=HueNet1,PW=****
+[147] SSID1=HueNet2,PW1=****
+[150] Server=account.duckdns.org,Token=token
+[157] Server1=192.168.2.112,Token1=token1
+[162] Port=8080
+[164] Connecting MultiWifi...
+[167] UseStatIP
+[168] con2WF:start
+[4415] WiFi connected after time: 1
+[4416] SSID: HueNet1, RSSI = -51
+[4416] Channel: 2, IP address: 192.168.2.220
+[4416] bg: WiFi OK. Try Blynk
+[4417] 
     ___  __          __
    / _ )/ /_ _____  / /__
   / _  / / // / _ \/  '_/
  /____/_/\_, /_//_/_/\_\
         /___/ v0.6.1 on NodeMCU
 
-[11292] BlynkArduinoClient.connect: Connecting to 192.168.2.112:8080  <= Try Server
-[11325] Ready (ping: 19ms).                                           <= Connected to Server
-[11392] Connected to Blynk Server = 192.168.2.112, Token  = ****
-[11392] bg: WiFi+Blynk connected
-Blynk ESP8288 using EEPROM connected. Board Name : ESP8266-Multi-WM
-EEPROM size = 4096 bytes, EEPROM start address = 512 / 0x200
-BRB
+[4431] BlynkArduinoClient.connect: Connecting to account.duckdns.org:8080
+[5125] Ready (ping: 5ms).
+[5125] Free RAM: 41024
+[5192] Connected to Blynk Server = account.duckdns.org, Token = token
+[5192] bg: WiFi+Blynk OK
+
+Blynk ESP8288 using EEPROM connected. Board Name : ESP8266-BlynkWM-v1.0.11
+EEPROM size = 4096 bytes, EEPROM start address = 0 / 0x0
+Your stored Credentials :
+MQTT Server = mqtt.duckdns.org
+Port = 1883
+MQTT UserName = mqtt-username
+MQTT PWD = mqtt-pass
+Subs Topics = SubsTopic1
+Pubs Topics = PubsTopic1
+```
+
+3. Testing WiFi and Blynk Server lost to verify auto-reconnection
+
+```
+Starting ...
+[143] Hostname=ESP8266-WM-Config
+[143] CCSum=0x32c1,RCSum=0x32c1
+[144] CrCCsum=6078,CrRCsum=6078
+[144] Hdr=ESP8266,BrdName=ESP8266-BlynkWM-v1.0.11
+[145] SSID=HueNet1,PW=****
+[147] SSID1=HueNet2,PW1=****
+[150] Server=account.duckdns.org,Token=token
+[157] Server1=192.168.2.112,Token1=token1
+[162] Port=8080
+[164] Connecting MultiWifi...
+[167] UseStatIP
+[168] con2WF:start
+[4415] WiFi connected after time: 1
+[4416] SSID: HueNet1, RSSI = -51
+[4416] Channel: 2, IP address: 192.168.2.220
+[4416] bg: WiFi OK. Try Blynk
+[4417] 
+    ___  __          __
+   / _ )/ /_ _____  / /__
+  / _  / / // / _ \/  '_/
+ /____/_/\_, /_//_/_/\_\
+        /___/ v0.6.1 on NodeMCU
+
+[4431] BlynkArduinoClient.connect: Connecting to account.duckdns.org:8080  <= Try Server
+[5125] Ready (ping: 5ms).                                           <= Connected to Server
+[5125] Free RAM: 41024
+[5192] Connected to Blynk Server = account.duckdns.org, Token = token
+[5192] bg: WiFi+Blynk OK
+
+Blynk ESP8288 using EEPROM connected. Board Name : ESP8266-BlynkWM-v1.0.11
+EEPROM size = 4096 bytes, EEPROM start address = 0 / 0x0
+Your stored Credentials :
+MQTT Server = mqtt.duckdns.org
+Port = 1883
+MQTT UserName = mqtt-username
+MQTT PWD = mqtt-pass
+Subs Topics = SubsTopic1
+Pubs Topics = PubsTopic1
+BRBRBRBRBRBRBRBRBRBR BRBRBRBRBR
 [101232] run: WiFi lost. Reconnect WiFi+Blynk                           <= Lost SSID
 [101232] Connecting MultiWifi...
 [106316] WiFi connected after time: 1
@@ -237,9 +398,276 @@ void loop()
 }
 ```
 
+## Example
+Please take a look at examples, as well.
+
+```cpp
+#ifndef ESP8266
+#error This code is intended to run on the ESP8266 platform! Please check your Tools->Board setting.
+#endif
+
+#define BLYNK_PRINT Serial
+
+// Not use #define USE_SPIFFS  => using EEPROM for configuration data in WiFiManager
+// #define USE_SPIFFS    false => using EEPROM for configuration data in WiFiManager
+// #define USE_SPIFFS    true  => using SPIFFS for configuration data in WiFiManager
+// Be sure to define USE_SPIFFS before #include <BlynkSimpleEsp8266_WM.h>
+
+//#define USE_SPIFFS                  true
+#define USE_SPIFFS                  false
+
+#if (!USE_SPIFFS)
+// EEPROM_SIZE must be <= 4096 and >= CONFIG_DATA_SIZE (currently 172 bytes)
+#define EEPROM_SIZE    (4 * 1024)
+// EEPROM_START + CONFIG_DATA_SIZE must be <= EEPROM_SIZE
+#define EEPROM_START  0
+#endif
+
+// Force some params in Blynk, only valid for library version 1.0.1 and later
+#define TIMEOUT_RECONNECT_WIFI                    10000L
+#define RESET_IF_CONFIG_TIMEOUT                   true
+#define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET    5
+// Those above #define's must be placed before #include <BlynkSimpleEsp8266_WM.h>
+
+//#define USE_SSL   true
+#define USE_SSL   false
+
+#if USE_SSL
+#include <BlynkSimpleEsp8266_SSL_WM.h>
+#else
+#include <BlynkSimpleEsp8266_WM.h>
+#endif
+
+#define USE_DYNAMIC_PARAMETERS      true
+
+/////////////// Start dynamic Credentials ///////////////
+
+//Defined in <BlynkSimpleEsp32_GSM_WFM.h>
+/**************************************
+  #define MAX_ID_LEN                5
+  #define MAX_DISPLAY_NAME_LEN      16
+
+  typedef struct
+  {
+  char id             [MAX_ID_LEN + 1];
+  char displayName    [MAX_DISPLAY_NAME_LEN + 1];
+  char *pdata;
+  uint8_t maxlen;
+  } MenuItem;
+**************************************/
+
+#if USE_DYNAMIC_PARAMETERS
+
+#define MAX_MQTT_SERVER_LEN      34
+char MQTT_Server  [MAX_MQTT_SERVER_LEN]   = "";
+
+#define MAX_MQTT_PORT_LEN        6
+char MQTT_Port   [MAX_MQTT_PORT_LEN]  = "";
+
+#define MAX_MQTT_USERNAME_LEN      34
+char MQTT_UserName  [MAX_MQTT_USERNAME_LEN]   = "";
+
+#define MAX_MQTT_PW_LEN        34
+char MQTT_PW   [MAX_MQTT_PW_LEN]  = "";
+
+#define MAX_MQTT_SUBS_TOPIC_LEN      34
+char MQTT_SubsTopic  [MAX_MQTT_SUBS_TOPIC_LEN]   = "";
+
+#define MAX_MQTT_PUB_TOPIC_LEN       34
+char MQTT_PubTopic   [MAX_MQTT_PUB_TOPIC_LEN]  = "";
+
+MenuItem myMenuItems [] =
+{
+  { "mqtt", "MQTT Server",      MQTT_Server,      MAX_MQTT_SERVER_LEN },
+  { "mqpt", "Port",             MQTT_Port,        MAX_MQTT_PORT_LEN   },
+  { "user", "MQTT UserName",    MQTT_UserName,    MAX_MQTT_USERNAME_LEN },
+  { "mqpw", "MQTT PWD",         MQTT_PW,          MAX_MQTT_PW_LEN },
+  { "subs", "Subs Topics",      MQTT_SubsTopic,   MAX_MQTT_SUBS_TOPIC_LEN },
+  { "pubs", "Pubs Topics",      MQTT_PubTopic,    MAX_MQTT_PUB_TOPIC_LEN },
+};
+
+#else
+
+MenuItem myMenuItems [] = {};
+
+#endif
+
+uint16_t NUM_MENU_ITEMS = sizeof(myMenuItems) / sizeof(MenuItem);  //MenuItemSize;
+/////// // End dynamic Credentials ///////////
+
+#include <Ticker.h>
+#include <DHT.h>
+
+#define PIN_LED   2   // Pin D4 mapped to pin GPIO2/TXD1 of ESP8266, NodeMCU and WeMoS, control on-board LED
+#define PIN_D2    4   // Pin D2 mapped to pin GPIO4 of ESP8266
+
+#define DHT_PIN     PIN_D2
+#define DHT_TYPE    DHT11
+
+DHT dht(DHT_PIN, DHT_TYPE);
+BlynkTimer timer;
+Ticker     led_ticker;
+
+void readAndSendData()
+{
+  float temperature = dht.readTemperature();
+  float humidity    = dht.readHumidity();
+
+  if (Blynk.connected())
+  {
+    if (!isnan(temperature) && !isnan(humidity))
+    {
+      Blynk.virtualWrite(V17, String(temperature, 1));
+      Blynk.virtualWrite(V18, String(humidity, 1));
+    }
+    else
+    {
+      Blynk.virtualWrite(V17, "NAN");
+      Blynk.virtualWrite(V18, "NAN");
+    }
+  }
+
+  // Blynk Timer uses millis() and is still working even if WiFi/Blynk not connected
+  Serial.print("R");
+}
+
+void set_led(byte status)
+{
+  digitalWrite(LED_BUILTIN, status);
+}
+
+void heartBeatPrint(void)
+{
+  static int num = 1;
+
+  if (Blynk.connected())
+  {
+    set_led(LOW);
+    led_ticker.once_ms(111, set_led, (byte) HIGH);
+    Serial.print("B");
+  }
+  else
+  {
+    Serial.print("F");
+  }
+
+  if (num == 80)
+  {
+    Serial.println();
+    num = 1;
+  }
+  else if (num++ % 10 == 0)
+  {
+    Serial.print(" ");
+  }
+}
+
+void check_status()
+{
+  static unsigned long checkstatus_timeout = 0;
+
+#define STATUS_CHECK_INTERVAL     60000L
+
+  // Send status report every STATUS_REPORT_INTERVAL (60) seconds: we don't need to send updates frequently if there is no status change.
+  if ((millis() > checkstatus_timeout) || (checkstatus_timeout == 0))
+  {
+    // report status to Blynk
+    heartBeatPrint();
+
+    checkstatus_timeout = millis() + STATUS_CHECK_INTERVAL;
+  }
+}
+
+void setup()
+{
+  // Debug console
+  Serial.begin(115200);
+  while (!Serial);
+  
+  pinMode(PIN_LED, OUTPUT);
+
+  Serial.println("\nStarting ...");
+
+  dht.begin();
+
+  // From v1.0.5
+  // Set config portal SSID and Password
+  Blynk.setConfigPortal("TestPortal-ESP8266", "TestPortalPass");
+  // Set config portal IP address
+  Blynk.setConfigPortalIP(IPAddress(192, 168, 200, 1));
+
+  // From v1.0.5, select either one of these to set static IP + DNS
+  Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 220), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0));
+  //Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 220), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0),
+  //                           IPAddress(192, 168, 2, 1), IPAddress(8, 8, 8, 8));
+  //Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 220), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0),
+  //                           IPAddress(4, 4, 4, 4), IPAddress(8, 8, 8, 8));
+
+  // Use this to default DHCP hostname to ESP8266-XXXXXX or ESP32-XXXXXX
+  //Blynk.begin();
+  // Use this to personalize DHCP hostname (RFC952 conformed)
+  // 24 chars max,- only a..z A..Z 0..9 '-' and no '-' as last char
+  Blynk.begin("ESP8266-WM-Config");
+
+  timer.setInterval(60 * 1000, readAndSendData);
+
+  if (Blynk.connected())
+  {
+#if USE_SPIFFS
+    Serial.println("\nBlynk ESP8288 using SPIFFS connected. Board Name : " + Blynk.getBoardName());
+#else
+    {
+      Serial.println("\nBlynk ESP8288 using EEPROM connected. Board Name : " + Blynk.getBoardName());
+      Serial.printf("EEPROM size = %d bytes, EEPROM start address = %d / 0x%X\n", EEPROM_SIZE, EEPROM_START, EEPROM_START);
+    }
+#endif
+  }
+}
+
+#if USE_DYNAMIC_PARAMETERS
+void displayCredentials(void)
+{
+  Serial.println("Your stored Credentials :");
+
+  for (int i = 0; i < NUM_MENU_ITEMS; i++)
+  {
+    Serial.println(String(myMenuItems[i].displayName) + " = " + myMenuItems[i].pdata);
+  }
+}
+#endif
+
+void loop()
+{
+  Blynk.run();
+  timer.run();
+  check_status();
+
+#if USE_DYNAMIC_PARAMETERS
+  static bool displayedCredentials = false;
+
+  if (!displayedCredentials)
+  {
+    for (int i = 0; i < NUM_MENU_ITEMS; i++)
+    {
+      if (!strlen(myMenuItems[i].pdata))
+      {
+        break;
+      }
+
+      if ( i == (NUM_MENU_ITEMS - 1) )
+      {
+        displayedCredentials = true;
+        displayCredentials();
+      }
+    }
+  }
+#endif  
+}
+```
+
 ## TO DO
 
-1. Dynamic custom parameters in Config Portal, similar to [BlynkGSM_Manager](https://github.com/khoih-prog/BlynkGSM_Manager)
+1. Fix bug. Add enhancement
 
 ## DONE
 
@@ -255,70 +683,14 @@ void loop()
 10. Add checksum for more reliable data
 11. Add MultiWiFi feature to enable reconnect to the best / available WiFi AP.
 12. Add MultiBlynk feature to enable reconnect to the best / available Blynk Server.
+13. WiFi Password max length is 63, as in WPA2 standards
+14. Permit to input special chars such as ***%*** and ***#*** into data fields.
+15. Add Dynamic Parameters with checksum
 
-## Example
-Please take a look at examples, as well.
-```
-#define BLYNK_PRINT Serial
+### Releases v1.0.11
 
-// Not use #define USE_SPIFFS  => using EEPROM for configuration data in WiFiManager
-// #define USE_SPIFFS    false => using EEPROM for configuration data in WiFiManager
-// #define USE_SPIFFS    true  => using SPIFFS for configuration data in WiFiManager
-// Be sure to define USE_SPIFFS before #include <BlynkSimpleEsp8266_WM.h>
-
-//#define USE_SPIFFS                  true
-#define USE_SPIFFS                  false
-
-#if (!USE_SPIFFS)
-  // EEPROM_SIZE must be <= 4096 and >= CONFIG_DATA_SIZE (currently 172 bytes)
-  #define EEPROM_SIZE    (4 * 1024)
-  // EEPROM_START + CONFIG_DATA_SIZE must be <= EEPROM_SIZE
-  #define EEPROM_START   1024
-#endif
-
-// Force some params in Blynk, only valid for library version 1.0.1 and later
-#define TIMEOUT_RECONNECT_WIFI                    10000L
-#define RESET_IF_CONFIG_TIMEOUT                   true
-#define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET    5
-// Those above #define's must be placed before #include <BlynkSimpleEsp8266_WM.h>
-
-#define USE_SSL   false
-
-#if USE_SSL
-  #include <BlynkSimpleEsp8266_SSL_WM.h>
-#else
-  #include <BlynkSimpleEsp8266_WM.h>
-#endif
-
-void setup() 
-{
-    ....
-    
-    // From v1.0.5
-    // Set config portal SSID and Password
-    Blynk.setConfigPortal("TestPortal", "TestPortalPass");
-    // Set config portal IP address
-    Blynk.setConfigPortalIP(IPAddress(192, 168, 220, 1));
-
-    // From v1.0.5, select either one of these to set static IP + DNS
-    Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 230), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0));
-    //Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 220), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0), 
-    //                           IPAddress(192, 168, 2, 1), IPAddress(8, 8, 8, 8));
-    //Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 220), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0), 
-    //                           IPAddress(4, 4, 4, 4), IPAddress(8, 8, 8, 8));
-    
-  // Use this to default DHCP hostname to ESP8266-XXXXXX or ESP32-XXXXXX
-  //Blynk.begin();
-  // Use this to personalize DHCP hostname (RFC952 conformed)
-  // 24 chars max,- only a..z A..Z 0..9 '-' and no '-' as last char
-  Blynk.begin("Personalized-HostName");
-}
-
-void loop() 
-{
-    Blynk.run();
-}
-```
+1. New ***powerful-yet-simple-to-use feature to enable adding dynamic custom parameters*** from sketch and input using the same Config Portal. Config Portal will be auto-adjusted to match the number of dynamic parameters.
+2. Dynamic custom parameters to be saved ***automatically in EEPROM, or SPIFFS***.
 
 ### Releases v1.0.10
 

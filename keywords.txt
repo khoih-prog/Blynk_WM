@@ -15,7 +15,7 @@ BlynkParam	KEYWORD1
 BlynkParamAllocated	KEYWORD1
 WiFi_Credentials  KEYWORD1
 Blynk_Credentials KEYWORD1
-Blynk_WF_Configuration  KEYWORD1
+Blynk_WM_Configuration  KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
@@ -44,11 +44,12 @@ startConfigurationMode  KEYWORD2
 setHostname KEYWORD2
 setConfigPortalIP KEYWORD2
 setConfigPortal KEYWORD2
+setConfigPortalChannel  KEYWORD2
 setSTAStaticIPConfig  KEYWORD2
+getWiFiSSID KEYWORD2
+getWiFiPW KEYWORD2
 getServerName KEYWORD2
 getToken  KEYWORD2
-getBlynkBTToken KEYWORD2
-getBlynkBLEToken  KEYWORD2
 getBoardName  KEYWORD2
 getHWPort KEYWORD2
 getFullConfigData KEYWORD2
