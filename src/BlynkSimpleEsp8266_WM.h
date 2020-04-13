@@ -7,7 +7,7 @@
    Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
    Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
    Licensed under MIT license
-   Version: 1.0.11
+   Version: 1.0.12
 
    Original Blynk Library author:
    @file       BlynkSimpleEsp8266.h
@@ -31,7 +31,7 @@
     1.0.9   K Hoang      12/03/2020 Enhance Config Portal GUI
     1.0.10  K Hoang      08/04/2020 SSID password maxlen is 63 now. Permit special chars # and % in input data.
     1.0.11  K Hoang      09/04/2020 Enable adding dynamic custom parameters from sketch
- *****************************************************************************************************************************/
+    1.0.12  K Hoang      13/04/2020 Fix MultiWiFi/Blynk bug introduced in broken v1.0.11 *****************************************************************************************************************************/
 
 
 #ifndef BlynkSimpleEsp8266_WM_h
@@ -686,8 +686,12 @@ class BlynkWifi
         char* _pointer = myMenuItems[i].pdata;
         totalDataSize += myMenuItems[i].maxlen;
         
+        // Actual size of pdata is [maxlen + 1]
+        memset(myMenuItems[i].pdata, 0, myMenuItems[i].maxlen + 1);
+        
         file.readBytes(_pointer, myMenuItems[i].maxlen);
-               
+        
+              
         for (uint16_t j = 0; j < myMenuItems[i].maxlen; j++,_pointer++)
         {         
           checkSum += *_pointer;  
@@ -885,7 +889,8 @@ class BlynkWifi
 
         for (int i = 0; i < NUM_MENU_ITEMS; i++)
         {
-          memset(myMenuItems[i].pdata, 0, myMenuItems[i].maxlen);
+          // Actual size of pdata is [maxlen + 1]
+          memset(myMenuItems[i].pdata, 0, myMenuItems[i].maxlen + 1);
         }
 
         BLYNK_LOG2(BLYNK_F("InitCfgFile,sz="), sizeof(Blynk8266_WM_config));
@@ -905,7 +910,7 @@ class BlynkWifi
         
         for (int i = 0; i < NUM_MENU_ITEMS; i++)
         {
-          strncpy(myMenuItems[i].pdata, NO_CONFIG, myMenuItems[i].maxlen - 1);
+          strncpy(myMenuItems[i].pdata, NO_CONFIG, myMenuItems[i].maxlen);
         }
         
         // Don't need
@@ -972,6 +977,9 @@ class BlynkWifi
       {       
         char* _pointer = myMenuItems[i].pdata;
         totalDataSize += myMenuItems[i].maxlen;
+        
+        // Actual size of pdata is [maxlen + 1]
+        memset(myMenuItems[i].pdata, 0, myMenuItems[i].maxlen + 1);
                
         for (uint16_t j = 0; j < myMenuItems[i].maxlen; j++,_pointer++,offset++)
         {
@@ -1042,7 +1050,8 @@ class BlynkWifi
 
         for (int i = 0; i < NUM_MENU_ITEMS; i++)
         {
-          memset(myMenuItems[i].pdata, 0, myMenuItems[i].maxlen);
+          // Actual size of pdata is [maxlen + 1]
+          memset(myMenuItems[i].pdata, 0, myMenuItems[i].maxlen + 1);
         }
         
         // Including Credentials CSum
@@ -1063,7 +1072,7 @@ class BlynkWifi
         
         for (int i = 0; i < NUM_MENU_ITEMS; i++)
         {
-          strncpy(myMenuItems[i].pdata, NO_CONFIG, myMenuItems[i].maxlen - 1);
+          strncpy(myMenuItems[i].pdata, NO_CONFIG, myMenuItems[i].maxlen);
         }
         
         // Don't need
@@ -1120,8 +1129,8 @@ class BlynkWifi
 
         if (connect(BLYNK_CONNECT_TIMEOUT_MS) )
         {
-          BLYNK_LOG4(BLYNK_F("Connected to Blynk Server = "), Blynk8266_WM_config.Blynk_Creds[i].blynk_server,
-                     BLYNK_F(", Token = "), Blynk8266_WM_config.Blynk_Creds[i].blynk_token);
+          BLYNK_LOG4(BLYNK_F("Connected to BlynkServer="), Blynk8266_WM_config.Blynk_Creds[i].blynk_server,
+                     BLYNK_F(",Token="), Blynk8266_WM_config.Blynk_Creds[i].blynk_token);
           return true;
         }
       }
@@ -1140,20 +1149,11 @@ class BlynkWifi
       uint8_t status;
       BLYNK_LOG1(BLYNK_F("Connecting MultiWifi..."));
 
-      //WiFi.mode(WIFI_STA);
+      WiFi.mode(WIFI_STA);
+      
       //New v1.0.11
       setHostname();
-      
-      /// New from Blynk_WM v1.0.5
-      if (static_IP != IPAddress(0, 0, 0, 0))
-      {
-        BLYNK_LOG1(BLYNK_F("UseStatIP"));
-        WiFi.config(static_IP, static_GW, static_SN, static_DNS1, static_DNS2);
-      }
-      
-      BLYNK_LOG1(BLYNK_F("con2WF:start"));
-      ///
-      
+           
       int i = 0;
       status = wifiMulti.run();
       delay(WIFI_MULTI_CONNECT_WAITING_MS);
@@ -1171,8 +1171,8 @@ class BlynkWifi
       if ( status == WL_CONNECTED )
       {
         BLYNK_LOG2(BLYNK_F("WiFi connected after time: "), i);
-        BLYNK_LOG4(BLYNK_F("SSID: "), WiFi.SSID(), BLYNK_F(", RSSI = "), WiFi.RSSI());
-        BLYNK_LOG4(BLYNK_F("Channel: "), WiFi.channel(), BLYNK_F(", IP address: "), WiFi.localIP() );
+        BLYNK_LOG4(BLYNK_F("SSID="), WiFi.SSID(), BLYNK_F(",RSSI="), WiFi.RSSI());
+        BLYNK_LOG4(BLYNK_F("Channel="), WiFi.channel(), BLYNK_F(",IP="), WiFi.localIP() );
       }
       else
         BLYNK_LOG1(BLYNK_F("WiFi not connected"));
@@ -1181,9 +1181,7 @@ class BlynkWifi
     }
 
     // NEW
-    String root_html_template;
-       
-    String createHTML(void)
+    void createHTML(String &root_html_template)
     {
       String pitem;
       
@@ -1213,7 +1211,7 @@ class BlynkWifi
       
       root_html_template += String(BLYNK_WM_HTML_SCRIPT_END) + BLYNK_WM_HTML_END;
       
-      return root_html_template;     
+      return;     
     }
     ////
     
@@ -1228,7 +1226,8 @@ class BlynkWifi
 
         if (key == "" && value == "")
         {
-          String result = createHTML();
+          String result;
+          createHTML(result);
 
           //BLYNK_LOG1(BLYNK_F("h:repl"));
 
@@ -1349,10 +1348,13 @@ class BlynkWifi
             //BLYNK_LOG4(F("h:"), myMenuItems[i].id, F("="), value.c_str() );
             number_items_Updated++;
 
-            if ((int) strlen(value.c_str()) < myMenuItems[i].maxlen - 1)
+            // Actual size of pdata is [maxlen + 1]
+            memset(myMenuItems[i].pdata, 0, myMenuItems[i].maxlen + 1);
+
+            if ((int) strlen(value.c_str()) < myMenuItems[i].maxlen)
               strcpy(myMenuItems[i].pdata, value.c_str());
             else
-              strncpy(myMenuItems[i].pdata, value.c_str(), myMenuItems[i].maxlen - 1);
+              strncpy(myMenuItems[i].pdata, value.c_str(), myMenuItems[i].maxlen);
           }
         }
         

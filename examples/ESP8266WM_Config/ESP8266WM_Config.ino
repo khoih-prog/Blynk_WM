@@ -7,7 +7,7 @@
    Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
    Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
    Licensed under MIT license
-   Version: 1.0.11
+   Version: 1.0.12
 
    Original Blynk Library author:
    @file       BlynkSimpleEsp8266.h
@@ -31,6 +31,7 @@
     1.0.9   K Hoang      12/03/2020 Enhance Config Portal GUI
     1.0.10  K Hoang      08/04/2020 SSID password maxlen is 63 now. Permit special chars # and % in input data.
     1.0.11  K Hoang      09/04/2020 Enable adding dynamic custom parameters from sketch
+    1.0.12  K Hoang      13/04/2020 Fix MultiWiFi/Blynk bug introduced in broken v1.0.11
  *****************************************************************************************************************************/
 
 #ifndef ESP8266
@@ -60,8 +61,8 @@
 #define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET    5
 // Those above #define's must be placed before #include <BlynkSimpleEsp8266_WM.h>
 
-//#define USE_SSL   true
-#define USE_SSL   false
+#define USE_SSL   true
+//#define USE_SSL   false
 
 #if USE_SSL
 #include <BlynkSimpleEsp8266_SSL_WM.h>
@@ -69,7 +70,7 @@
 #include <BlynkSimpleEsp8266_WM.h>
 #endif
 
-#define USE_DYNAMIC_PARAMETERS      true
+#define USE_DYNAMIC_PARAMETERS     true
 
 /////////////// Start dynamic Credentials ///////////////
 
@@ -90,22 +91,22 @@
 #if USE_DYNAMIC_PARAMETERS
 
 #define MAX_MQTT_SERVER_LEN      34
-char MQTT_Server  [MAX_MQTT_SERVER_LEN]   = "";
+char MQTT_Server  [MAX_MQTT_SERVER_LEN + 1]   = "";
 
 #define MAX_MQTT_PORT_LEN        6
-char MQTT_Port   [MAX_MQTT_PORT_LEN]  = "";
+char MQTT_Port   [MAX_MQTT_PORT_LEN + 1]  = "";
 
 #define MAX_MQTT_USERNAME_LEN      34
-char MQTT_UserName  [MAX_MQTT_USERNAME_LEN]   = "";
+char MQTT_UserName  [MAX_MQTT_USERNAME_LEN + 1]   = "";
 
 #define MAX_MQTT_PW_LEN        34
-char MQTT_PW   [MAX_MQTT_PW_LEN]  = "";
+char MQTT_PW   [MAX_MQTT_PW_LEN + 1]  = "";
 
 #define MAX_MQTT_SUBS_TOPIC_LEN      34
-char MQTT_SubsTopic  [MAX_MQTT_SUBS_TOPIC_LEN]   = "";
+char MQTT_SubsTopic  [MAX_MQTT_SUBS_TOPIC_LEN + 1]   = "";
 
 #define MAX_MQTT_PUB_TOPIC_LEN       34
-char MQTT_PubTopic   [MAX_MQTT_PUB_TOPIC_LEN]  = "";
+char MQTT_PubTopic   [MAX_MQTT_PUB_TOPIC_LEN + 1]  = "";
 
 MenuItem myMenuItems [] =
 {
@@ -117,13 +118,16 @@ MenuItem myMenuItems [] =
   { "pubs", "Pubs Topics",      MQTT_PubTopic,    MAX_MQTT_PUB_TOPIC_LEN },
 };
 
+uint16_t NUM_MENU_ITEMS = sizeof(myMenuItems) / sizeof(MenuItem);  //MenuItemSize;
+
 #else
 
 MenuItem myMenuItems [] = {};
 
+uint16_t NUM_MENU_ITEMS = 0;
 #endif
 
-uint16_t NUM_MENU_ITEMS = sizeof(myMenuItems) / sizeof(MenuItem);  //MenuItemSize;
+
 /////// // End dynamic Credentials ///////////
 
 #include <Ticker.h>
@@ -214,7 +218,7 @@ void setup()
   // Debug console
   Serial.begin(115200);
   while (!Serial);
-  
+
   pinMode(PIN_LED, OUTPUT);
 
   Serial.println("\nStarting ...");
@@ -258,7 +262,7 @@ void setup()
 #if USE_DYNAMIC_PARAMETERS
 void displayCredentials(void)
 {
-  Serial.println("Your stored Credentials :");
+  Serial.println("\nYour stored Credentials :");
 
   for (int i = 0; i < NUM_MENU_ITEMS; i++)
   {
@@ -292,5 +296,5 @@ void loop()
       }
     }
   }
-#endif  
+#endif
 }

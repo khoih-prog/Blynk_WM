@@ -2,16 +2,18 @@
 
 [![arduino-library-badge](https://www.ardu-badge.com/badge/Blynk_WiFiManager.svg?)](https://www.ardu-badge.com/Blynk_WiFiManager)
 
-### ImportantNote
-
-***This Release v1.0.11 is broken now. Please use v1.0.10 and soon-to-be-released v1.0.12***
-
 I'm inspired by [`EasyBlynk8266`](https://github.com/Barbayar/EasyBlynk8266)
 This is a Blynk and WiFiManager Library for configuring/auto(re)connecting ESP8266/ESP32 modules to the best or available MultiWiFi APs and MultiBlynk servers at runtime. Connection is with or without SSL. Configuration data to be saved in either SPIFFS or EEPROM.
  
 To help you to eliminate `hardcoding` your Wifi and Blynk credentials for ESP8266 and ESP32 (with / wwithout SSL), and updating/reflashing every time when you need to change them.
 
+### Releases v1.0.12
+
+1. Fix severe bug in v1.0.11
+
 ### Releases v1.0.11
+
+#### Severe connecting bug. Don't use
 
 1. New ***powerful-yet-simple-to-use feature to enable adding dynamic custom parameters*** from sketch and input using the same Config Portal. Config Portal will be auto-adjusted to match the number of dynamic parameters.
 2. Dynamic custom parameters to be saved ***automatically in EEPROM, or SPIFFS***.
@@ -159,9 +161,11 @@ Then click `Save`. The system will auto-restart. You will see the board's built-
 - To add custom parameters, just modify from the example below
 
 ```
+#define USE_DYNAMIC_PARAMETERS     true
+
 /////////////// Start dynamic Credentials ///////////////
 
-//Defined in <BlynkSimpleEsp32_GSM_WFM.h>
+//Defined in <BlynkSimpleEsp8266_WM.h> and <BlynkSimpleEsp8266_SSL_WM.h>
 /**************************************
   #define MAX_ID_LEN                5
   #define MAX_DISPLAY_NAME_LEN      16
@@ -175,23 +179,25 @@ Then click `Save`. The system will auto-restart. You will see the board's built-
   } MenuItem;
 **************************************/
 
+#if USE_DYNAMIC_PARAMETERS
+
 #define MAX_MQTT_SERVER_LEN      34
-char MQTT_Server  [MAX_MQTT_SERVER_LEN]   = "";
+char MQTT_Server  [MAX_MQTT_SERVER_LEN + 1]   = "";
 
 #define MAX_MQTT_PORT_LEN        6
-char MQTT_Port   [MAX_MQTT_PORT_LEN]  = "";
+char MQTT_Port   [MAX_MQTT_PORT_LEN + 1]  = "";
 
 #define MAX_MQTT_USERNAME_LEN      34
-char MQTT_UserName  [MAX_MQTT_USERNAME_LEN]   = "";
+char MQTT_UserName  [MAX_MQTT_USERNAME_LEN + 1]   = "";
 
 #define MAX_MQTT_PW_LEN        34
-char MQTT_PW   [MAX_MQTT_PW_LEN]  = "";
+char MQTT_PW   [MAX_MQTT_PW_LEN + 1]  = "";
 
 #define MAX_MQTT_SUBS_TOPIC_LEN      34
-char MQTT_SubsTopic  [MAX_MQTT_SUBS_TOPIC_LEN]   = "";
+char MQTT_SubsTopic  [MAX_MQTT_SUBS_TOPIC_LEN + 1]   = "";
 
 #define MAX_MQTT_PUB_TOPIC_LEN       34
-char MQTT_PubTopic   [MAX_MQTT_PUB_TOPIC_LEN]  = "";
+char MQTT_PubTopic   [MAX_MQTT_PUB_TOPIC_LEN + 1]  = "";
 
 MenuItem myMenuItems [] =
 {
@@ -204,17 +210,32 @@ MenuItem myMenuItems [] =
 };
 
 uint16_t NUM_MENU_ITEMS = sizeof(myMenuItems) / sizeof(MenuItem);  //MenuItemSize;
+
+#else
+
+MenuItem myMenuItems [] = {};
+
+uint16_t NUM_MENU_ITEMS = 0;
+#endif
+
+
 /////// // End dynamic Credentials ///////////
 
 ```
 - If you don't need to add dynamic parameters, use the following in sketch
 
 ```
+#define USE_DYNAMIC_PARAMETERS     false
+```
+
+or
+
+```
 /////////////// Start dynamic Credentials ///////////////
 
 MenuItem myMenuItems [] = {};
 
-uint16_t NUM_MENU_ITEMS = sizeof(myMenuItems) / sizeof(MenuItem);  //MenuItemSize;
+uint16_t NUM_MENU_ITEMS = 0;
 /////// // End dynamic Credentials ///////////
 
 ```
@@ -442,11 +463,11 @@ Please take a look at examples, as well.
 #include <BlynkSimpleEsp8266_WM.h>
 #endif
 
-#define USE_DYNAMIC_PARAMETERS      true
+#define USE_DYNAMIC_PARAMETERS     true
 
 /////////////// Start dynamic Credentials ///////////////
 
-//Defined in <BlynkSimpleEsp32_GSM_WFM.h>
+//Defined in <BlynkSimpleEsp8266_WM.h> and <BlynkSimpleEsp8266_SSL_WM.h>
 /**************************************
   #define MAX_ID_LEN                5
   #define MAX_DISPLAY_NAME_LEN      16
@@ -463,22 +484,22 @@ Please take a look at examples, as well.
 #if USE_DYNAMIC_PARAMETERS
 
 #define MAX_MQTT_SERVER_LEN      34
-char MQTT_Server  [MAX_MQTT_SERVER_LEN]   = "";
+char MQTT_Server  [MAX_MQTT_SERVER_LEN + 1]   = "";
 
 #define MAX_MQTT_PORT_LEN        6
-char MQTT_Port   [MAX_MQTT_PORT_LEN]  = "";
+char MQTT_Port   [MAX_MQTT_PORT_LEN + 1]  = "";
 
 #define MAX_MQTT_USERNAME_LEN      34
-char MQTT_UserName  [MAX_MQTT_USERNAME_LEN]   = "";
+char MQTT_UserName  [MAX_MQTT_USERNAME_LEN + 1]   = "";
 
 #define MAX_MQTT_PW_LEN        34
-char MQTT_PW   [MAX_MQTT_PW_LEN]  = "";
+char MQTT_PW   [MAX_MQTT_PW_LEN + 1]  = "";
 
 #define MAX_MQTT_SUBS_TOPIC_LEN      34
-char MQTT_SubsTopic  [MAX_MQTT_SUBS_TOPIC_LEN]   = "";
+char MQTT_SubsTopic  [MAX_MQTT_SUBS_TOPIC_LEN + 1]   = "";
 
 #define MAX_MQTT_PUB_TOPIC_LEN       34
-char MQTT_PubTopic   [MAX_MQTT_PUB_TOPIC_LEN]  = "";
+char MQTT_PubTopic   [MAX_MQTT_PUB_TOPIC_LEN + 1]  = "";
 
 MenuItem myMenuItems [] =
 {
@@ -490,13 +511,16 @@ MenuItem myMenuItems [] =
   { "pubs", "Pubs Topics",      MQTT_PubTopic,    MAX_MQTT_PUB_TOPIC_LEN },
 };
 
+uint16_t NUM_MENU_ITEMS = sizeof(myMenuItems) / sizeof(MenuItem);  //MenuItemSize;
+
 #else
 
 MenuItem myMenuItems [] = {};
 
+uint16_t NUM_MENU_ITEMS = 0;
 #endif
 
-uint16_t NUM_MENU_ITEMS = sizeof(myMenuItems) / sizeof(MenuItem);  //MenuItemSize;
+
 /////// // End dynamic Credentials ///////////
 
 #include <Ticker.h>
@@ -691,7 +715,13 @@ void loop()
 14. Permit to input special chars such as ***%*** and ***#*** into data fields.
 15. Add Dynamic Parameters with checksum
 
+### Releases v1.0.12
+
+1. Fix severe bug in v1.0.11
+
 ### Releases v1.0.11
+
+#### Severe connecting bug. Don't use
 
 1. New ***powerful-yet-simple-to-use feature to enable adding dynamic custom parameters*** from sketch and input using the same Config Portal. Config Portal will be auto-adjusted to match the number of dynamic parameters.
 2. Dynamic custom parameters to be saved ***automatically in EEPROM, or SPIFFS***.

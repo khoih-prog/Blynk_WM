@@ -13,6 +13,7 @@ WidgetMap	KEYWORD1
 WidgetTable	KEYWORD1
 BlynkParam	KEYWORD1
 BlynkParamAllocated	KEYWORD1
+MenuItem  KEYWORD1
 WiFi_Credentials  KEYWORD1
 Blynk_Credentials KEYWORD1
 Blynk_WM_Configuration  KEYWORD1
