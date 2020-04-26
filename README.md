@@ -4,7 +4,7 @@
 [![GitHub release](https://img.shields.io/github/release/khoih-prog/Blynk_WM.svg)](https://github.com/khoih-prog/Blynk_WM/releases)
 [![GitHub](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/khoih-prog/Blynk_WiFiManager/blob/master/LICENSE)
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](#Contributing)
-[![GitHub issues](https://img.shields.io/github/issues/khoih-prog/Blynk_WiFiManager.svg)](http://github.com/khoih-prog/Blynk_WiFiManager/issues)
+[![GitHub issues](https://img.shields.io/github/issues/khoih-prog/Blynk_WM.svg)](http://github.com/khoih-prog/Blynk_WM/issues)
 
 I'm inspired by [`EasyBlynk8266`](https://github.com/Barbayar/EasyBlynk8266)
 
