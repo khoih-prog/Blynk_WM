@@ -7,7 +7,7 @@
    Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
    Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
    Licensed under MIT license
-   Version: 1.0.12
+   ersion: 1.0.13
 
    Original Blynk Library author:
    @file       BlynkSimpleEsp8266.h
@@ -32,90 +32,13 @@
     1.0.10  K Hoang      08/04/2020 SSID password maxlen is 63 now. Permit special chars # and % in input data.
     1.0.11  K Hoang      09/04/2020 Enable adding dynamic custom parameters from sketch
     1.0.12  K Hoang      13/04/2020 Fix MultiWiFi/Blynk bug introduced in broken v1.0.11
+    1.0.13  K Hoang      25/04/2020 Add Configurable Config Portal Title, Default Config Data and DRD. Update examples.
  *****************************************************************************************************************************/
 
-#ifndef ESP8266
-#error This code is intended to run on the ESP8266 platform! Please check your Tools->Board setting.
-#endif
-
-// Not use #define USE_SPIFFS  => using EEPROM for configuration data in WiFiManager
-// #define USE_SPIFFS    false => using EEPROM for configuration data in WiFiManager
-// #define USE_SPIFFS    true  => using SPIFFS for configuration data in WiFiManager
-// Be sure to define USE_SPIFFS before #include <BlynkSimpleEsp8266_WM.h>
-
-#define USE_SPIFFS    true
-
-#include <BlynkSimpleEsp8266_WM.h>
-
-#define USE_DYNAMIC_PARAMETERS      false
-
-/////////////// Start dynamic Credentials ///////////////
-
-//Defined in <BlynkSimpleEsp32_WM.h> and <BlynkSimpleEsp32_SSL_WM.h>
-/**************************************
-  #define MAX_ID_LEN                5
-  #define MAX_DISPLAY_NAME_LEN      16
-
-  typedef struct
-  {
-  char id             [MAX_ID_LEN + 1];
-  char displayName    [MAX_DISPLAY_NAME_LEN + 1];
-  char *pdata;
-  uint8_t maxlen;
-  } MenuItem;
-**************************************/
-
-#if USE_DYNAMIC_PARAMETERS
-
-#define MAX_MQTT_SERVER_LEN      34
-char MQTT_Server  [MAX_MQTT_SERVER_LEN + 1]   = "";
-
-#define MAX_MQTT_PORT_LEN        6
-char MQTT_Port   [MAX_MQTT_PORT_LEN + 1]  = "";
-
-#define MAX_MQTT_USERNAME_LEN      34
-char MQTT_UserName  [MAX_MQTT_USERNAME_LEN + 1]   = "";
-
-#define MAX_MQTT_PW_LEN        34
-char MQTT_PW   [MAX_MQTT_PW_LEN + 1]  = "";
-
-#define MAX_MQTT_SUBS_TOPIC_LEN      34
-char MQTT_SubsTopic  [MAX_MQTT_SUBS_TOPIC_LEN + 1]   = "";
-
-#define MAX_MQTT_PUB_TOPIC_LEN       34
-char MQTT_PubTopic   [MAX_MQTT_PUB_TOPIC_LEN + 1]  = "";
-
-MenuItem myMenuItems [] =
-{
-  { "mqtt", "MQTT Server",      MQTT_Server,      MAX_MQTT_SERVER_LEN },
-  { "mqpt", "Port",             MQTT_Port,        MAX_MQTT_PORT_LEN   },
-  { "user", "MQTT UserName",    MQTT_UserName,    MAX_MQTT_USERNAME_LEN },
-  { "mqpw", "MQTT PWD",         MQTT_PW,          MAX_MQTT_PW_LEN },
-  { "subs", "Subs Topics",      MQTT_SubsTopic,   MAX_MQTT_SUBS_TOPIC_LEN },
-  { "pubs", "Pubs Topics",      MQTT_PubTopic,    MAX_MQTT_PUB_TOPIC_LEN },
-};
-
-#else
-
-MenuItem myMenuItems [] = {};
-
-#endif
-
-uint16_t NUM_MENU_ITEMS = sizeof(myMenuItems) / sizeof(MenuItem);  //MenuItemSize;
-/////// // End dynamic Credentials ///////////
-
-#ifndef LED_BUILTIN
-#define LED_BUILTIN       2         // Pin D2 mapped to pin GPIO2/ADC12 of ESP32, control on-board LED
-#endif
+#include "defines.h"
 
 #include <Ticker.h>
 #include <DHT.h>
-
-#define PIN_LED   2   // Pin D4 mapped to pin GPIO2/TXD1 of ESP8266, NodeMCU and WeMoS, control on-board LED
-#define PIN_D2    4   // Pin D2 mapped to pin GPIO4 of ESP8266
-
-#define DHT_PIN     PIN_D2
-#define DHT_TYPE    DHT11
 
 DHT dht(DHT_PIN, DHT_TYPE);
 BlynkTimer timer;
@@ -195,11 +118,15 @@ void setup()
 
   dht.begin();
 
+#if USE_BLYNK_WM
+
   // From v1.0.5
   // Set config portal SSID and Password
   Blynk.setConfigPortal("TestPortal", "TestPortalPass");
   // Set config portal IP address
   Blynk.setConfigPortalIP(IPAddress(192, 168, 200, 1));
+  // Set config portal channel, defalut = 1. Use 0 => random channel from 1-13
+  Blynk.setConfigPortalChannel(0);
 
   // From v1.0.5, select either one of these to set static IP + DNS
   Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 220), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0));
@@ -212,24 +139,38 @@ void setup()
   //Blynk.begin();
   // Use this to personalize DHCP hostname (RFC952 conformed)
   // 24 chars max,- only a..z A..Z 0..9 '-' and no '-' as last char
-  Blynk.begin("DHT11-ESP8266");
+  //Blynk.begin("DHT11_ESP8266");
+  Blynk.begin(HOST_NAME);
+#else
+  WiFi.begin(ssid, pass);
+
+#if USE_LOCAL_SERVER
+  Blynk.config(auth, blynk_server, BLYNK_HARDWARE_PORT);
+#else
+  Blynk.config(auth);
+#endif
+
+  Blynk.connect();
+#endif
 
   timer.setInterval(60 * 1000, readAndSendData);
 
+#if USE_BLYNK_WM
   if (Blynk.connected())
   {
 #if USE_SPIFFS
-    Serial.println("\nBlynk ESP8288 using SPIFFS connected. Board Name : " + Blynk.getBoardName());
+    Serial.println("\nBlynk ESP32 using SPIFFS connected. Board Name : " + Blynk.getBoardName());
 #else
-    Serial.println("\nBlynk ESP8288 using EEPROM connected. Board Name : " + Blynk.getBoardName());
+    Serial.println("\nBlynk ESP32 using EEPROM connected. Board Name : " + Blynk.getBoardName());
 #endif
   }
+#endif  
 }
 
-#if USE_DYNAMIC_PARAMETERS
+#if (USE_BLYNK_WM && USE_DYNAMIC_PARAMETERS)
 void displayCredentials(void)
 {
-  Serial.println("Your stored Credentials :");
+  Serial.println("\nYour stored Credentials :");
 
   for (int i = 0; i < NUM_MENU_ITEMS; i++)
   {
@@ -244,7 +185,7 @@ void loop()
   timer.run();
   check_status();
 
-#if USE_DYNAMIC_PARAMETERS
+#if (USE_BLYNK_WM && USE_DYNAMIC_PARAMETERS)
   static bool displayedCredentials = false;
 
   if (!displayedCredentials)

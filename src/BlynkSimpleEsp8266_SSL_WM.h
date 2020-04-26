@@ -7,7 +7,7 @@
    Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
    Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
    Licensed under MIT license
-   Version: 1.0.12
+   Version: 1.0.13
 
    Original Blynk Library author:
    @file       BlynkSimpleEsp8266.h
@@ -32,6 +32,7 @@
     1.0.10  K Hoang      08/04/2020 SSID password maxlen is 63 now. Permit special chars # and % in input data.
     1.0.11  K Hoang      09/04/2020 Enable adding dynamic custom parameters from sketch
     1.0.12  K Hoang      13/04/2020 Fix MultiWiFi/Blynk bug introduced in broken v1.0.11
+    1.0.13  K Hoang      25/04/2020 Add Configurable Config Portal Title, Default Config Data and DRD. Update examples.
  *****************************************************************************************************************************/
 
 #ifndef BlynkSimpleEsp8266_SSL_WM_h
@@ -76,6 +77,41 @@ static const unsigned char BLYNK_DEFAULT_CERT_DER[] PROGMEM =
 #else
 #include <EEPROM.h>
 #endif
+
+///////// NEW for DRD /////////////
+// These defines must be put before #include <ESP_DoubleResetDetector.h>
+// to select where to store DoubleResetDetector's variable.
+// For ESP32, You must select one to be true (EEPROM or SPIFFS)
+// For ESP8266, You must select one to be true (RTC, EEPROM or SPIFFS)
+// Otherwise, library will use default EEPROM storage
+#define ESP8266_DRD_USE_RTC     false   //true
+
+#if USE_SPIFFS
+#define ESP_DRD_USE_EEPROM      false
+#define ESP_DRD_USE_SPIFFS      true
+#else
+#define ESP_DRD_USE_EEPROM      true
+#define ESP_DRD_USE_SPIFFS      false
+#endif
+
+#ifndef DOUBLERESETDETECTOR_DEBUG
+#define DOUBLERESETDETECTOR_DEBUG     false
+#endif
+
+#include <ESP_DoubleResetDetector.h>      //https://github.com/khoih-prog/ESP_DoubleResetDetector
+
+// Number of seconds after reset during which a
+// subseqent reset will be considered a double reset.
+#define DRD_TIMEOUT 10
+
+// RTC Memory Address for the DoubleResetDetector to use
+#define DRD_ADDRESS 0
+
+//DoubleResetDetector drd(DRD_TIMEOUT, DRD_ADDRESS);
+DoubleResetDetector* drd;
+
+///////// NEW for DRD /////////////
+
 
   template <typename Client>
 class BlynkArduinoClientSecure
@@ -153,7 +189,6 @@ class BlynkArduinoClientSecure
     const char* fingerprint;
 };
 
-//NEW
 #define MAX_ID_LEN                5
 #define MAX_DISPLAY_NAME_LEN      16
 
@@ -164,9 +199,7 @@ typedef struct
   char *pdata;
   uint8_t maxlen;
 } MenuItem;
-//
 
-///NEW
 extern uint16_t NUM_MENU_ITEMS;
 extern MenuItem myMenuItems [];
 
@@ -206,6 +239,10 @@ typedef struct Configuration
 // Currently CONFIG_DATA_SIZE  =  ( 48 + (96 * NUM_WIFI_CREDENTIALS) + (68 * NUM_BLYNK_CREDENTIALS) ) = 376
 
 uint16_t CONFIG_DATA_SIZE = sizeof(Blynk_WM_Configuration);
+
+///New from v1.0.13
+extern bool LOAD_DEFAULT_CONFIG_DATA;
+extern Blynk_WM_Configuration defaultConfig;
 
 //From v1.0.10, Permit special chars such as # and %
 
@@ -353,6 +390,23 @@ class BlynkWifi
       //Turn OFF
       pinMode(LED_BUILTIN, OUTPUT);
       digitalWrite(LED_BUILTIN, LED_OFF);
+      
+      //// New DRD ////
+      drd = new DoubleResetDetector(DRD_TIMEOUT, DRD_ADDRESS);  
+      bool noConfigPortal = true;
+   
+      if (drd->detectDoubleReset())
+      {
+#if ( BLYNK_WM_DEBUG > 1)      
+        BLYNK_LOG1(BLYNK_F("Double Reset Detected"));
+#endif        
+        noConfigPortal = false;
+      }
+      //// New DRD ////
+#if ( BLYNK_WM_DEBUG > 2)      
+      BLYNK_LOG1(BLYNK_F("======= Start Default Config Data ======="));
+      displayConfigData(defaultConfig);
+#endif
 
       WiFi.mode(WIFI_STA);
 
@@ -371,10 +425,21 @@ class BlynkWifi
       }
 
       BLYNK_LOG2(BLYNK_F("Hostname="), RFC952_hostname);
+      
+#if ( BLYNK_WM_DEBUG > 2)        
+        BLYNK_LOG1(noConfigPortal? BLYNK_F("bg: noConfigPortal = true") : BLYNK_F("bg: noConfigPortal = false"));
+#endif       
 
-      if (getConfigData())
+      //// New DRD ////
+      //  noConfigPortal when getConfigData() OK and no DRD'ed
+      if (getConfigData() && noConfigPortal)
+      //// New DRD ////
       {
         hadConfigData = true;
+
+#if ( BLYNK_WM_DEBUG > 2)        
+        BLYNK_LOG1(noConfigPortal? BLYNK_F("bg: noConfigPortal = true") : BLYNK_F("bg: noConfigPortal = false"));
+#endif
 
         for (int i = 0; i < NUM_WIFI_CREDENTIALS; i++)
         {
@@ -410,7 +475,9 @@ class BlynkWifi
       }
       else
       {
-        BLYNK_LOG1(BLYNK_F("bg: No configdat. Stay forever in config portal"));
+        BLYNK_LOG2(BLYNK_F("bg: Stay forever in config portal."), 
+                   noConfigPortal ? BLYNK_F("No configDat") : BLYNK_F("DRD detected"));
+          
         // failed to connect to Blynk server, will start configuration mode
         hadConfigData = false;
         startConfigurationMode();
@@ -454,6 +521,14 @@ class BlynkWifi
     void run()
     {
       static int retryTimes = 0;
+      
+      //// New DRD ////
+      // Call the double reset detector loop method every so often,
+      // so that it can recognise when the timeout expires.
+      // You can also call drd.stop() when you wish to no longer
+      // consider the next reset as a double reset.
+      drd->loop();
+      //// New DRD ////
 
       // Lost connection in running. Give chance to reconfig.
       if ( WiFi.status() != WL_CONNECTED || !this->connected() )
@@ -724,19 +799,20 @@ class BlynkWifi
       return RFC952_hostname;
     }
 
-    void displayConfigData(void)
+    void displayConfigData(Blynk_WM_Configuration configData)
     {
-      BLYNK_LOG4(BLYNK_F("Hdr="),       Blynk8266_WM_config.header,
-                 BLYNK_F(",BrdName="),  Blynk8266_WM_config.board_name);
-      BLYNK_LOG4(BLYNK_F("SSID="),      Blynk8266_WM_config.WiFi_Creds[0].wifi_ssid,
-                 BLYNK_F(",PW="),       Blynk8266_WM_config.WiFi_Creds[0].wifi_pw);
-      BLYNK_LOG4(BLYNK_F("SSID1="),     Blynk8266_WM_config.WiFi_Creds[1].wifi_ssid,
-                 BLYNK_F(",PW1="),      Blynk8266_WM_config.WiFi_Creds[1].wifi_pw);
-      BLYNK_LOG4(BLYNK_F("Server="),    Blynk8266_WM_config.Blynk_Creds[0].blynk_server,
-                 BLYNK_F(",Token="),    Blynk8266_WM_config.Blynk_Creds[0].blynk_token);
-      BLYNK_LOG4(BLYNK_F("Server1="),   Blynk8266_WM_config.Blynk_Creds[1].blynk_server,
-                 BLYNK_F(",Token1="),   Blynk8266_WM_config.Blynk_Creds[1].blynk_token);
-      BLYNK_LOG2(BLYNK_F("Port="),      Blynk8266_WM_config.blynk_port);
+      BLYNK_LOG4(BLYNK_F("Hdr="),       configData.header,
+                 BLYNK_F(",BrdName="),  configData.board_name);
+      BLYNK_LOG4(BLYNK_F("SSID="),      configData.WiFi_Creds[0].wifi_ssid,
+                 BLYNK_F(",PW="),       configData.WiFi_Creds[0].wifi_pw);
+      BLYNK_LOG4(BLYNK_F("SSID1="),     configData.WiFi_Creds[1].wifi_ssid,
+                 BLYNK_F(",PW1="),      configData.WiFi_Creds[1].wifi_pw);
+      BLYNK_LOG4(BLYNK_F("Server="),    configData.Blynk_Creds[0].blynk_server,
+                 BLYNK_F(",Token="),    configData.Blynk_Creds[0].blynk_token);
+      BLYNK_LOG4(BLYNK_F("Server1="),   configData.Blynk_Creds[1].blynk_server,
+                 BLYNK_F(",Token1="),   configData.Blynk_Creds[1].blynk_token);
+      BLYNK_LOG2(BLYNK_F("Port="),      configData.blynk_port);
+      BLYNK_LOG1(BLYNK_F("======= End Config Data ======="));
     }
 
     void displayWiFiData(void)
@@ -830,8 +906,9 @@ class BlynkWifi
       for (int i = 0; i < NUM_MENU_ITEMS; i++)
       {       
         char* _pointer = myMenuItems[i].pdata;
-        
-        //BLYNK_LOG4(F("pdata="), myMenuItems[i].pdata, F(",len="), myMenuItems[i].maxlen);
+#if ( BLYNK_WM_DEBUG > 2)        
+        BLYNK_LOG4(F("CW1:pdata="), myMenuItems[i].pdata, F(",len="), myMenuItems[i].maxlen);
+#endif
         
         if (file)
         {
@@ -869,8 +946,9 @@ class BlynkWifi
       {       
         char* _pointer = myMenuItems[i].pdata;
         
-        //BLYNK_LOG4(F("pdata="), myMenuItems[i].pdata, F(",len="), myMenuItems[i].maxlen);
-        
+#if ( BLYNK_WM_DEBUG > 2)        
+        BLYNK_LOG4(F("CW2:pdata="), myMenuItems[i].pdata, F(",len="), myMenuItems[i].maxlen);
+#endif        
         if (file)
         {
           file.write((uint8_t*) _pointer, myMenuItems[i].maxlen);         
@@ -978,6 +1056,9 @@ class BlynkWifi
       {
         // if config file exists, load
         loadConfigData();
+#if ( BLYNK_WM_DEBUG > 2)        
+        displayConfigData(Blynk8266_WM_config);
+#endif        
       }
 
       int calChecksum = calcChecksum();
@@ -985,39 +1066,64 @@ class BlynkWifi
       BLYNK_LOG4(BLYNK_F("CCSum=0x"), String(calChecksum, HEX),
                  BLYNK_F(",RCSum=0x"), String(Blynk8266_WM_config.checkSum, HEX));
 
-      //displayConfigData();
-      credDataValid = loadCredentials();
+      //displayConfigData(Blynk8266_WM_config);
+      if (LOAD_DEFAULT_CONFIG_DATA)
+      {
+        // Load default and assume it's OK
+        credDataValid = true;
+      }
+      else
+      {           
+        credDataValid = loadCredentials();  
+      }  
+      
 
       if ( (strncmp(Blynk8266_WM_config.header, BLYNK_BOARD_TYPE, strlen(BLYNK_BOARD_TYPE)) != 0) ||
            (calChecksum != Blynk8266_WM_config.checkSum) || !credDataValid )
-      {
-        memset(&Blynk8266_WM_config, 0, sizeof(Blynk8266_WM_config));
-        
-        for (int i = 0; i < NUM_MENU_ITEMS; i++)
-        {
-          // Actual size of pdata is [maxlen + 1]
-          memset(myMenuItems[i].pdata, 0, myMenuItems[i].maxlen + 1);
-        }
-
+      {       
+        // Including Credentials CSum
         BLYNK_LOG2(BLYNK_F("InitCfgFile,sz="), sizeof(Blynk8266_WM_config));
 
-        // doesn't have any configuration
-        strcpy(Blynk8266_WM_config.header,                        BLYNK_BOARD_TYPE);
-        strcpy(Blynk8266_WM_config.WiFi_Creds[0].wifi_ssid,       NO_CONFIG);
-        strcpy(Blynk8266_WM_config.WiFi_Creds[0].wifi_pw,         NO_CONFIG);
-        strcpy(Blynk8266_WM_config.WiFi_Creds[1].wifi_ssid,       NO_CONFIG);
-        strcpy(Blynk8266_WM_config.WiFi_Creds[1].wifi_pw,         NO_CONFIG);
-        strcpy(Blynk8266_WM_config.Blynk_Creds[0].blynk_server,   NO_CONFIG);
-        strcpy(Blynk8266_WM_config.Blynk_Creds[0].blynk_token,    NO_CONFIG);
-        strcpy(Blynk8266_WM_config.Blynk_Creds[1].blynk_server,   NO_CONFIG);
-        strcpy(Blynk8266_WM_config.Blynk_Creds[1].blynk_token,    NO_CONFIG);
-        Blynk8266_WM_config.blynk_port = BLYNK_SERVER_HARDWARE_PORT;
-        strcpy(Blynk8266_WM_config.board_name,       NO_CONFIG);
+        // doesn't have any configuration        
+        if (LOAD_DEFAULT_CONFIG_DATA)
+        {
+          memcpy(&Blynk8266_WM_config, &defaultConfig, sizeof(Blynk8266_WM_config));
+        }
+        else
+        {
+          memset(&Blynk8266_WM_config, 0, sizeof(Blynk8266_WM_config));
+
+          for (int i = 0; i < NUM_MENU_ITEMS; i++)
+          {
+            // Actual size of pdata is [maxlen + 1]
+            memset(myMenuItems[i].pdata, 0, myMenuItems[i].maxlen + 1);
+          }
+              
+          strcpy(Blynk8266_WM_config.WiFi_Creds[0].wifi_ssid,       NO_CONFIG);
+          strcpy(Blynk8266_WM_config.WiFi_Creds[0].wifi_pw,         NO_CONFIG);
+          strcpy(Blynk8266_WM_config.WiFi_Creds[1].wifi_ssid,       NO_CONFIG);
+          strcpy(Blynk8266_WM_config.WiFi_Creds[1].wifi_pw,         NO_CONFIG);
+          strcpy(Blynk8266_WM_config.Blynk_Creds[0].blynk_server,   NO_CONFIG);
+          strcpy(Blynk8266_WM_config.Blynk_Creds[0].blynk_token,    NO_CONFIG);
+          strcpy(Blynk8266_WM_config.Blynk_Creds[1].blynk_server,   NO_CONFIG);
+          strcpy(Blynk8266_WM_config.Blynk_Creds[1].blynk_token,    NO_CONFIG);
+          Blynk8266_WM_config.blynk_port = BLYNK_SERVER_HARDWARE_PORT;      
+          strcpy(Blynk8266_WM_config.board_name,       NO_CONFIG);
+          
+          for (int i = 0; i < NUM_MENU_ITEMS; i++)
+          {
+            strncpy(myMenuItems[i].pdata, NO_CONFIG, myMenuItems[i].maxlen);
+          }
+        }
+    
+        strcpy(Blynk8266_WM_config.header, BLYNK_BOARD_TYPE);
         
+        #if ( BLYNK_WM_DEBUG > 2)
         for (int i = 0; i < NUM_MENU_ITEMS; i++)
         {
-          strncpy(myMenuItems[i].pdata, NO_CONFIG, myMenuItems[i].maxlen);
+          BLYNK_LOG4(BLYNK_F("g:myMenuItems["), i, BLYNK_F("]="), myMenuItems[i].pdata );
         }
+        #endif
         
         // Don't need
         Blynk8266_WM_config.checkSum = 0;
@@ -1040,7 +1146,7 @@ class BlynkWifi
       }
       else
       {
-        displayConfigData();
+        displayConfigData(Blynk8266_WM_config);
       }
 
       return true;
@@ -1049,33 +1155,37 @@ class BlynkWifi
 #else
 
 #ifndef EEPROM_SIZE
-#define EEPROM_SIZE     512
+#define EEPROM_SIZE     1024
 #else
 #if (EEPROM_SIZE > 4096)
 #warning EEPROM_SIZE must be <= 4096. Reset to 4096
 #undef EEPROM_SIZE
 #define EEPROM_SIZE     4096
 #endif
-#if (EEPROM_SIZE < CONFIG_DATA_SIZE)
+// FLAG_DATA_SIZE is 4, to store DRD flag
+#if (EEPROM_SIZE < FLAG_DATA_SIZE + CONFIG_DATA_SIZE)
 #warning EEPROM_SIZE must be > CONFIG_DATA_SIZE. Reset to 512
 #undef EEPROM_SIZE
-#define EEPROM_SIZE     512
+#define EEPROM_SIZE     4096
 #endif
 #endif
 
 #ifndef EEPROM_START
-#define EEPROM_START     0
+#define EEPROM_START     0      //define 256 in DRD
 #else
-#if (EEPROM_START + CONFIG_DATA_SIZE > EEPROM_SIZE)
-#error EPROM_START + CONFIG_DATA_SIZE > EEPROM_SIZE. Please adjust.
+#if (EEPROM_START + FLAG_DATA_SIZE + CONFIG_DATA_SIZE > EEPROM_SIZE)
+#error EPROM_START + FLAG_DATA_SIZE + CONFIG_DATA_SIZE > EEPROM_SIZE. Please adjust.
 #endif
 #endif
+
+// Stating positon to store Blynk8266_WM_config
+#define BLYNK_EEPROM_START    (EEPROM_START + FLAG_DATA_SIZE)
 
     bool EEPROM_getCredentials(void)
     {
       int readCheckSum;
       int checkSum = 0;
-      uint16_t offset = EEPROM_START + sizeof(Blynk8266_WM_config);
+      uint16_t offset = BLYNK_EEPROM_START + sizeof(Blynk8266_WM_config);
            
       totalDataSize = sizeof(Blynk8266_WM_config) + sizeof(readCheckSum);
       
@@ -1110,13 +1220,14 @@ class BlynkWifi
     void EEPROM_putCredentials(void)
     {
       int checkSum = 0;
-      uint16_t offset = EEPROM_START + sizeof(Blynk8266_WM_config);
+      uint16_t offset = BLYNK_EEPROM_START + sizeof(Blynk8266_WM_config);
                 
       for (int i = 0; i < NUM_MENU_ITEMS; i++)
       {       
         char* _pointer = myMenuItems[i].pdata;
-        
-        //BLYNK_LOG4(F("pdata="), myMenuItems[i].pdata, F(",len="), myMenuItems[i].maxlen);
+#if ( BLYNK_WM_DEBUG > 2)        
+        BLYNK_LOG4(F("CW:pdata="), myMenuItems[i].pdata, F(",len="), myMenuItems[i].maxlen);
+#endif
                             
         for (uint16_t j = 0; j < myMenuItems[i].maxlen; j++,_pointer++,offset++)
         {
@@ -1140,51 +1251,77 @@ class BlynkWifi
       hadConfigData = false; 
       
       EEPROM.begin(EEPROM_SIZE);
-      EEPROM.get(EEPROM_START, Blynk8266_WM_config);
+      EEPROM.get(BLYNK_EEPROM_START, Blynk8266_WM_config);
 
+#if ( BLYNK_WM_DEBUG > 2)     
+      displayConfigData(Blynk8266_WM_config);
+#endif
       int calChecksum = calcChecksum();
 
       BLYNK_LOG4(BLYNK_F("CCSum=0x"), String(calChecksum, HEX),
                  BLYNK_F(",RCSum=0x"), String(Blynk8266_WM_config.checkSum, HEX));
                  
-      credDataValid = EEPROM_getCredentials();        
+      if (LOAD_DEFAULT_CONFIG_DATA)
+      {
+        // Load default and assume it's OK
+        credDataValid = true;
+      }
+      else
+      {           
+        credDataValid = EEPROM_getCredentials();    
+      }  
       
       if ( (strncmp(Blynk8266_WM_config.header, BLYNK_BOARD_TYPE, strlen(BLYNK_BOARD_TYPE)) != 0) ||
            (calChecksum != Blynk8266_WM_config.checkSum) || !credDataValid )
-      {
-        memset(&Blynk8266_WM_config, 0, sizeof(Blynk8266_WM_config));
-
-        for (int i = 0; i < NUM_MENU_ITEMS; i++)
-        {
-          // Actual size of pdata is [maxlen + 1]
-          memset(myMenuItems[i].pdata, 0, myMenuItems[i].maxlen + 1);
-        }
-        
+      {       
         // Including Credentials CSum
         BLYNK_LOG4(F("InitEEPROM,sz="), EEPROM_SIZE, F(",Datasz="), totalDataSize);
 
-        // doesn't have any configuration
-        strcpy(Blynk8266_WM_config.header,                        BLYNK_BOARD_TYPE);
-        strcpy(Blynk8266_WM_config.WiFi_Creds[0].wifi_ssid,       NO_CONFIG);
-        strcpy(Blynk8266_WM_config.WiFi_Creds[0].wifi_pw,         NO_CONFIG);
-        strcpy(Blynk8266_WM_config.WiFi_Creds[1].wifi_ssid,       NO_CONFIG);
-        strcpy(Blynk8266_WM_config.WiFi_Creds[1].wifi_pw,         NO_CONFIG);
-        strcpy(Blynk8266_WM_config.Blynk_Creds[0].blynk_server,   NO_CONFIG);
-        strcpy(Blynk8266_WM_config.Blynk_Creds[0].blynk_token,    NO_CONFIG);
-        strcpy(Blynk8266_WM_config.Blynk_Creds[1].blynk_server,   NO_CONFIG);
-        strcpy(Blynk8266_WM_config.Blynk_Creds[1].blynk_token,    NO_CONFIG);
-        Blynk8266_WM_config.blynk_port = BLYNK_SERVER_HARDWARE_PORT;
-        strcpy(Blynk8266_WM_config.board_name,       NO_CONFIG);
+        // doesn't have any configuration        
+        if (LOAD_DEFAULT_CONFIG_DATA)
+        {
+          memcpy(&Blynk8266_WM_config, &defaultConfig, sizeof(Blynk8266_WM_config));
+        }
+        else
+        {
+          memset(&Blynk8266_WM_config, 0, sizeof(Blynk8266_WM_config));
+
+          for (int i = 0; i < NUM_MENU_ITEMS; i++)
+          {
+            // Actual size of pdata is [maxlen + 1]
+            memset(myMenuItems[i].pdata, 0, myMenuItems[i].maxlen + 1);
+          }
+              
+          strcpy(Blynk8266_WM_config.WiFi_Creds[0].wifi_ssid,       NO_CONFIG);
+          strcpy(Blynk8266_WM_config.WiFi_Creds[0].wifi_pw,         NO_CONFIG);
+          strcpy(Blynk8266_WM_config.WiFi_Creds[1].wifi_ssid,       NO_CONFIG);
+          strcpy(Blynk8266_WM_config.WiFi_Creds[1].wifi_pw,         NO_CONFIG);
+          strcpy(Blynk8266_WM_config.Blynk_Creds[0].blynk_server,   NO_CONFIG);
+          strcpy(Blynk8266_WM_config.Blynk_Creds[0].blynk_token,    NO_CONFIG);
+          strcpy(Blynk8266_WM_config.Blynk_Creds[1].blynk_server,   NO_CONFIG);
+          strcpy(Blynk8266_WM_config.Blynk_Creds[1].blynk_token,    NO_CONFIG);
+          Blynk8266_WM_config.blynk_port = BLYNK_SERVER_HARDWARE_PORT;      
+          strcpy(Blynk8266_WM_config.board_name,       NO_CONFIG);
+          
+          for (int i = 0; i < NUM_MENU_ITEMS; i++)
+          {
+            strncpy(myMenuItems[i].pdata, NO_CONFIG, myMenuItems[i].maxlen);
+          }
+        }
+    
+        strcpy(Blynk8266_WM_config.header, BLYNK_BOARD_TYPE);
         
+        #if ( BLYNK_WM_DEBUG > 2)      
         for (int i = 0; i < NUM_MENU_ITEMS; i++)
         {
-          strncpy(myMenuItems[i].pdata, NO_CONFIG, myMenuItems[i].maxlen);
+          BLYNK_LOG4(BLYNK_F("g:myMenuItems["), i, BLYNK_F("]="), myMenuItems[i].pdata );
         }
+        #endif
         
         // Don't need
         Blynk8266_WM_config.checkSum = 0;
 
-        EEPROM.put(EEPROM_START, Blynk8266_WM_config);
+        EEPROM.put(BLYNK_EEPROM_START, Blynk8266_WM_config);
         EEPROM_putCredentials();
         EEPROM.commit();
 
@@ -1204,7 +1341,7 @@ class BlynkWifi
       }
       else
       {
-        displayConfigData();
+        displayConfigData(Blynk8266_WM_config);
       }
 
       return true;
@@ -1216,7 +1353,7 @@ class BlynkWifi
       Blynk8266_WM_config.checkSum = calChecksum;
       BLYNK_LOG4(BLYNK_F("SaveEEPROM,sz="), EEPROM.length(), BLYNK_F(",CSum=0x"), String(calChecksum, HEX))
 
-      EEPROM.put(EEPROM_START, Blynk8266_WM_config);
+      EEPROM.put(BLYNK_EEPROM_START, Blynk8266_WM_config);
       EEPROM_putCredentials();
       
       EEPROM.commit();
@@ -1339,7 +1476,18 @@ class BlynkWifi
 
           // Reset configTimeout to stay here until finished.
           configTimeout = 0;
-
+          
+          if ( RFC952_hostname[0] != 0 )
+          {
+            // Replace only if Hostname is valid
+            result.replace("BlynkSimpleEsp8266_SSL_WM", RFC952_hostname);
+          }
+          else if ( Blynk8266_WM_config.board_name[0] != 0 )
+          {
+            // Or replace only if board_name is valid.  Otherwise, keep intact
+            result.replace("BlynkSimpleEsp8266_SSL_WM", Blynk8266_WM_config.board_name);
+          }
+          
           result.replace("[[id]]",     Blynk8266_WM_config.WiFi_Creds[0].wifi_ssid);
           result.replace("[[pw]]",     Blynk8266_WM_config.WiFi_Creds[0].wifi_pw);
           result.replace("[[id1]]",    Blynk8266_WM_config.WiFi_Creds[1].wifi_ssid);
@@ -1350,11 +1498,15 @@ class BlynkWifi
           result.replace("[[tk1]]",    Blynk8266_WM_config.Blynk_Creds[1].blynk_token);
           result.replace("[[pt]]",     String(Blynk8266_WM_config.blynk_port));
           result.replace("[[nm]]",     Blynk8266_WM_config.board_name);
-
+          
+          // Load default configuration        
           for (int i = 0; i < NUM_MENU_ITEMS; i++)
           {
             String toChange = String("[[") + myMenuItems[i].id + "]]";
             result.replace(toChange, myMenuItems[i].pdata);
+#if ( BLYNK_WM_DEBUG > 2)                 
+            BLYNK_LOG4(BLYNK_F("h1:myMenuItems["), i, BLYNK_F("]="), myMenuItems[i].pdata )
+#endif            
           }
 
           server->send(200, "text/html", result);
@@ -1461,6 +1613,9 @@ class BlynkWifi
               strcpy(myMenuItems[i].pdata, value.c_str());
             else
               strncpy(myMenuItems[i].pdata, value.c_str(), myMenuItems[i].maxlen);
+#if ( BLYNK_WM_DEBUG > 2)                   
+            BLYNK_LOG4(BLYNK_F("h2:myMenuItems["), i, BLYNK_F("]="), myMenuItems[i].pdata );
+#endif            
           }
         }
         

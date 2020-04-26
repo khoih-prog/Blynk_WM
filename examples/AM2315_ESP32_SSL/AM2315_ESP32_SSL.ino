@@ -7,7 +7,7 @@
    Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
    Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
    Licensed under MIT license
-   Version: 1.0.12
+   Version: 1.0.13
 
    Original Blynk Library author:
    @file       BlynkSimpleEsp8266.h
@@ -32,129 +32,15 @@
     1.0.10  K Hoang      08/04/2020 SSID password maxlen is 63 now. Permit special chars # and % in input data.
     1.0.11  K Hoang      09/04/2020 Enable adding dynamic custom parameters from sketch
     1.0.12  K Hoang      13/04/2020 Fix MultiWiFi/Blynk bug introduced in broken v1.0.11
+    1.0.13  K Hoang      25/04/2020 Add Configurable Config Portal Title, Default Config Data and DRD. Update examples.
  *****************************************************************************************************************************/
 
-#ifndef ESP32
-#error This code is intended to run on the ESP32 platform! Please check your Tools->Board setting.
-#endif
-
-#define BLYNK_PRINT Serial
-
-// Not use #define USE_SPIFFS  => using EEPROM for configuration data in WiFiManager
-// #define USE_SPIFFS    false => using EEPROM for configuration data in WiFiManager
-// #define USE_SPIFFS    true  => using SPIFFS for configuration data in WiFiManager
-// Be sure to define USE_SPIFFS before #include <BlynkSimpleEsp8266_WM.h>
-
-#define USE_SPIFFS    true
-
-//You have to download Blynk WiFiManager Blynk_WM library at //https://github.com/khoih-prog/Blynk_WM
-// In order to enable (USE_BLYNK_WM = true). Otherwise, use (USE_BLYNK_WM = false)
-#define USE_BLYNK_WM   true
-//#define USE_BLYNK_WM   false
-
-#define USE_SSL     true
-//#define USE_SSL     false
-
-#if USE_BLYNK_WM
-#if USE_SSL
-#include <BlynkSimpleEsp32_SSL_WM.h>        //https://github.com/khoih-prog/Blynk_WM
-#else
-#include <BlynkSimpleEsp32_WM.h>            //https://github.com/khoih-prog/Blynk_WM
-#endif
-
-#define USE_DYNAMIC_PARAMETERS      false
-
-/////////////// Start dynamic Credentials ///////////////
-
-//Defined in <BlynkSimpleEsp32_WM.h> and <BlynkSimpleEsp32_SSL_WM.h>
-/**************************************
-  #define MAX_ID_LEN                5
-  #define MAX_DISPLAY_NAME_LEN      16
-
-  typedef struct
-  {
-  char id             [MAX_ID_LEN + 1];
-  char displayName    [MAX_DISPLAY_NAME_LEN + 1];
-  char *pdata;
-  uint8_t maxlen;
-  } MenuItem;
-**************************************/
-
-#if USE_DYNAMIC_PARAMETERS
-
-#define MAX_MQTT_SERVER_LEN      34
-char MQTT_Server  [MAX_MQTT_SERVER_LEN + 1]   = "";
-
-#define MAX_MQTT_PORT_LEN        6
-char MQTT_Port   [MAX_MQTT_PORT_LEN + 1]  = "";
-
-#define MAX_MQTT_USERNAME_LEN      34
-char MQTT_UserName  [MAX_MQTT_USERNAME_LEN + 1]   = "";
-
-#define MAX_MQTT_PW_LEN        34
-char MQTT_PW   [MAX_MQTT_PW_LEN + 1]  = "";
-
-#define MAX_MQTT_SUBS_TOPIC_LEN      34
-char MQTT_SubsTopic  [MAX_MQTT_SUBS_TOPIC_LEN + 1]   = "";
-
-#define MAX_MQTT_PUB_TOPIC_LEN       34
-char MQTT_PubTopic   [MAX_MQTT_PUB_TOPIC_LEN + 1]  = "";
-
-MenuItem myMenuItems [] =
-{
-  { "mqtt", "MQTT Server",      MQTT_Server,      MAX_MQTT_SERVER_LEN },
-  { "mqpt", "Port",             MQTT_Port,        MAX_MQTT_PORT_LEN   },
-  { "user", "MQTT UserName",    MQTT_UserName,    MAX_MQTT_USERNAME_LEN },
-  { "mqpw", "MQTT PWD",         MQTT_PW,          MAX_MQTT_PW_LEN },
-  { "subs", "Subs Topics",      MQTT_SubsTopic,   MAX_MQTT_SUBS_TOPIC_LEN },
-  { "pubs", "Pubs Topics",      MQTT_PubTopic,    MAX_MQTT_PUB_TOPIC_LEN },
-};
-
-#else
-
-MenuItem myMenuItems [] = {};
-
-#endif
-
-uint16_t NUM_MENU_ITEMS = sizeof(myMenuItems) / sizeof(MenuItem);  //MenuItemSize;
-/////// // End dynamic Credentials ///////////
-
-#else
-#if USE_SSL
-#include <BlynkSimpleEsp32_SSL.h>
-#define BLYNK_HARDWARE_PORT     9443
-#else
-#include <BlynkSimpleEsp32.h>
-#define BLYNK_HARDWARE_PORT     8080
-#endif
-#endif
-
-#if !USE_BLYNK_WM
-
-#ifndef LED_BUILTIN
-#define LED_BUILTIN       2         // Pin D2 mapped to pin GPIO2/ADC12 of ESP32, control on-board LED
-#endif
-
-#define USE_LOCAL_SERVER    true
-//#define USE_LOCAL_SERVER    false
-
-// If local server
-#if USE_LOCAL_SERVER
-char blynk_server[]   = "yourname.duckdns.org";
-#endif
-
-char auth[]     = "***";
-char ssid[]     = "***";
-char pass[]     = "***";
-
-#endif
+#include "defines.h"
 
 #include <Ticker.h>
 #include <Wire.h>
 #include <Adafruit_AM2315.h>        // To install Adafruit AM2315 library
 
-#define PIN_D21           21        // Pin D21 mapped to pin GPIO21/SDA of ESP32
-#define PIN_D22           22        // Pin D22 mapped to pin GPIO22/SCL of ESP32
 
 // Connect RED of the AM2315 sensor to 5.0V
 // Connect BLACK to Ground
@@ -260,6 +146,8 @@ void setup()
   Blynk.setConfigPortal("TestPortal", "TestPortalPass");
   // Set config portal IP address
   Blynk.setConfigPortalIP(IPAddress(192, 168, 200, 1));
+  // Set config portal channel, defalut = 1. Use 0 => random channel from 1-13
+  Blynk.setConfigPortalChannel(0);
 
   // From v1.0.5, select either one of these to set static IP + DNS
   Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 220), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0));
@@ -272,7 +160,8 @@ void setup()
   //Blynk.begin();
   // Use this to personalize DHCP hostname (RFC952 conformed)
   // 24 chars max,- only a..z A..Z 0..9 '-' and no '-' as last char
-  Blynk.begin("AM2315_ESP32_SSL");
+  //Blynk.begin("AM2315_ESP32_SSL");
+  Blynk.begin(HOST_NAME);
 #else
   WiFi.begin(ssid, pass);
 
@@ -291,7 +180,7 @@ void setup()
   {
 #if USE_SPIFFS
     Serial.print("\nBlynk ESP32 SSL using SPIFFS connected.");
-    
+
 #else
     Serial.println("\nBlynk ESP32 SSL using EEPROM connected.");
 #endif
@@ -304,7 +193,7 @@ void setup()
 #if (USE_BLYNK_WM && USE_DYNAMIC_PARAMETERS)
 void displayCredentials(void)
 {
-  Serial.println("Your stored Credentials :");
+  Serial.println("\nYour stored Credentials :");
 
   for (int i = 0; i < NUM_MENU_ITEMS; i++)
   {
@@ -338,5 +227,5 @@ void loop()
       }
     }
   }
-#endif    
+#endif
 }
