@@ -35,7 +35,7 @@ Thanks to [thorathome in GitHub](https://github.com/thorathome) to test, suggest
 ### Releases v1.0.10
 
 1. WiFi Password max length is 63, according to WPA2 standard
-2. Permit to input special chars such as ***~, !, @, #, $, %, ^, &, *, (, ), _, -, space,etc"*** into data fields. Thanks to [brondolin](https://github.com/brondolin) to provide the amazing fix.
+2. Permit to input special chars such as ***~, !, @, #, $, %, ^, &, _, -, space,etc.*** into data fields. Thanks to [brondolin](https://github.com/brondolin) to provide the amazing fix.
 
 With version `v1.0.7` or later, you now can configure:
 
@@ -180,10 +180,10 @@ Enter your WiFi and Blynk Credentials:
 Then click ***Save***. The system will auto-restart. You will see the board's built-in LED turned OFF. That means, it's already connected to your Blynk server successfully.
 
 ### Important notes
-1. Now you can use special chars such as ***~, !, @, #, $, %, ^, &, *, (, ), _, -, space,etc"*** thanks to [brondolin](https://github.com/brondolin) to provide the amazing fix in v1.0.10 to permit input special chars such as ***%*** and ***#*** into data fields. See [Issue 3](https://github.com/khoih-prog/Blynk_WM/issues/3).
+1. Now you can use special chars such as ***~, !, @, #, $, %, ^, &, _, -, space,etc.*** thanks to [brondolin](https://github.com/brondolin) to provide the amazing fix in v1.0.10 to permit input special chars such as ***%*** and ***#*** into data fields. See [Issue 3](https://github.com/khoih-prog/Blynk_WM/issues/3).
 2. The SSIDs, Passwords, BlynkServers and Tokens must be input (or to make them different from ***nothing***). Otherwise, the Config Portal will re-open until those fields have been changed. If you don't need any field, just input anything or use duplicated data from similar field.
 3. WiFi password max length now is 63 chars according to WPA2 standard.
-4. Sometimes, it's hard or not possible to connect to Config Portal WiFi AP, the majority cases are caused by WiFi channel conflict if there are too many WiFi APs are running around. Please use ***random ConfigPortal WiFi AP*** in sketch (see code snippet below) and reset the board so that another channel is used. Repeat
+4. Sometimes, it's hard or not possible to connect to Config Portal WiFi AP, the majority cases are caused by WiFi channel conflict if there are too many WiFi APs running around. Please use ***random ConfigPortal WiFi AP channel*** in sketch (see code snippet below) and reset the board so that another channel is used. Repeat until connectin is OK
 
 ```
 // Set config portal channel, default = 1. Use 0 => random channel from 1-13 to avoid conflict
@@ -365,7 +365,8 @@ uint16_t NUM_MENU_ITEMS = 0;
 
 ### Important Notes for using Dynamic Parameters' ids
 
-1. These id (such as "mqtt" in examplse) must be ***unique*** 
+1. These ids (such as "mqtt" in example) must be ***unique***.
+
 Please be noted that the following ***reserved names are already used in library***:
 
 ```
