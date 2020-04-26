@@ -8,18 +8,18 @@
 
 I'm inspired by [`EasyBlynk8266`](https://github.com/Barbayar/EasyBlynk8266)
 
-This is a Blynk and WiFiManager Library for configuring/auto(re)connecting ESP8266/ESP32 modules to the best or available MultiWiFi APs and MultiBlynk servers at runtime. Connection is with or without SSL. Configuration data to be saved in either SPIFFS or EEPROM. Default Credentials as well as Dynamic custom parameters can be added and modified easily without coding knowledge. DoubleDetectDetector is used to force Config Porta opening even if the Credentials are still valid.
+This is a Blynk and WiFiManager Library for configuring/auto(re)connecting ESP8266/ESP32 modules to the best or available MultiWiFi APs and MultiBlynk servers at runtime. Connection is with or without SSL. Configuration data to be saved in either SPIFFS or EEPROM. Default Credentials as well as Dynamic custom parameters can be added and modified easily without coding knowledge. DoubleDetectDetector is used to force Config Portal opening even if the Credentials are still valid.
  
-This library is designed to help you to eliminate `hardcoding` your Wifi and Blynk credentials for ESP8266 and ESP32 (with / wwithout SSL), and updating/reflashing every time when you need to change them.
+This library is designed to help you to eliminate `hardcoding` your Wifi and Blynk credentials for ESP8266 and ESP32 (with/without SSL), and updating/reflashing every time you need to change them.
 
 ### Releases v1.0.13
 
 1. Optional default ***Credentials as well as Dynamic parameters to be optionally autoloaded into Config Portal*** to use or change instead of manually input.
 2. ***DoubleDetectDetector*** feature to force Config Portal when double reset is detected within predetermined time, default 10s.
-3. Configurable ***Config Portal Title*** to be either Hostname, BoardName or default undistinguishable names.
+3. Configurable ***Config Portal Title*** to be either HostName, BoardName or default undistinguishable names.
 4. Examples are redesigned to separate Credentials / Defines / Dynamic Params / Code so that you can change Credentials / Dynamic Params quickly for each device.
 
-Thanks to [thorathome in GitHub](https://github.com/thorathome) to test, suggest and encourage to add those new features in v1.0.13, such as Default Credentials/Dynamic Parms, Configurable Config Portal Title, DRD.
+Thanks to [thorathome in GitHub](https://github.com/thorathome) to test, suggest and encourage to add those new features in v1.0.13, such as Default Credentials/Dynamic Params, Configurable Config Portal Title, DRD.
 
 ### Releases v1.0.12
 
@@ -77,7 +77,7 @@ In your code, replace
 2. `BlynkSimpleEsp8266_SSL.h` with `BlynkSimpleEsp8266_SSL_WM.h`  for ESP8266 `with SSL`
 3. `BlynkSimpleEsp32.h`       with `BlynkSimpleEsp32_WM.h`        for ESP32 `without SSL`
 4. `BlynkSimpleEsp32_SSL.h`   with `BlynkSimpleEsp32_SSL_WM.h`    for ESP32 `with SSL`
-5. In your code, insert
+5. then add
 
 ```
 #define USE_SPIFFS    true
@@ -87,8 +87,8 @@ to use SPIFFS or
 ```
 #define USE_SPIFFS    false
 ```
-to use EEPROM ( 312 bytes from address EEPROM_START ) to save your configuration data.
-EEPROM_SIZE can be specified from 512 to 4096 bytes. See examples [ESP32WM_Config](https://github.com/khoih-prog/Blynk_WM/tree/master/examples/ESP32WM_Config) and [ESP8266WM_Config](https://github.com/khoih-prog/Blynk_WM/tree/master/examples/ESP8266WM_Config).
+to use EEPROM, currently, data size in v1.0.13, with DRD and not including dynamic params, is 380  bytes from address EEPROM_START ) to save your configuration data.
+EEPROM_SIZE can be specified from 512 to 4096 (2048 for ESP32) bytes. See examples [ESP32WM_Config](https://github.com/khoih-prog/Blynk_WM/tree/master/examples/ESP32WM_Config) and [ESP8266WM_Config](https://github.com/khoih-prog/Blynk_WM/tree/master/examples/ESP8266WM_Config).
 
 
 ```
@@ -146,7 +146,8 @@ Also see examples:
 
 
 ## So, how it works?
-If it cannot connect to the Blynk server in 30 seconds, it will switch to `Configuration Mode`. You will see your built-in LED turned ON. In `Configuration Mode`, it starts an AP with default name `ESP_xxxxxx` and password `MyESP_xxxxxx` or configurable name amd password you specified. The AP IP address is default at `192.168.4.1` or configured IP (e.g. `192.168.200.1`).
+
+If it cannot connect to the Blynk server in 30 seconds, no valid stored Credentials or Double Reset is detected within 10s, it will switch to `Configuration Mode`. You will see your built-in LED turned ON. In `Configuration Mode`, it starts an AP with default name `ESP_xxxxxx` and password `MyESP_xxxxxx` or configurable name and password you specified. The AP IP address is default at `192.168.4.1` or configured IP (e.g. `192.168.200.1`).
 
 First, connect your (PC, Laptop, Tablet, phone, etc.) WiFi to Config Portal AP, then enter the WiFi password :
 
@@ -154,7 +155,7 @@ First, connect your (PC, Laptop, Tablet, phone, etc.) WiFi to Config Portal AP, 
     <img src="https://github.com/khoih-prog/Blynk_WM/blob/master/pics/PortalAuth.jpg">
 </p>
 
-1. If you choose not to load default Credentials and Dynamic Parameters
+1. If you choose ***not to load*** default Credentials and Dynamic Parameters
 
 After you connected, please, go to http://192.168.4.1 or the configured AP IP. The following Config Portal screen will appear:
 
@@ -162,7 +163,7 @@ After you connected, please, go to http://192.168.4.1 or the configured AP IP. T
     <img src="https://github.com/khoih-prog/Blynk_WM/blob/master/pics/Main.png">
 </p>
 
-1. If you choose to load default Credentials and Dynamic Parameters
+2. If you choose ***to load*** default Credentials and Dynamic Parameters
 
 After you connected, please, go to http://192.168.4.1 or the configured AP IP. The following  Config Portal screen will appear:
 
@@ -182,6 +183,12 @@ Then click ***Save***. The system will auto-restart. You will see the board's bu
 1. Now you can use special chars such as ***~, !, @, #, $, %, ^, &, *, (, ), _, -, space,etc"*** thanks to [brondolin](https://github.com/brondolin) to provide the amazing fix in v1.0.10 to permit input special chars such as ***%*** and ***#*** into data fields. See [Issue 3](https://github.com/khoih-prog/Blynk_WM/issues/3).
 2. The SSIDs, Passwords, BlynkServers and Tokens must be input (or to make them different from ***nothing***). Otherwise, the Config Portal will re-open until those fields have been changed. If you don't need any field, just input anything or use duplicated data from similar field.
 3. WiFi password max length now is 63 chars according to WPA2 standard.
+4. Sometimes, it's hard or not possible to connect to Config Portal WiFi AP, the majority cases are caused by WiFi channel conflict if there are too many WiFi APs are running around. Please use ***random ConfigPortal WiFi AP*** in sketch (see code snippet below) and reset the board so that another channel is used. Repeat
+
+```
+// Set config portal channel, default = 1. Use 0 => random channel from 1-13 to avoid conflict
+  Blynk.setConfigPortalChannel(0);
+```
 
 ### How to use default Credentials and have them pre-loaded onto Config Portal
 
@@ -274,7 +281,7 @@ Blynk_WM_Configuration defaultConfig =
 
 ### How to add dynamic parameters from sketch
 
-- To add custom parameters, just modify from the example below
+- To add custom parameters, just modify the example below
 
 ```
 #define USE_DYNAMIC_PARAMETERS      true
@@ -359,7 +366,7 @@ uint16_t NUM_MENU_ITEMS = 0;
 ### Important Notes for using Dynamic Parameters' ids
 
 1. These id (such as "mqtt" in examplse) must be ***unique*** 
-Please be noted that the following reserved names are already used in library:
+Please be noted that the following ***reserved names are already used in library***:
 
 ```
 "id"    for WiFi SSID
@@ -377,7 +384,7 @@ Please be noted that the following reserved names are already used in library:
 
 The following is the sample terminal output when running example [ESP8266WM_Config](examples/ESP8266WM_Config)
 
-1. No Config Data with LOAD_DEFAULT_CONFIG_DATA = true => Config Portal loads default Credentials and dynamic Params
+1. No Config Data with ***LOAD_DEFAULT_CONFIG_DATA = true*** => Config Portal loads default Credentials and dynamic Params
 
 ```
 Starting ...
@@ -430,7 +437,7 @@ RF
 [103329] h:Rst
 ```
 
-2. Input valid credentials with LOAD_DEFAULT_CONFIG_DATA = true => reboot
+2. Input valid credentials with ***LOAD_DEFAULT_CONFIG_DATA = true*** => reboot
 
 ```
 Starting ...
@@ -480,7 +487,7 @@ Subs Topics = default-mqtt-SubTopic
 Pubs Topics = default-mqtt-PubTopic
 ```
 
-3. No Config Data with LOAD_DEFAULT_CONFIG_DATA = false => Config Portal loads "blank" to all fields
+3. No Config Data with ***LOAD_DEFAULT_CONFIG_DATA = false*** => Config Portal loads "blank" to all fields
 
 ```
 Starting ...
@@ -534,7 +541,7 @@ RF[186385] h2:myMenuItems[0]=default-mqtt-server
 [186495] h:Rst
 ```
 
-4. Input valid credentials with LOAD_DEFAULT_CONFIG_DATA = false => reboot
+4. Input valid credentials with ***LOAD_DEFAULT_CONFIG_DATA = false*** => reboot
 
 ```
 Starting ...
@@ -585,7 +592,7 @@ Subs Topics = default-mqtt-SubTopic
 Pubs Topics = default-mqtt-PubTopic
 ```
 
-5. No DRD detected => no Config Portal with valid Credentials
+5. ***No DRD detected*** => no Config Portal with valid Credentials
 
 ```
 Starting ...
@@ -643,7 +650,7 @@ Saving config file...
 Saving config file OK
 ```
 
-6. DRD detected => Config Portal even with valid Credentials
+6. ***DRD detected*** => Config Portal even with valid Credentials
 
 ```
 Starting ...
@@ -684,6 +691,7 @@ MQTT PWD = default-mqtt-password
 Subs Topics = default-mqtt-SubTopic
 Pubs Topics = default-mqtt-PubTopic
 RF
+```
 
 7. Testing WiFi and Blynk Server lost to verify auto-reconnection
 
@@ -763,9 +771,9 @@ RBRBRBRBRBRBRB RBRB
 
 ```
 
-You can see that the system automatically detect and connect to the best or avaiable WiFi APs and/or Blynk Servers, whenever interruption happens. This feature is very useful for systems requiring high degree of reliability.
+You can see that the system automatically detects and connects to the best or avaiable WiFi APs and/or Blynk Servers, whenever interruption happens. This feature is very useful for systems requiring high degree of reliability.
 
-Moreover, this `Blynk.begin()` is not a blocking call, so you can use it for critical functions requiring in loop(). 
+Moreover, this `Blynk.begin()` is ***not a blocking call***, so you can use it for critical functions requiring in loop(). 
 Anyway, this is better for projects using Blynk just for GUI (graphical user interface).
 
 In operation, if WiFi or Blynk connection is lost, `Blynk.run()` will try reconnecting automatically. Therefore, `Blynk.run()` must be called in the `loop()` function. Don't use:
