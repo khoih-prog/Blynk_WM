@@ -12,6 +12,10 @@ This is a Blynk and WiFiManager Library for configuring/auto(re)connecting ESP82
  
 This library is designed to help you to eliminate `hardcoding` your Wifi and Blynk credentials for ESP8266 and ESP32 (with/without SSL), and updating/reflashing every time you need to change them.
 
+### Releases v1.0.13a
+
+1. Fix dynamicParams bug in v1.0.13. Again thanks to [thorathome in GitHub](https://github.com/thorathome) and [thorathome in Blynk](https://community.blynk.cc/u/thorathome)
+
 ### Releases v1.0.13
 
 1. Optional default ***Credentials as well as Dynamic parameters to be optionally autoloaded into Config Portal*** to use or change instead of manually input.
@@ -183,7 +187,7 @@ Then click ***Save***. The system will auto-restart. You will see the board's bu
 1. Now you can use special chars such as ***~, !, @, #, $, %, ^, &, _, -, space,etc.*** thanks to [brondolin](https://github.com/brondolin) to provide the amazing fix in v1.0.10 to permit input special chars such as ***%*** and ***#*** into data fields. See [Issue 3](https://github.com/khoih-prog/Blynk_WM/issues/3).
 2. The SSIDs, Passwords, BlynkServers and Tokens must be input (or to make them different from ***nothing***). Otherwise, the Config Portal will re-open until those fields have been changed. If you don't need any field, just input anything or use duplicated data from similar field.
 3. WiFi password max length now is 63 chars according to WPA2 standard.
-4. Sometimes, it's hard or not possible to connect to Config Portal WiFi AP, the majority cases are caused by WiFi channel conflict if there are too many WiFi APs running around. Please use ***random ConfigPortal WiFi AP channel*** in sketch (see code snippet below) and reset the board so that another channel is used. Repeat until connectin is OK
+4. Sometimes, it's hard or not possible to connect to Config Portal WiFi AP, the majority cases are caused by WiFi channel conflict if there are too many WiFi APs running around. Please use ***random ConfigPortal WiFi AP channel*** in sketch (see code snippet below) and reset the board so that another channel is used. Repeat until connection is OK
 
 ```
 // Set config portal channel, default = 1. Use 0 => random channel from 1-13 to avoid conflict
@@ -1202,6 +1206,10 @@ uint16_t NUM_MENU_ITEMS = 0;
 18. Configurable Config Portal Title
 19. Re-structure all examples to separate Credentials / Defines / Dynamic Params / Code so that you can change Credentials / Dynamic Params quickly for each device.
 
+### Releases v1.0.13a
+
+1. Fix dynamicParams bug in v1.0.13. Again thanks to [thorathome in GitHub](https://github.com/thorathome) and [thorathome in Blynk](https://community.blynk.cc/u/thorathome)
+
 ### Releases v1.0.13
 
 1. Optional default ***Credentials as well as Dynamic parameters to be optionally autoloaded into Config Portal*** to use or change instead of manually input.
@@ -1300,7 +1308,7 @@ Now you can easily specify and have the friendly, identifiable, RFC-952-conforme
 
 1. Thanks to [chriskio](https://github.com/chriskio) to report [AP-staying-open bug](https://github.com/khoih-prog/Blynk_WM/issues/2). 
 2. Thanks to [brondolin](https://github.com/brondolin) to provide the amazing fix in v1.0.10 to permit input special chars such as ***%*** and ***#*** into data fields. See [Issue 3](https://github.com/khoih-prog/Blynk_WM/issues/3).
-3. Thanks to [thorathome in GitHub](https://github.com/thorathome) and [thorathome in Blynk](https://community.blynk.cc/u/thorathome) to test, suggest and encourage to add those new features in v1.0.13, such as Default Credentials/Dynamic Parms, Configurable Config Portal Title, DRD. See [WM Config Portal using BlynkSimpleEsp32/8266_WM.h](https://community.blynk.cc/t/wm-config-portal-using-blynksimpleesp32-8266-wm-h/45402).
+3. Thanks to [thorathome in GitHub](https://github.com/thorathome) and [thorathome in Blynk](https://community.blynk.cc/u/thorathome) to test, find bug, suggest and encourage to add those new features in v1.0.13, such as Default Credentials/Dynamic Parms, Configurable Config Portal Title, DRD. See [WM Config Portal using BlynkSimpleEsp32/8266_WM.h](https://community.blynk.cc/t/wm-config-portal-using-blynksimpleesp32-8266-wm-h/45402).
 
 ## Contributing
 

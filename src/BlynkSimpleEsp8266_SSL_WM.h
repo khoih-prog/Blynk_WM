@@ -7,7 +7,7 @@
    Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
    Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
    Licensed under MIT license
-   Version: 1.0.13
+   Version: 1.0.13a
 
    Original Blynk Library author:
    @file       BlynkSimpleEsp8266.h
@@ -17,22 +17,23 @@
    @date       Jan 2015
    @brief
 
-   Version Modified By   Date      Comments
-   ------- -----------  ---------- -----------
-    1.0.0   K Hoang      28/10/2019 Initial coding
-    1.0.1   K Hoang      28/10/2019 Add features
-    1.0.2   K Hoang      21/11/2019 Fix bug. Add features.
-    1.0.3   K Hoang      31/11/2019 Fix compiler errors for ESP8266 core pre-2.5.2. Add examples.
-    1.0.4   K Hoang      07/01/2020 Add configurable personalized RFC-952 DHCP hostname
-    1.0.5   K Hoang      20/01/2020 Add configurable static IP, GW, SN, DNS1, DNS2 and Config Portal static IP and Credentials
-    1.0.6   K Hoang      05/02/2020 Optimize, fix EEPROM size to 2K from 4K, shorten code size, add functions
-    1.0.7   K Hoang      18/02/2020 Add checksum, enable AutoConnect to configurable MultiWiFi and MultiBlynk Credentials
-    1.0.8   K Hoang      24/02/2020 Fix AP-staying-open bug. Add clearConfigData()
-    1.0.9   K Hoang      12/03/2020 Enhance Config Portal GUI
-    1.0.10  K Hoang      08/04/2020 SSID password maxlen is 63 now. Permit special chars # and % in input data.
-    1.0.11  K Hoang      09/04/2020 Enable adding dynamic custom parameters from sketch
-    1.0.12  K Hoang      13/04/2020 Fix MultiWiFi/Blynk bug introduced in broken v1.0.11
-    1.0.13  K Hoang      25/04/2020 Add Configurable Config Portal Title, Default Config Data and DRD. Update examples.
+   Version    Modified By   Date      Comments
+   -------    -----------  ---------- -----------
+    1.0.0     K Hoang      28/10/2019 Initial coding
+    1.0.1     K Hoang      28/10/2019 Add features
+    1.0.2     K Hoang      21/11/2019 Fix bug. Add features.
+    1.0.3     K Hoang      31/11/2019 Fix compiler errors for ESP8266 core pre-2.5.2. Add examples.
+    1.0.4     K Hoang      07/01/2020 Add configurable personalized RFC-952 DHCP hostname
+    1.0.5     K Hoang      20/01/2020 Add configurable static IP, GW, SN, DNS1, DNS2 and Config Portal static IP and Credentials
+    1.0.6     K Hoang      05/02/2020 Optimize, fix EEPROM size to 2K from 4K, shorten code size, add functions
+    1.0.7     K Hoang      18/02/2020 Add checksum, enable AutoConnect to configurable MultiWiFi and MultiBlynk Credentials
+    1.0.8     K Hoang      24/02/2020 Fix AP-staying-open bug. Add clearConfigData()
+    1.0.9     K Hoang      12/03/2020 Enhance Config Portal GUI
+    1.0.10    K Hoang      08/04/2020 SSID password maxlen is 63 now. Permit special chars # and % in input data.
+    1.0.11    K Hoang      09/04/2020 Enable adding dynamic custom parameters from sketch
+    1.0.12    K Hoang      13/04/2020 Fix MultiWiFi/Blynk bug introduced in broken v1.0.11
+    1.0.13    K Hoang      25/04/2020 Add Configurable Config Portal Title, Default Config Data and DRD. Update examples.
+    1.0.13a   K Hoang      28/04/2020 Fix bug in dynamicParams
  *****************************************************************************************************************************/
 
 #ifndef BlynkSimpleEsp8266_SSL_WM_h
@@ -874,6 +875,10 @@ class BlynkWifi
         memset(myMenuItems[i].pdata, 0, myMenuItems[i].maxlen + 1);
         
         file.readBytes(_pointer, myMenuItems[i].maxlen);
+        
+#if ( BLYNK_WM_DEBUG > 2)        
+        BLYNK_LOG4(F("CR:pdata="), myMenuItems[i].pdata, F(",len="), myMenuItems[i].maxlen);
+#endif        
                
         for (uint16_t j = 0; j < myMenuItems[i].maxlen; j++,_pointer++)
         {         
@@ -1070,6 +1075,7 @@ class BlynkWifi
       if (LOAD_DEFAULT_CONFIG_DATA)
       {
         // Load default and assume it's OK
+        loadCredentials();  
         credDataValid = true;
       }
       else
@@ -1193,6 +1199,7 @@ class BlynkWifi
       {       
         char* _pointer = myMenuItems[i].pdata;
         totalDataSize += myMenuItems[i].maxlen;
+
         
         // Actual size of pdata is [maxlen + 1]
         memset(myMenuItems[i].pdata, 0, myMenuItems[i].maxlen + 1);
@@ -1202,7 +1209,11 @@ class BlynkWifi
           *_pointer = EEPROM.read(offset);
           
           checkSum += *_pointer;  
-         }       
+         }     
+  
+#if ( BLYNK_WM_DEBUG > 2)        
+        BLYNK_LOG4(F("CR:pdata="), myMenuItems[i].pdata, F(",len="), myMenuItems[i].maxlen);
+#endif  
       }
       
       EEPROM.get(offset, readCheckSum);
@@ -1264,6 +1275,7 @@ class BlynkWifi
       if (LOAD_DEFAULT_CONFIG_DATA)
       {
         // Load default and assume it's OK
+        EEPROM_getCredentials();  
         credDataValid = true;
       }
       else
