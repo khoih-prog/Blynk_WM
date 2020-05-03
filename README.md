@@ -12,7 +12,7 @@ This is a Blynk and WiFiManager Library for configuring/auto(re)connecting ESP82
  
 This library is designed to help you to eliminate `hardcoding` your Wifi and Blynk credentials for ESP8266 and ESP32 (with/without SSL), and updating/reflashing every time you need to change them.
 
-### Releases v1.0.13a
+### Releases v1.0.14
 
 1. Fix dynamicParams bug in v1.0.13. Again thanks to [thorathome in GitHub](https://github.com/thorathome) and [thorathome in Blynk](https://community.blynk.cc/u/thorathome)
 
@@ -1206,7 +1206,7 @@ uint16_t NUM_MENU_ITEMS = 0;
 18. Configurable Config Portal Title
 19. Re-structure all examples to separate Credentials / Defines / Dynamic Params / Code so that you can change Credentials / Dynamic Params quickly for each device.
 
-### Releases v1.0.13a
+### Releases v1.0.14
 
 1. Fix dynamicParams bug in v1.0.13. Again thanks to [thorathome in GitHub](https://github.com/thorathome) and [thorathome in Blynk](https://community.blynk.cc/u/thorathome)
 

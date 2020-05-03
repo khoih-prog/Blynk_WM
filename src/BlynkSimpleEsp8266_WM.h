@@ -33,7 +33,7 @@
     1.0.11    K Hoang      09/04/2020 Enable adding dynamic custom parameters from sketch
     1.0.12    K Hoang      13/04/2020 Fix MultiWiFi/Blynk bug introduced in broken v1.0.11
     1.0.13    K Hoang      25/04/2020 Add Configurable Config Portal Title, Default Config Data and DRD. Update examples.
-    1.0.13a   K Hoang      28/04/2020 Fix bug in dynamicParams *****************************************************************************************************************************/
+    1.0.14    K Hoang      03/05/2020 Fix bug and change feature in dynamicParams.  *****************************************************************************************************************************/
 
 
 #ifndef BlynkSimpleEsp8266_WM_h
@@ -734,7 +734,101 @@ class BlynkWifi
 #define  CREDENTIALS_FILENAME         BLYNK_F("/wm_cred.dat")
 #define  CREDENTIALS_FILENAME_BACKUP  BLYNK_F("/wm_cred.bak")
 
-    bool loadCredentials(void)
+    bool checkDynamicData(void)
+    {
+      int checkSum = 0;
+      int readCheckSum;
+      char* readBuffer;
+           
+      File file = SPIFFS.open(CREDENTIALS_FILENAME, "r");
+      BLYNK_LOG1(BLYNK_F("LoadCredFile "));
+
+      if (!file)
+      {
+        BLYNK_LOG1(BLYNK_F("failed"));
+
+        // Trying open redundant config file
+        file = SPIFFS.open(CREDENTIALS_FILENAME_BACKUP, "r");
+        BLYNK_LOG1(BLYNK_F("LoadBkUpCredFile "));
+
+        if (!file)
+        {
+          BLYNK_LOG1(BLYNK_F("failed"));
+          return false;
+        }
+      }
+      
+      // Find the longest pdata, then dynamically allocate buffer. Remember to free when done
+      // This is used to store tempo data to calculate checksum to see of data is valid
+      // We dont like to destroy myMenuItems[i].pdata with invalid data
+      
+      uint16_t maxBufferLength = 0;
+      for (int i = 0; i < NUM_MENU_ITEMS; i++)
+      {       
+        if (myMenuItems[i].maxlen > maxBufferLength)
+          maxBufferLength = myMenuItems[i].maxlen;
+      }
+      
+      if (maxBufferLength > 0)
+      {
+        readBuffer = new char[ maxBufferLength + 1 ];
+        
+        // check to see NULL => stop and return false
+        if (readBuffer == NULL)
+        {
+          BLYNK_LOG1(BLYNK_F("ChkCrR: Error can't allocate buffer."));
+          return false;
+        }
+#if ( BLYNK_WM_DEBUG > 2)          
+        else
+        {
+          BLYNK_LOG2(BLYNK_F("ChkCrR: Buffer allocated, sz="), maxBufferLength + 1);
+        }
+#endif             
+      }
+     
+      for (int i = 0; i < NUM_MENU_ITEMS; i++)
+      {       
+        char* _pointer = readBuffer;
+
+        // Actual size of pdata is [maxlen + 1]
+        memset(readBuffer, 0, myMenuItems[i].maxlen + 1);
+        
+        file.readBytes(_pointer, myMenuItems[i].maxlen);
+
+#if ( BLYNK_WM_DEBUG > 2)        
+        BLYNK_LOG4(F("ChkCrR:pdata="), readBuffer, F(",len="), myMenuItems[i].maxlen);
+#endif          
+               
+        for (uint16_t j = 0; j < myMenuItems[i].maxlen; j++,_pointer++)
+        {         
+          checkSum += *_pointer;  
+        }       
+      }
+
+      file.readBytes((char *) &readCheckSum, sizeof(readCheckSum));
+      
+      BLYNK_LOG1(BLYNK_F("OK"));
+      file.close();
+      
+      BLYNK_LOG4(F("CrCCsum="), String(checkSum, HEX), F(",CrRCsum="), String(readCheckSum, HEX));
+      
+      // Free buffer
+      if (readBuffer != NULL)
+      {
+        free(readBuffer);
+        BLYNK_LOG1(BLYNK_F("Buffer freed"));
+      }
+      
+      if ( checkSum != readCheckSum)
+      {
+        return false;
+      }
+      
+      return true;    
+    }
+
+    bool loadDynamicData(void)
     {
       int checkSum = 0;
       int readCheckSum;
@@ -762,16 +856,16 @@ class BlynkWifi
       {       
         char* _pointer = myMenuItems[i].pdata;
         totalDataSize += myMenuItems[i].maxlen;
-        
+
         // Actual size of pdata is [maxlen + 1]
         memset(myMenuItems[i].pdata, 0, myMenuItems[i].maxlen + 1);
         
         file.readBytes(_pointer, myMenuItems[i].maxlen);
-        
+
 #if ( BLYNK_WM_DEBUG > 2)        
-        BLYNK_LOG4(F("CR:pdata="), myMenuItems[i].pdata, F(",len="), myMenuItems[i].maxlen);
-#endif
-              
+        BLYNK_LOG4(F("CrR:pdata="), myMenuItems[i].pdata, F(",len="), myMenuItems[i].maxlen);
+#endif          
+               
         for (uint16_t j = 0; j < myMenuItems[i].maxlen; j++,_pointer++)
         {         
           checkSum += *_pointer;  
@@ -783,7 +877,7 @@ class BlynkWifi
       BLYNK_LOG1(BLYNK_F("OK"));
       file.close();
       
-      BLYNK_LOG4(F("CrCCsum="), checkSum, F(",CrRCsum="), readCheckSum);
+      BLYNK_LOG4(F("CrCCsum="), String(checkSum, HEX), F(",CrRCsum="), String(readCheckSum, HEX));
       
       if ( checkSum != readCheckSum)
       {
@@ -793,7 +887,7 @@ class BlynkWifi
       return true;    
     }
 
-    void saveCredentials(void)
+    void saveDynamicData(void)
     {
       int checkSum = 0;
     
@@ -804,7 +898,7 @@ class BlynkWifi
       {       
         char* _pointer = myMenuItems[i].pdata;
 
-#if ( BLYNK_WM_DEBUG > 2)       
+#if ( BLYNK_WM_DEBUG > 2)          
         BLYNK_LOG4(F("CW1:pdata="), myMenuItems[i].pdata, F(",len="), myMenuItems[i].maxlen);
 #endif
         
@@ -834,7 +928,7 @@ class BlynkWifi
         BLYNK_LOG1(BLYNK_F("failed"));
       }   
            
-      BLYNK_LOG2(F("CrCCSum="), checkSum);
+      BLYNK_LOG2(F("CrWCSum="), String(checkSum, HEX));
       
       // Trying open redundant Auth file
       file = SPIFFS.open(CREDENTIALS_FILENAME_BACKUP, "w");
@@ -844,10 +938,10 @@ class BlynkWifi
       {       
         char* _pointer = myMenuItems[i].pdata;
 
-#if ( BLYNK_WM_DEBUG > 2)        
+#if ( BLYNK_WM_DEBUG > 2)         
         BLYNK_LOG4(F("CW2:pdata="), myMenuItems[i].pdata, F(",len="), myMenuItems[i].maxlen);
-#endif   
-     
+#endif
+        
         if (file)
         {
           file.write((uint8_t*) _pointer, myMenuItems[i].maxlen);         
@@ -895,7 +989,7 @@ class BlynkWifi
         }
       }
 
-      file.readBytes((char*) &Blynk8266_WM_config, sizeof(Blynk8266_WM_config));
+      file.readBytes((char *) &Blynk8266_WM_config, sizeof(Blynk8266_WM_config));
 
       BLYNK_LOG1(BLYNK_F("OK"));
       file.close();
@@ -908,7 +1002,7 @@ class BlynkWifi
 
       int calChecksum = calcChecksum();
       Blynk8266_WM_config.checkSum = calChecksum;
-      BLYNK_LOG2(BLYNK_F("CSum=0x"), String(calChecksum, HEX));
+      BLYNK_LOG2(BLYNK_F("WCSum=0x"), String(calChecksum, HEX));
 
       if (file)
       {
@@ -927,22 +1021,23 @@ class BlynkWifi
 
       if (file)
       {
-        file.write((uint8_t*) &Blynk8266_WM_config, sizeof(Blynk8266_WM_config));
+        file.write((uint8_t *) &Blynk8266_WM_config, sizeof(Blynk8266_WM_config));
         file.close();
         BLYNK_LOG1(BLYNK_F("OK"));
       }
       else
       {
-        BLYNK_LOG1(BLYNK_F(" failed"));
+        BLYNK_LOG1(BLYNK_F("failed"));
       }
       
-      saveCredentials();
+      saveDynamicData();
     }
-    
+
+
     // Return false if init new EEPROM or SPIFFS. No more need trying to connect. Go directly to config mode
     bool getConfigData()
     {
-      bool credDataValid;   
+      bool dynamicDataValid;   
       
       hadConfigData = false;
       
@@ -956,9 +1051,10 @@ class BlynkWifi
       {
         // if config file exists, load
         loadConfigData();
-#if ( BLYNK_WM_DEBUG > 2)        
+#if ( BLYNK_WM_DEBUG > 2)      
+        BLYNK_LOG1(BLYNK_F("======= Start Stored Config Data ======="));
         displayConfigData(Blynk8266_WM_config);
-#endif        
+#endif      
       }
 
       int calChecksum = calcChecksum();
@@ -968,19 +1064,34 @@ class BlynkWifi
 
       if (LOAD_DEFAULT_CONFIG_DATA)
       {
-        // Load default and assume it's OK
-        loadCredentials();  
-        credDataValid = true;
+        // Load default dynamicData, if checkSum OK => valid data => load
+        // otherwise, use default in sketch and just assume it's OK
+        if (checkDynamicData())
+        {
+#if ( BLYNK_WM_DEBUG > 2)      
+          BLYNK_LOG1(BLYNK_F("Valid Stored Dynamic Data"));
+#endif            
+          loadDynamicData();
+        }
+#if ( BLYNK_WM_DEBUG > 2)  
+        else
+        {
+          BLYNK_LOG1(BLYNK_F("Valid Stored Dynamic Data"));
+        }
+#endif         
+             
+        dynamicDataValid = true;
       }
       else
       {           
-        credDataValid = loadCredentials();  
+        dynamicDataValid = loadDynamicData();  
       }  
       
 
       if ( (strncmp(Blynk8266_WM_config.header, BLYNK_BOARD_TYPE, strlen(BLYNK_BOARD_TYPE)) != 0) ||
-           (calChecksum != Blynk8266_WM_config.checkSum) || !credDataValid )
-      {       
+           (calChecksum != Blynk8266_WM_config.checkSum) || !dynamicDataValid )
+                      
+      {         
         // Including Credentials CSum
         BLYNK_LOG2(BLYNK_F("InitCfgFile,sz="), sizeof(Blynk8266_WM_config));
 
@@ -1082,7 +1193,68 @@ class BlynkWifi
 #define BLYNK_EEPROM_START    (EEPROM_START + FLAG_DATA_SIZE)
 
 
-    bool EEPROM_getCredentials(void)
+    bool checkDynamicData(void)
+    {
+      int checkSum = 0;
+      int readCheckSum;
+      
+      #define BUFFER_LEN      128
+      char readBuffer[BUFFER_LEN + 1];
+      
+      uint16_t offset = BLYNK_EEPROM_START + sizeof(Blynk8266_WM_config);
+                
+      // Find the longest pdata, then dynamically allocate buffer. Remember to free when done
+      // This is used to store tempo data to calculate checksum to see of data is valid
+      // We dont like to destroy myMenuItems[i].pdata with invalid data
+      
+      for (int i = 0; i < NUM_MENU_ITEMS; i++)
+      {       
+        if (myMenuItems[i].maxlen > BUFFER_LEN)
+        {
+          // Size too large, abort and flag false
+          BLYNK_LOG1(BLYNK_F("ChkCrR: Error Small Buffer."));
+          return false;
+        }
+      }
+         
+      for (int i = 0; i < NUM_MENU_ITEMS; i++)
+      {       
+        char* _pointer = readBuffer;
+        
+        // Prepare buffer, more than enough
+        memset(readBuffer, 0, sizeof(readBuffer));
+        
+        // Read more than necessary, but OK and easier to code
+        EEPROM.get(offset, readBuffer);
+        // NULL terminated
+        readBuffer[myMenuItems[i].maxlen] = 0;
+
+#if ( BLYNK_WM_DEBUG > 2)        
+        BLYNK_LOG4(F("ChkCrR:pdata="), readBuffer, F(",len="), myMenuItems[i].maxlen);
+#endif          
+               
+        for (uint16_t j = 0; j < myMenuItems[i].maxlen; j++,_pointer++)
+        {         
+          checkSum += *_pointer;  
+        }   
+        
+        offset += myMenuItems[i].maxlen;    
+      }
+
+      EEPROM.get(offset, readCheckSum);
+           
+      BLYNK_LOG4(F("ChkCrR:CrCCsum="), String(checkSum, HEX), F(",CrRCsum="), String(readCheckSum, HEX));
+           
+      if ( checkSum != readCheckSum)
+      {
+        return false;
+      }
+      
+      return true;    
+    }
+
+
+    bool EEPROM_getDynamicData(void)
     {
       int readCheckSum;
       int checkSum = 0;
@@ -1094,7 +1266,7 @@ class BlynkWifi
       {       
         char* _pointer = myMenuItems[i].pdata;
         totalDataSize += myMenuItems[i].maxlen;
-       
+        
         // Actual size of pdata is [maxlen + 1]
         memset(myMenuItems[i].pdata, 0, myMenuItems[i].maxlen + 1);
                
@@ -1103,16 +1275,15 @@ class BlynkWifi
           *_pointer = EEPROM.read(offset);
           
           checkSum += *_pointer;  
-         }
-         
+         }    
 #if ( BLYNK_WM_DEBUG > 2)        
         BLYNK_LOG4(F("CR:pdata="), myMenuItems[i].pdata, F(",len="), myMenuItems[i].maxlen);
-#endif                
+#endif             
       }
       
       EEPROM.get(offset, readCheckSum);
       
-      BLYNK_LOG4(F("CrCCsum="), checkSum, F(",CrRCsum="), readCheckSum);
+      BLYNK_LOG4(F("CrCCsum="), String(checkSum, HEX), F(",CrRCsum="), String(readCheckSum, HEX));
       
       if ( checkSum != readCheckSum)
       {
@@ -1122,7 +1293,7 @@ class BlynkWifi
       return true;
     }
 
-    void EEPROM_putCredentials(void)
+    void EEPROM_putDynamicData(void)
     {
       int checkSum = 0;
       uint16_t offset = BLYNK_EEPROM_START + sizeof(Blynk8266_WM_config);
@@ -1130,7 +1301,7 @@ class BlynkWifi
       for (int i = 0; i < NUM_MENU_ITEMS; i++)
       {       
         char* _pointer = myMenuItems[i].pdata;
-
+        
 #if ( BLYNK_WM_DEBUG > 2)        
         BLYNK_LOG4(F("CW:pdata="), myMenuItems[i].pdata, F(",len="), myMenuItems[i].maxlen);
 #endif
@@ -1146,22 +1317,23 @@ class BlynkWifi
       EEPROM.put(offset, checkSum);
       //EEPROM.commit();
       
-      BLYNK_LOG2(F("CrCCSum="), checkSum);
+      BLYNK_LOG2(F("CrWCSum="), String(checkSum, HEX));
     }
-
-    // Return false if init new EEPROM or SPIFFS. No more need trying to connect. Go directly to config mode
+    
     bool getConfigData()
     {
-      bool credDataValid;   
+      bool dynamicDataValid;   
       
       hadConfigData = false; 
       
       EEPROM.begin(EEPROM_SIZE);
+      BLYNK_LOG2(BLYNK_F("EEPROMsz:"), EEPROM_SIZE);
       EEPROM.get(BLYNK_EEPROM_START, Blynk8266_WM_config);
 
 #if ( BLYNK_WM_DEBUG > 2)      
+      BLYNK_LOG1(BLYNK_F("======= Start Stored Config Data ======="));
       displayConfigData(Blynk8266_WM_config);
-#endif
+#endif      
 
       int calChecksum = calcChecksum();
 
@@ -1170,17 +1342,30 @@ class BlynkWifi
                  
       if (LOAD_DEFAULT_CONFIG_DATA)
       {
-        // Load default and assume it's OK
-        EEPROM_getCredentials();  
-        credDataValid = true;
+        // Load default dynamicData, if checkSum OK => valid data => load
+        // otherwise, use default in sketch and just assume it's OK        
+        if (checkDynamicData())
+        {
+#if ( BLYNK_WM_DEBUG > 2)      
+          BLYNK_LOG1(BLYNK_F("Valid Stored Dynamic Data"));
+#endif          
+          EEPROM_getDynamicData();
+        }
+#if ( BLYNK_WM_DEBUG > 2)  
+        else
+        {
+          BLYNK_LOG1(BLYNK_F("Invalid Stored Dynamic Data. Ignored"));
+        }
+#endif            
+        dynamicDataValid = true;
       }
       else
       {           
-        credDataValid = EEPROM_getCredentials();    
+        dynamicDataValid = EEPROM_getDynamicData();    
       }  
       
       if ( (strncmp(Blynk8266_WM_config.header, BLYNK_BOARD_TYPE, strlen(BLYNK_BOARD_TYPE)) != 0) ||
-           (calChecksum != Blynk8266_WM_config.checkSum) || !credDataValid )
+           (calChecksum != Blynk8266_WM_config.checkSum) || !dynamicDataValid )
       {       
         // Including Credentials CSum
         BLYNK_LOG4(F("InitEEPROM,sz="), EEPROM_SIZE, F(",Datasz="), totalDataSize);
@@ -1230,7 +1415,7 @@ class BlynkWifi
         Blynk8266_WM_config.checkSum = 0;
 
         EEPROM.put(BLYNK_EEPROM_START, Blynk8266_WM_config);
-        EEPROM_putCredentials();
+        EEPROM_putDynamicData();
         EEPROM.commit();
 
         return false;
@@ -1262,7 +1447,7 @@ class BlynkWifi
       BLYNK_LOG4(BLYNK_F("SaveEEPROM,sz="), EEPROM.length(), BLYNK_F(",CSum=0x"), String(calChecksum, HEX))
 
       EEPROM.put(BLYNK_EEPROM_START, Blynk8266_WM_config);
-      EEPROM_putCredentials();
+      EEPROM_putDynamicData();
       
       EEPROM.commit();
     }
