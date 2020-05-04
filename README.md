@@ -60,19 +60,35 @@ With version `v1.0.5` or later, you now can configure:
 
 ### Installation
 
-The suggested way to install is to:
+1. Be certain you have installed the most up to date version of Arduino IDE.
+2. Be certain you have installed the most up-to-date Blynk library.  
+3. Using Arduino IDE, 
+* either *use the zip file*
+	 * **Navigate to the** [Blynk_WM](https://github.com/khoih-prog/Blynk_WM) page in Github.
+	 * **Download the latest release** of `Blynk_WM-master.zip` and save to your hard drive.
+	 * **Open Arduino IDE.**
+	 * Menu: Sketch->Include Library->Add .ZIP library…
+	 * Select the downloaded `Blynk_WM-master.zip` file
+	 * Hit Open
+  * Once Arduino IDE is finished installing the library, **EXIT Arduino IDE.**
+	 
+* or *use Arduino IDE's Library Manager*
+	 * **Open Arduino IDE.**
+  * Menu: Tools->**Manage Libraries…**
+  * Wait for library list to populate.
+  * Search for Blynk. **Find Blynk_WiFiManager.**
+  * Select the latest version.
+  * Hit Install.
+  * Once Arduino IDE is finished installing the library, **EXIT Arduino IDE.**
 
-1. Navigate to [Blynk_WM](https://github.com/khoih-prog/Blynk_WM) page.
-2. Download the latest release `Blynk_WM-master.zip`.
-3. Extract the zip file to `Blynk_WM-master` directory 
-4. Copy whole `Blynk_WM-master/src` folder to Arduino libraries' `src` directory such as `~/Arduino/libraries/Blynk/src`.
+4. Move 4 files from WM-master to Blynk library	
+   * **Find the `Blynk_WM-master/src` library directory.** Using Arduino IDE, this directory is normally found under Arduino/Sketchbook/libraries. 
+      * *(Sometimes Arduino IDE names a library folder with an unhelpful name like Arduino_12345. You can safely rename that folder under …/Sketchbook/libraries/ to a compliant name like Blynk_WM-master for convenience. Remember to exit and restart IDE after making such a folder renaming.)*
+   * **Copy the contents (4 files)** of the /src folder to the /src folder in the Blynk master library director.
+   * **Delete the `Blynk_WM-master/src` directory.**
+   
+5. **Open Arduino IDE.** Your library is installed.
 
-The file BlynkSimpleEsp8266_WM.h, BlynkSimpleEsp8266_SSL_WM.h, BlynkSimpleEsp32_WM.h and BlynkSimpleEsp32_SSL_WM.h must be placed in Blynk libraries `src` directory (normally `~/Arduino/libraries/Blynk/src`)
-
-Another way is to use `Arduino Library Manager`. 
-1. Search for `Blynk_WiFiManager`, then select / install the latest version. 
-2. You can also use this link [![arduino-library-badge](https://www.ardu-badge.com/badge/Blynk_WiFiManager.svg?)](https://www.ardu-badge.com/Blynk_WiFiManager) for more detailed instructions.
-3. Then move the 2 files `BlynkSimpleEsp8266_SSL_WM.h` and `BlynkSimpleEsp32_SSL_WM.h` from directory `~/Arduino/libraries/Blynk_WiFiManager/src` into Blynk libraries `src` directory (normally `~/Arduino/libraries/Blynk/src`)
 
 ### How to use
 
@@ -1320,4 +1336,4 @@ If you want to contribute to this project:
 
 ## Copyright
 
-Copyright 2019- Khoi Hoang
+Copyright 2020- Khoi Hoang
