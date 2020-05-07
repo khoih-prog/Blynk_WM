@@ -64,7 +64,7 @@ With version `v1.0.5` or later, you now can configure:
 2. Be certain you have installed the most up-to-date Blynk library.  
 3. Using Arduino IDE, 
 * either *use the zip file*
-	 * **Navigate to the** [Blynk_WM](https://github.com/khoih-prog/Blynk_WM) page in Github.
+	 * **Navigate to the** [Blynk_WiFiManager](https://github.com/khoih-prog/Blynk_WM) page in Github.
 	 * **Download the latest release** of `Blynk_WM-master.zip` and save to your hard drive.
 	 * **Open Arduino IDE.**
 	 * Menu: Sketch->Include Library->Add .ZIP library…
@@ -76,16 +76,18 @@ With version `v1.0.5` or later, you now can configure:
 	 * **Open Arduino IDE.**
   * Menu: Tools->**Manage Libraries…**
   * Wait for library list to populate.
-  * Search for Blynk. **Find Blynk_WiFiManager.**
-  * Select the latest version.
+  * Search for the keyword "Blynk". **Find Blynk_WiFiManager** in the library list.
+  * Select the latest version of the Blynk_WiFiManager library.
   * Hit Install.
   * Once Arduino IDE is finished installing the library, **EXIT Arduino IDE.**
 
-4. Move 4 files from WM-master to Blynk library	
-   * **Find the `Blynk_WM-master/src` library directory.** Using Arduino IDE, this directory is normally found under Arduino/Sketchbook/libraries. 
-      * *(Sometimes Arduino IDE names a library folder with an unhelpful name like Arduino_12345. You can safely rename that folder under …/Sketchbook/libraries/ to a compliant name like Blynk_WM-master for convenience. Remember to exit and restart IDE after making such a folder renaming.)*
-   * **Copy the contents (4 files)** of the /src folder to the /src folder in the Blynk master library director.
-   * **Delete the `Blynk_WM-master/src` directory.**
+4. COPY the /certs files from the main Blynk library to the Blynk_WiFiManager library.	
+   * **Find the `Blynk/src/certs` library directory.** (This is in the main Blynk library, may be named differently.)
+   * **Find the `Blynk_WiFiManager/src/certs` library directory.** (This is in the installed Blynk_WiFiManager library, may be named differently.) Using Arduino IDE, these directories are normally found under Arduino/Sketchbook/libraries. 
+      * *(Sometimes Arduino IDE names a library folder with an unhelpful name like Arduino_12345. You can safely rename that folder under …/Sketchbook/libraries/ to a compliant name like Blynk_WiFiManager for convenience. Remember to exit and restart IDE after renaming any library directory.)*
+   * **COPY (do not cut and paste) the entire contents** of the `Blynk/src/certs` directory to the `Blynk_WiFiManager/src/certs` directory.
+      * *(FYI: the reason for copying the certs from the Blynk library to Blynk_WiFiManager library is so that Blynk_WiFiManager will have access to Blynk's SSL certificates. And you almost certainly want to be using SSL!)*
+  * **You must do Step 4 each time you update the Blynk_WiFiManager library** to keep those SSL certs accessible. 
    
 5. **Open Arduino IDE.** Your library is installed.
 
