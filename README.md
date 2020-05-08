@@ -156,15 +156,16 @@ in your code. Keep `Blynk.run()` intact.
 That's it.
 
 Also see examples: 
-1. [AM2315_ESP32_SSL](examples/AM2315_ESP32_SSL)
-2. [AM2315_ESP8266](examples/AM2315_ESP8266)
-3. [DHT11ESP32](examples/DHT11ESP32) 
-4. [DHT11ESP32_SSL](examples/DHT11ESP32_SSL) 
-5. [DHT11ESP8266](examples/DHT11ESP8266)
-6. [DHT11ESP8266_Debug](examples/DHT11ESP8266_Debug)
-7. [DHT11ESP8266_SSL](examples/DHT11ESP82662_SSL) 
-8. [ESP32WM_Config](examples/ESP32WM_Config)
-9. [ESP8266WM_Config](examples/ESP8266WM_Config)
+ 1. [AM2315_ESP32_SSL](examples/AM2315_ESP32_SSL)
+ 2. [AM2315_ESP8266](examples/AM2315_ESP8266)
+ 3. [DHT11ESP32](examples/DHT11ESP32) 
+ 4. [DHT11ESP32_SSL](examples/DHT11ESP32_SSL) 
+ 5. [DHT11ESP8266](examples/DHT11ESP8266)
+ 6. [DHT11ESP8266_Debug](examples/DHT11ESP8266_Debug)
+ 7. [DHT11ESP8266_SSL](examples/DHT11ESP82662_SSL) 
+ 8. [ESP32WM_Config](examples/ESP32WM_Config)
+ 9. [ESP8266WM_Config](examples/ESP8266WM_Config)
+10. [Blynk_WM_Template](examples/Blynk_WM_Template)
 
 
 ## So, how it works?
@@ -1326,7 +1327,7 @@ Now you can easily specify and have the friendly, identifiable, RFC-952-conforme
 
 1. Thanks to [chriskio](https://github.com/chriskio) to report [AP-staying-open bug](https://github.com/khoih-prog/Blynk_WM/issues/2). 
 2. Thanks to [brondolin](https://github.com/brondolin) to provide the amazing fix in v1.0.10 to permit input special chars such as ***%*** and ***#*** into data fields. See [Issue 3](https://github.com/khoih-prog/Blynk_WM/issues/3).
-3. Thanks to [thorathome in GitHub](https://github.com/thorathome) and [thorathome in Blynk](https://community.blynk.cc/u/thorathome) to test, find bug, suggest and encourage to add those new features in v1.0.13, such as Default Credentials/Dynamic Parms, Configurable Config Portal Title, DRD. See [WM Config Portal using BlynkSimpleEsp32/8266_WM.h](https://community.blynk.cc/t/wm-config-portal-using-blynksimpleesp32-8266-wm-h/45402).
+3. Thanks to [thorathome in GitHub](https://github.com/thorathome) and [thorathome in Blynk](https://community.blynk.cc/u/thorathome) to test, find bug, suggest and encourage to add those new features in v1.0.13, such as Default Credentials/Dynamic Parms, Configurable Config Portal Title, DRD. The powerful [Blynk_WM_Template](examples/Blynk_WM_Template) is written by [thorathome](https://github.com/thorathome) and is included in the examples with his permission. See [WM Config Portal using BlynkSimpleEsp32/8266_WM.h](https://community.blynk.cc/t/wm-config-portal-using-blynksimpleesp32-8266-wm-h/45402).
 
 ## Contributing
 
