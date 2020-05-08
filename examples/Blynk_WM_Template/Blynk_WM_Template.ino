@@ -39,10 +39,9 @@
     1.0.14    K Hoang      03/05/2020 Fix bug and change feature in dynamicParams.
  *****************************************************************************************************************************/
 /*  
- * The Arduino/Blynk sketch Blynk_WiFiMgr_ESP32_8266_Template_HexColor.ino is a fully-developed 
- * get-started demo program for the powerful BlynkSimpleEsp... and the newer WiFiManager (WM) libraries.
- * This demo sketch written by Thor Johnson (https://github.com/thorathome) May 2020 as a template for
- * Blynk Wifi ESP communications. See https://github.com/thorathome/Blynk_Examples
+ * The Arduino/Blynk sketch Blynk_WM_Template.ino is a fully-developed 
+ * get-started demo program for the powerful BlynkSimpleEsp... and the newer WiFiManager (WM) libraries. 
+ * See https://github.com/thorathome/Blynk_Examples
  * 
  * It demonstrates
  * * WiFiManager Config Portal configuration and use
@@ -81,16 +80,16 @@
  *
  * I hope this is as useful to you as it has been to me to understand Blynk, 
  * the BlynkSimpleEsp... and ...WiFiManager libraries, the ESP32 and ESP8266.
+ * 
+ * This sketch is occasionally updated at https://github.com/thorathome/Blynk_Examples
  */
 
-
-#define SERIAL_SPEED 115200
-#define SKETCH_NAME "Blynk_WiFiMgr_ESP32_8266_Template_HexColor"
+#define SERIAL_SPEED 230400
+#define SKETCH_NAME "Blynk_WM_Template"
 
 #define BLYNK_PRINT Serial  // Generates Blynk debug prints. Comment out if not needed, saving space
 
 // Sketch uses Arduino IDE-selected ESP32 and ESP8266 to select compile choices
-
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //// COMPILER SWITCH SELECTION - USE WIFI MANAGER OR NOT //////////////////////////////////
@@ -101,8 +100,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //// COMPILER SWITCH SELECTION - USE SSL OR NOT ///////////////////////////////////////////
-//#define USE_SSL true // to easily select SSL or not
-#define USE_SSL false // to easily select SSL or not
+#define USE_SSL true // to easily select SSL or not
+//#define USE_SSL false // to easily select SSL or not
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -110,7 +109,7 @@
 #define CONTROL_DEFAULT_VPIN "2"        // Can also be changed via Config Portal (USE_DYNAMIC_PARAMETERS)
 #define HEARTBEAT_LED_DEFAULT_VPIN "3"  // Can also be changed via Config Portal (USE_DYNAMIC_PARAMETERS)
 #define DISPLAY_DEFAULT_VPIN "4"        // Can also be changed via Config Portal (USE_DYNAMIC_PARAMETERS)
-
+// These can all be reset using Config Portal. I have included them as default values only. */ 
 
 #if USE_WM
   ///////////////////////////////////////////////////////////////////////////////////////////
@@ -131,8 +130,9 @@
   ///////////////////////////////////////////////////////////////////////////////////////////
   //// COMPILER SWITCH SELECTION - USE SPIFFS OR EEPROM /////////////////////////////////////
   //// only relevant if using WiFiManager _WM
-  //#define USE_SPIFFS false  // Choosing EEPROM over SPIFFS here
-  #define USE_SPIFFS true
+  #define USE_SPIFFS false  // Choosing EEPROM over SPIFFS here
+  //#define USE_SPIFFS true
+
 
   // COMPILE-TIME LOGIC: NON-VOLATILE MEMORY SELECTION (WiFiManager only) 
   // NOT NECESSARY TO MODIFY
@@ -143,12 +143,13 @@
     #define EEPROM_START   512
   #endif
 
+
   // NOT NECESSARY TO MODIFY - MUST BE INCLUDED
   // Force some params in Blynk, only valid for library version 1.0.1 and later
   // (from the Github doc)
   #define TIMEOUT_RECONNECT_WIFI                    10000L
   #define RESET_IF_CONFIG_TIMEOUT                   true
-  #define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET    5
+  #define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET    3  // Library default is 10 (times 2) - DEBUG SET AT 2
 
   // NOT NECESSARY TO MODIFY
   // COMPILE-TIME LOGIC: AUTOMATIC LIBRARY SELECTION 
@@ -197,6 +198,7 @@
   #define CONFIG_PORTAL_PASSWORD "12345678"     // password for device-generated WiFi beacon - 8+ characters
   #define CONFIG_PORTAL_IPADDRESS 192,168,220,1 // IP address of Config Portal once connected to WiFi beacon
   #define DEVICE_HOST_NAME "Configurator-Demo"  // DHCP Host name for device
+
 
   #if USE_DEFAULT_CONFIG_DATA // Set default values for "standard" fields presented in Config Portal
     bool LOAD_DEFAULT_CONFIG_DATA = true;  //do not modify - used by library
@@ -327,6 +329,20 @@
     uint16_t NUM_MENU_ITEMS = 0;
   #endif // end USE_DYNAMIC_PARAMETERS    
 
+
+
+
+
+  // NOT NECESSARY TO MODIFY - MUST BE INCLUDED
+  // Force some params in Blynk, only valid for library version 1.0.1 and later
+  // (from the Github doc)
+  #define TIMEOUT_RECONNECT_WIFI                    10000L
+  #define RESET_IF_CONFIG_TIMEOUT                   true
+  #define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET    3  // Library default is 10 (times 2) - DEBUG SET AT 2
+
+
+  
+
 #else // NOT USING WIFI MANAGER - SET STANDARD WIFI & BLYNK CREDENTIALS, VIRTUAL PIN CHAR VARIABLES
   ///////////////////////////////////////////////////////////////////////////////////////////
   //// COMPILER VALUE SELECTION - STANDARD WIFI CREDENTIALS /////////////////////////////////
@@ -352,6 +368,9 @@ int heartbeatVpin; // = HEARTBEAT_LED_DEFAULT_VPIN or set in Config Portam (WM)
 int displayVpin;   // = DISPLAY_DEFAULT_VPIN or set in Config Portam (WM)
 
 
+
+
+
 // THIS SKETCH SETS UP A HEARTBEAT LED ON A TIMER TO SHOW SYSTEM IS ALIVEAND WELL
 BlynkTimer myTimer;
 // Blynk timers to blink a heartbeat LED on and off
@@ -361,6 +380,12 @@ int heartbeatLEDtimerID;
 int heartbeatLEDduration = 750; // duraction of each blink in millisec (set as an interval timer)
 int heartbeatLEDdurationTimerID;
 bool heartbeatLEDon = false; // this lets me use the same routine for the turn-on timer and the turn-off interval
+
+#ifdef ESP32
+  #define LED_BUILTIN 13  // NOT DEFINED IN ESP32 BOARD FILES - HMMM.  
+#endif
+
+
 
 // SETUP WIFI, BLYNK, HEARTBEAT
  void setup() 
@@ -383,6 +408,7 @@ bool heartbeatLEDon = false; // this lets me use the same routine for the turn-o
   pinMode ( LED_BUILTIN, OUTPUT );  
   digitalWrite ( LED_BUILTIN, LOW ); 
     
+
   // Set Blynk Virtual Heartbeat LED OFF
   Blynk.virtualWrite ( heartbeatVpin, 000 );  
   heartbeatLEDblink(); // first heartbeat 
@@ -391,12 +417,20 @@ bool heartbeatLEDon = false; // this lets me use the same routine for the turn-o
   
 } //end setup
 
+
+
+
+
 // KEEPING IT SIMPLE
 void loop()
 {
   Blynk.run();
   myTimer.run();  
 } 
+
+
+
+
 
 // CONNECT TO WLAN WITH OR WITHOUT WM
 // Connect to Blynk once WiFi connection establishked
@@ -454,9 +488,18 @@ void connectToWLANandBlynk()
     Blynk.connect ( 2500 ); // Don't get stuck hanging for more than 2500 millis.
   #endif // using WM
   
-  if ( Blynk.connected() ) Serial.println ( "Blynk connected just fine\n" ); 
+  if ( Blynk.connected() ) 
+  {
+    Serial.println ( "Blynk connected just fine" ); 
+    Serial.print   ( "  IP address  " ); Serial.println ( WiFi.localIP() ) ;
+    Serial.print   ( "  MAC address " ); Serial.println ( WiFi.macAddress() );  
+    Serial.println();  
+  }
   else Serial.println ( "Blynk NOT CONNECTED \n\n" );  
 } // end connectToWLANandBlynk
+
+
+
 
 
 // SET UP BLYNK TIMER FOR HEARTBEAT (and anything eles you may want later)
@@ -469,6 +512,10 @@ void setupBlynkTimers()
   Serial.println ( "... Blynk timers set up." );  
   
 } //end setupBlynkTimers
+
+
+
+
 
 // LED HEARTBEAT
 void heartbeatLEDblink()
@@ -484,8 +531,7 @@ void heartbeatLEDblink()
     digitalWrite ( LED_BUILTIN, LOW ); // On-board LED
     Blynk.virtualWrite ( heartbeatVpin, 000 );  
     Serial.println ( " ..." );
-  } 
-  else
+  } else
   {
     //heartbeatLED.on();      // Blynk Virtual LED
     
@@ -500,6 +546,10 @@ void heartbeatLEDblink()
   
   heartbeatLEDon = ! heartbeatLEDon; // flip status
 } //end heartbeatLEDblink
+
+
+
+
 
 // BLYNK_WRITE_DEFAULT GETS CALLED WHEN THERE IS NO SPECIFIC BLYNK_WRITE FOR THAT VIRTUAL PIN
 // This makes it a flexible - and programmable - receiver
@@ -552,15 +602,19 @@ BLYNK_WRITE_DEFAULT()
   }
 } //end BLYNK_WRITE_DEFAULT
 
+
+
+
+#if USE_WM
 // UPDATE DYNAMIC PARAMETERS 
 //  1 - CONVERTS THE char INFO FROM THE CONFIG PORTAL OR COMPILER CONSTANTS TO THE int VALUES THEY NEED TO BE FOR USE IN A SKETCH
 //  2 -   UPDATES BLYNK WITH OTHER DYNAMIC PARAMETERS (WIDGET LABELS) 
 void updateDynamicParameters()
 {
 
-  Serial.print ( "\nupdateDynamicParameters has: \n   controlVpinC/label = " ); Serial.print ( controlVpinC ); Serial.print ( "/" ); Serial.print ( controlLabel ); 
-  Serial.print ( "\n   heartbeatVpinC/label = " ); Serial.print ( heartbeatVpinC ); Serial.print ( "/" ); Serial.print ( heartbeatLabel ); 
-  Serial.print ( "\n   displayVpinC/label = " ); Serial.print ( displayVpinC ); Serial.print ( "/" ); Serial.print ( displayLabel ); 
+  Serial.print ( "\nupdateDynamicParameters has: \n   controlVpinC/label = """ ); Serial.print ( controlVpinC ); Serial.print ( """/" ); Serial.print ( controlLabel ); 
+  Serial.print ( "\n   heartbeatVpinC/label = """ ); Serial.print ( heartbeatVpinC ); Serial.print ( """/" ); Serial.print ( heartbeatLabel ); 
+  Serial.print ( "\n   displayVpinC/label = """ ); Serial.print ( displayVpinC ); Serial.print ( """/" ); Serial.print ( displayLabel ); 
   Serial.println ( "\n" );  
     
   // Convert char Virtual Pin numbers to int in preperation for Blynk connect
@@ -593,12 +647,16 @@ void updateDynamicParameters()
     Serial.print ( "**** Bad displayVpin input value of " );
     Serial.println ( displayVpinC );
   }
-  Serial.print ( "   Set displayVpin/heartbeatLabel to " ) ; Serial.print ( displayVpin );
+  Serial.print ( "   Set displayVpin/displayLabel to " ) ; Serial.print ( displayVpin );
   Serial.print ( "/" ); Serial.println ( displayLabel );   
   Blynk.setProperty ( displayVpin, "label", displayLabel );  
 
   Serial.println();  
 } // end updateDynamicParameters
+#endif // (updateDynamicParameters not needed if NOT USE_WM)
+
+
+
 
 // BLYNK_CONNECTED GETS CALLED WHEN CONNECTING TO BLYNK SERVERS
 // GETS CALLED IMMEDIATELY ON FIRST CONNECT TO BLYNK SERVER, TOO
@@ -606,23 +664,16 @@ BLYNK_CONNECTED()
 {
   Serial.println ( "\nBLYNK_CONNECTED..." );  
 
-  // Convert the Config Portal (or compiler constant) Virtual Pin char values to Blynk-usable ints
-  updateDynamicParameters();  
+  #if USE_WM
+    // Convert the Config Portal (or compiler constant) Virtual Pin char values to Blynk-usable ints
+    updateDynamicParameters();  
+  #endif
 
-  #if USE_WM && USE_DYNAMIC_PARAMETERS // ACKNOWLEDGE THE VALUES FROM CONFIG PORTAL // debugging
-    Serial.print ( "controlVpin=<" ); Serial.print ( controlVpin ); 
-    Serial.print ( ">, label=<" ); Serial.print ( controlLabel ); 
-    Serial.print ( ">, heartbeatVpin=<" ); Serial.print ( heartbeatVpin ); 
-    Serial.print ( ">, label=<" ); Serial.print ( heartbeatLabel ); Serial.println ( ">\n" );  
-    Serial.print ( ">, displayVpin=<" ); Serial.print ( displayVpin ); 
-    Serial.print ( ">, display=<" ); Serial.print ( displayLabel ); Serial.println ( ">\n" );  
-      
-    Blynk.setProperty ( controlVpin, "label", controlLabel );
-    Blynk.setProperty ( heartbeatVpin, "label", heartbeatLabel );
-    Blynk.setProperty ( displayVpin, "label", displayLabel );
-
-   #endif
 } // end BLYNK_CONNECTED
+
+
+
+
 
 // BLYNK_APP_CONNECTED GETS CALLED WHEN APP CONNECTS TO BLYNK SERVERS
 // IT IS NOT SUPER RELIABLE !  
@@ -630,17 +681,4 @@ BLYNK_APP_CONNECTED()
 {
   Serial.println ( "\nBLYNK_APP_CONNECTED..." );  
 
-  #if USE_WM && USE_DYNAMIC_PARAMETERS // ACKNOWLEDGE THE VALUES FROM CONFIG PORTAL // debugging
-    Serial.print ( "controlVpin=<" ); Serial.print ( controlVpin ); 
-      Serial.print ( ">, label=<" ); Serial.print ( controlLabel ); 
-    Serial.print ( ">, heartbeatVpin=<" ); Serial.print ( heartbeatVpin ); 
-      Serial.print ( ">, label=<" ); Serial.print ( heartbeatLabel ); Serial.println ( ">\n" );  
-    Serial.print ( ">, displayVpin=<" ); Serial.print ( displayVpin ); 
-      Serial.print ( ">, display=<" ); Serial.print ( displayLabel ); Serial.println ( ">\n" );  
-      
-    Blynk.setProperty ( controlVpin, "label", controlLabel );
-    Blynk.setProperty ( heartbeatVpin, "label", heartbeatLabel );
-    Blynk.setProperty ( displayVpin, "label", displayLabel );
-
-   #endif
-} // end BLYNK_CONNECTED
+} // end BLYNK_APP_CONNECTED
