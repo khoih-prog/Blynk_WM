@@ -347,7 +347,7 @@ class BlynkWifi
         //Base::begin(BlynkESP32_WM_config.blynk_token);
         //this->conn.begin(BlynkESP32_WM_config.blynk_server, BlynkESP32_WM_config.blynk_port);
 
-        if (connectMultiWiFi())
+        if (connectMultiWiFi() == WL_CONNECTED)
         {
           BLYNK_LOG1(BLYNK_F("bg: WiFi OK. Try Blynk"));
 
@@ -467,7 +467,7 @@ class BlynkWifi
           if ( WiFi.status() != WL_CONNECTED )
           {
             BLYNK_LOG1(BLYNK_F("run: WiFi lost. Reconnect WiFi+Blynk"));
-            if (connectMultiWiFi())
+            if (connectMultiWiFi() == WL_CONNECTED)
             {
               // turn the LED_BUILTIN OFF to tell us we exit configuration mode.
               digitalWrite(LED_BUILTIN, LED_OFF);

@@ -396,7 +396,7 @@ class BlynkWifi
           wifiMulti.addAP(BlynkESP32_WM_config.WiFi_Creds[i].wifi_ssid, BlynkESP32_WM_config.WiFi_Creds[i].wifi_pw);
         }
 
-        if (connectMultiWiFi())
+        if (connectMultiWiFi() == WL_CONNECTED)
         {
           BLYNK_LOG1(BLYNK_F("bg: WiFi OK. Try Blynk"));
 
@@ -516,7 +516,7 @@ class BlynkWifi
           if ( WiFi.status() != WL_CONNECTED )
           {
             BLYNK_LOG1(BLYNK_F("run: WiFi lost. Reconnect WiFi+Blynk"));
-            if (connectMultiWiFi())
+            if (connectMultiWiFi() == WL_CONNECTED)
             {
               // turn the LED_BUILTIN OFF to tell us we exit configuration mode.
               digitalWrite(LED_BUILTIN, LED_OFF);
