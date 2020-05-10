@@ -42,7 +42,7 @@
 // Sketch uses Arduino IDE-selected ESP32 and ESP8266 to select compile choices
 
 /*  
- * The Arduino/Blynk sketch Blynk_WiFiMgr_ESP32_8266_Template_HexColor.ino is a fully-developed 
+ * The Arduino/Blynk sketch Blynk_WM_Template.ino is a fully-developed
  * get-started demo program for the powerful BlynkSimpleEsp... and the newer WiFiManager (WM) libraries. 
  * This demo sketch written by Thor Johnson (https://github.com/thorathome) May 2020 as a template for
  * Blynk Wifi ESP communications. See https://github.com/thorathome/Blynk_Examples
@@ -84,10 +84,15 @@
  *
  * I hope this is as useful to you as it has been to me to understand Blynk, 
  * the BlynkSimpleEsp... and ...WiFiManager libraries, the ESP32 and ESP8266.
+ * 
+ * This sketch is occasionally updated at https://github.com/thorathome/Blynk_Examples
  */
 
-#define SERIAL_SPEED 230400
-#define SKETCH_NAME "Blynk_WiFiMgr_ESP32_8266_Template_HexColor"
+// Sketch uses Arduino IDE-selected ESP32 and ESP8266 to select compile choices
+
+=======
+#define SERIAL_SPEED 115200
+#define SKETCH_NAME "Blynk_WM_Template"
 
 #define BLYNK_PRINT Serial  // Generates Blynk debug prints. Comment out if not needed, saving space
 
@@ -130,8 +135,9 @@
   ///////////////////////////////////////////////////////////////////////////////////////////
   //// COMPILER SWITCH SELECTION - USE SPIFFS OR EEPROM /////////////////////////////////////
   //// only relevant if using WiFiManager _WM
-  //#define USE_SPIFFS false  // Choosing EEPROM over SPIFFS here
-  #define USE_SPIFFS true
+  #define USE_SPIFFS false  // Choosing EEPROM over SPIFFS here
+  //#define USE_SPIFFS true
+
 
 
   // COMPILE-TIME LOGIC: NON-VOLATILE MEMORY SELECTION (WiFiManager only) 
@@ -329,19 +335,12 @@
     uint16_t NUM_MENU_ITEMS = 0;
   #endif // end USE_DYNAMIC_PARAMETERS    
 
-
-
-
-
   // NOT NECESSARY TO MODIFY - MUST BE INCLUDED
   // Force some params in Blynk, only valid for library version 1.0.1 and later
   // (from the Github doc)
   #define TIMEOUT_RECONNECT_WIFI                    10000L
   #define RESET_IF_CONFIG_TIMEOUT                   true
   #define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET    3  // Library default is 10 (times 2) - DEBUG SET AT 2
-
-
-  
 
 #else // NOT USING WIFI MANAGER - SET STANDARD WIFI & BLYNK CREDENTIALS, VIRTUAL PIN CHAR VARIABLES
   ///////////////////////////////////////////////////////////////////////////////////////////
@@ -367,10 +366,6 @@ int controlVpin;   // = CONTROL_DEFAULT_VPIN or set in Config Portam (WM)
 int heartbeatVpin; // = HEARTBEAT_LED_DEFAULT_VPIN or set in Config Portam (WM)
 int displayVpin;   // = DISPLAY_DEFAULT_VPIN or set in Config Portam (WM)
 
-
-
-
-
 // THIS SKETCH SETS UP A HEARTBEAT LED ON A TIMER TO SHOW SYSTEM IS ALIVEAND WELL
 BlynkTimer myTimer;
 // Blynk timers to blink a heartbeat LED on and off
@@ -384,8 +379,6 @@ bool heartbeatLEDon = false; // this lets me use the same routine for the turn-o
 #ifdef ESP32
   #define LED_BUILTIN 13  // NOT DEFINED IN ESP32 BOARD FILES - HMMM.  
 #endif
-
-
 
 // SETUP WIFI, BLYNK, HEARTBEAT
  void setup() 
@@ -417,20 +410,12 @@ bool heartbeatLEDon = false; // this lets me use the same routine for the turn-o
   
 } //end setup
 
-
-
-
-
 // KEEPING IT SIMPLE
 void loop()
 {
   Blynk.run();
   myTimer.run();  
 } 
-
-
-
-
 
 // CONNECT TO WLAN WITH OR WITHOUT WM
 // Connect to Blynk once WiFi connection establishked
@@ -498,10 +483,6 @@ void connectToWLANandBlynk()
   else Serial.println ( "Blynk NOT CONNECTED \n\n" );  
 } // end connectToWLANandBlynk
 
-
-
-
-
 // SET UP BLYNK TIMER FOR HEARTBEAT (and anything eles you may want later)
 void setupBlynkTimers()
 {
@@ -512,10 +493,6 @@ void setupBlynkTimers()
   Serial.println ( "... Blynk timers set up." );  
   
 } //end setupBlynkTimers
-
-
-
-
 
 // LED HEARTBEAT
 void heartbeatLEDblink()
@@ -546,10 +523,6 @@ void heartbeatLEDblink()
   
   heartbeatLEDon = ! heartbeatLEDon; // flip status
 } //end heartbeatLEDblink
-
-
-
-
 
 // BLYNK_WRITE_DEFAULT GETS CALLED WHEN THERE IS NO SPECIFIC BLYNK_WRITE FOR THAT VIRTUAL PIN
 // This makes it a flexible - and programmable - receiver
@@ -602,9 +575,6 @@ BLYNK_WRITE_DEFAULT()
   }
 } //end BLYNK_WRITE_DEFAULT
 
-
-
-
 #if USE_WM
 // UPDATE DYNAMIC PARAMETERS 
 //  1 - CONVERTS THE char INFO FROM THE CONFIG PORTAL OR COMPILER CONSTANTS TO THE int VALUES THEY NEED TO BE FOR USE IN A SKETCH
@@ -655,9 +625,6 @@ void updateDynamicParameters()
 } // end updateDynamicParameters
 #endif // (updateDynamicParameters not needed if NOT USE_WM)
 
-
-
-
 // BLYNK_CONNECTED GETS CALLED WHEN CONNECTING TO BLYNK SERVERS
 // GETS CALLED IMMEDIATELY ON FIRST CONNECT TO BLYNK SERVER, TOO
 BLYNK_CONNECTED()
@@ -670,10 +637,6 @@ BLYNK_CONNECTED()
   #endif
 
 } // end BLYNK_CONNECTED
-
-
-
-
 
 // BLYNK_APP_CONNECTED GETS CALLED WHEN APP CONNECTS TO BLYNK SERVERS
 // IT IS NOT SUPER RELIABLE !  
