@@ -7,7 +7,7 @@
    Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
    Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
    Licensed under MIT license
-   Version: 1.0.14
+   Version: 1.0.15
 
    Original Blynk Library author:
    @file       BlynkSimpleEsp8266.h
@@ -34,6 +34,7 @@
     1.0.12    K Hoang      13/04/2020 Fix MultiWiFi/Blynk bug introduced in broken v1.0.11
     1.0.13    K Hoang      25/04/2020 Add Configurable Config Portal Title, Default Config Data and DRD. Update examples.
     1.0.14    K Hoang      03/05/2020 Fix bug and change feature in dynamicParams.
+    1.0.15    K Hoang      12/05/2020 Fix bug and Update to use LittleFS for ESP8266 core 2.7.1+. Add example.
  *****************************************************************************************************************************/
 
 #include "defines.h"
@@ -105,7 +106,7 @@ void check_status()
 {
   static unsigned long checkstatus_timeout = 0;
 
-#define STATUS_CHECK_INTERVAL     60000L
+#define STATUS_CHECK_INTERVAL     10000L
 
   // Send status report every STATUS_REPORT_INTERVAL (60) seconds: we don't need to send updates frequently if there is no status change.
   if ((millis() > checkstatus_timeout) || (checkstatus_timeout == 0))
@@ -125,8 +126,18 @@ void setup()
 
   pinMode(PIN_LED, OUTPUT);
 
-  Serial.println("\nStarting ...");
+#if ( USE_LITTLEFS || USE_SPIFFS)
+  Serial.print("\nStarting ESP8266WM_Config using " + String(CurrentFileFS));  
+#else
+  Serial.print("\nStarting ESP8266WM_Config using EEPROM");
+#endif  
 
+#if USE_SSL
+  Serial.println(" with SSL");
+#else
+  Serial.println(" without SSL");
+#endif
+      
   dht.begin();
 
   // From v1.0.5
@@ -154,8 +165,8 @@ void setup()
 
   if (Blynk.connected())
   {
-#if USE_SPIFFS
-    Serial.println("\nBlynk ESP8288 using SPIFFS connected. Board Name : " + Blynk.getBoardName());
+#if ( USE_LITTLEFS || USE_SPIFFS)
+    Serial.println("\nBlynk ESP8288 using " + String(CurrentFileFS) + " connected. Board Name : " + Blynk.getBoardName());
 #else
     {
       Serial.println("\nBlynk ESP8288 using EEPROM connected. Board Name : " + Blynk.getBoardName());
