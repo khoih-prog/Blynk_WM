@@ -8,7 +8,7 @@
 
 I'm inspired by [`EasyBlynk8266`](https://github.com/Barbayar/EasyBlynk8266)
 
-This is a Blynk and WiFiManager Library for configuring/auto(re)connecting ESP8266/ESP32 modules to the best or available MultiWiFi APs and MultiBlynk servers at runtime. Connection is with or without SSL. Configuration data to be saved in either SPIFFS or EEPROM. Default Credentials as well as Dynamic custom parameters can be added and modified easily without coding knowledge. DoubleDetectDetector is used to force Config Portal opening even if the Credentials are still valid.
+This is a Blynk and WiFiManager Library for configuring/auto(re)connecting ESP8266/ESP32 modules to the best or available MultiWiFi APs and MultiBlynk servers at runtime. Connection is with or without SSL. Configuration data to be saved in either SPIFFS or EEPROM. Default Credentials as well as Dynamic custom parameters can be added and modified easily without coding knowledge. DoubleResetDetector is used to force Config Portal opening even if the Credentials are still valid.
  
 This library is designed to help you to eliminate `hardcoding` your Wifi and Blynk credentials for ESP8266 and ESP32 (with/without SSL), and updating/reflashing every time you need to change them.
 
@@ -83,8 +83,8 @@ With version `v1.0.5` or later, you now can configure:
 
 4. COPY the /certs files from the main Blynk library to the Blynk_WiFiManager library.	
    * **Find the `Blynk/src/certs` library directory.** (This is in the main Blynk library, may be named differently.)
-   * **Find the `Blynk_WiFiManager/src/certs` library directory.** (This is in the installed Blynk_WiFiManager library, may be named differently.) Using Arduino IDE, these directories are normally found under Arduino/Sketchbook/libraries. 
-      * *(Sometimes Arduino IDE names a library folder with an unhelpful name like Arduino_12345. You can safely rename that folder under …/Sketchbook/libraries/ to a compliant name like Blynk_WiFiManager for convenience. Remember to exit and restart IDE after renaming any library directory.)*
+   * **Find the `Blynk_WiFiManager/src/certs` library directory.** (This is in the installed Blynk_WiFiManager library, may be named differently.) Using Arduino IDE, these directories are normally found under .../Arduino/Sketchbook/libraries or .../Arduino/libraries. 
+      * *(Sometimes Arduino IDE names a library folder with an unhelpful name like Arduino_12345. You can safely rename that folder under …/libraries/ to a compliant name like Blynk_WiFiManager for convenience. Remember to exit and restart IDE after renaming any library directory.)*
    * **COPY (do not cut and paste) the entire contents** of the `Blynk/src/certs` directory to the `Blynk_WiFiManager/src/certs` directory.
       * *(FYI: the reason for copying the certs from the Blynk library to Blynk_WiFiManager library is so that Blynk_WiFiManager will have access to Blynk's SSL certificates. And you almost certainly want to be using SSL!)*
   * **You must do Step 4 each time you update the Blynk_WiFiManager library** to keep those SSL certs accessible. 
