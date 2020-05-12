@@ -1,5 +1,5 @@
 /****************************************************************************************************************************
-   Credentials.h
+   Credentials.h for AM2315_ESP8266.ino
    For ESP8266 boards
 
    Blynk_WM is a library for the ESP8266/ESP32 Arduino platform (https://github.com/esp8266/Arduino) to enable easy
@@ -7,7 +7,7 @@
    Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
    Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
    Licensed under MIT license
-   Version: 1.0.14
+   Version: 1.0.15
 
    Original Blynk Library author:
    @file       BlynkSimpleEsp8266.h
@@ -34,6 +34,7 @@
     1.0.12    K Hoang      13/04/2020 Fix MultiWiFi/Blynk bug introduced in broken v1.0.11
     1.0.13    K Hoang      25/04/2020 Add Configurable Config Portal Title, Default Config Data and DRD. Update examples.
     1.0.14    K Hoang      03/05/2020 Fix bug and change feature in dynamicParams.
+    1.0.15    K Hoang      12/05/2020 Fix bug and Update to use LittleFS for ESP8266 core 2.7.1+. Add example.
  *****************************************************************************************************************************/
 
 #ifndef Credentials_h

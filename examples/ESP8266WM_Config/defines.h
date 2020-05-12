@@ -53,14 +53,14 @@
 // #define USE_SPIFFS    true  => using SPIFFS for configuration data in WiFiManager
 // Be sure to define USE_SPIFFS before #include <BlynkSimpleEsp8266_WM.h>
 
-//#define USE_SPIFFS                  true
-#define USE_SPIFFS                  false
+#define USE_SPIFFS                  true
+//#define USE_SPIFFS                  false
 
 #if (!USE_SPIFFS)
 // EEPROM_SIZE must be <= 4096 and >= CONFIG_DATA_SIZE (currently 172 bytes)
 #define EEPROM_SIZE    (4 * 1024)
 // EEPROM_START + CONFIG_DATA_SIZE must be <= EEPROM_SIZE
-#define EEPROM_START  768
+#define EEPROM_START  0
 #endif
 
 // Force some params in Blynk, only valid for library version 1.0.1 and later

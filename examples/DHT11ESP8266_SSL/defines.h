@@ -7,7 +7,7 @@
    Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
    Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
    Licensed under MIT license
-   Version: 1.0.14
+   Version: 1.0.15
 
    Original Blynk Library author:
    @file       BlynkSimpleEsp8266.h
@@ -34,6 +34,7 @@
     1.0.12    K Hoang      13/04/2020 Fix MultiWiFi/Blynk bug introduced in broken v1.0.11
     1.0.13    K Hoang      25/04/2020 Add Configurable Config Portal Title, Default Config Data and DRD. Update examples.
     1.0.14    K Hoang      03/05/2020 Fix bug and change feature in dynamicParams.
+    1.0.15    K Hoang      12/05/2020 Fix bug and Update to use LittleFS for ESP8266 core 2.7.1+. Add example.
  *****************************************************************************************************************************/
 
 #ifndef defines_h
@@ -48,19 +49,35 @@
 #define DOUBLERESETDETECTOR_DEBUG     false
 #define BLYNK_WM_DEBUG                0
 
-// Not use #define USE_SPIFFS  => using EEPROM for configuration data in WiFiManager
-// #define USE_SPIFFS    false => using EEPROM for configuration data in WiFiManager
-// #define USE_SPIFFS    true  => using SPIFFS for configuration data in WiFiManager
-// Be sure to define USE_SPIFFS before #include <BlynkSimpleEsp8266_WM.h>
+// #define USE_SPIFFS and USE_LITTLEFS   false        => using EEPROM for configuration data in WiFiManager
+// #define USE_LITTLEFS    true                       => using LITTLEFS for configuration data in WiFiManager
+// #define USE_LITTLEFS    false and USE_SPIFFS true  => using SPIFFS for configuration data in WiFiManager
+// Be sure to define USE_LITTLEFS and USE_SPIFFS before #include <BlynkSimpleEsp8266_WM.h>
+// From ESP8266 core 2.7.1, SPIFFS will be deprecated and to be replaced by LittleFS
+// Select USE_LITTLEFS (higher priority) or USE_SPIFFS
 
-//#define USE_SPIFFS                  true
+#define USE_LITTLEFS                true
+//#define USE_LITTLEFS                false
 #define USE_SPIFFS                  false
+//#define USE_SPIFFS                  true
 
-#if (!USE_SPIFFS)
-// EEPROM_SIZE must be <= 2048 and >= CONFIG_DATA_SIZE (currently 172 bytes)
-#define EEPROM_SIZE    (2 * 1024)
+#if USE_LITTLEFS
+//LittleFS has higher priority
+#define CurrentFileFS     "LittleFS"
+#ifdef USE_SPIFFS
+#undef USE_SPIFFS
+#endif
+#define USE_SPIFFS                  false
+#elif USE_SPIFFS
+#define CurrentFileFS     "SPIFFS"
+#endif
+
+
+#if !( USE_LITTLEFS || USE_SPIFFS)
+// EEPROM_SIZE must be <= 4096 and >= CONFIG_DATA_SIZE (currently 172 bytes)
+#define EEPROM_SIZE    (4 * 1024)
 // EEPROM_START + CONFIG_DATA_SIZE must be <= EEPROM_SIZE
-#define EEPROM_START   0
+#define EEPROM_START  0
 #endif
 
 // Force some params in Blynk, only valid for library version 1.0.1 and later

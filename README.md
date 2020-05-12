@@ -12,6 +12,15 @@ This is a Blynk and WiFiManager Library for configuring/auto(re)connecting ESP82
  
 This library is designed to help you to eliminate `hardcoding` your Wifi and Blynk credentials for ESP8266 and ESP32 (with/without SSL), and updating/reflashing every time you need to change them.
 
+### Releases v1.0.15
+
+1. Update to use LittleFS for ESP8266 core 2.7.1+.
+2. Fix SSL connection bug.
+3. Fix dynamicParams loading bug in v1.0.14. 
+4. Add [Blynk_WM_Template example](examples/Blynk_WM_Template) contributed by [thorathome](https://github.com/thorathome).
+
+Again thanks to [thorathome in GitHub](https://github.com/thorathome) and [thorathome in Blynk](https://community.blynk.cc/u/thorathome) for testing, bug finding, feature adding, README rewriting, collaborating, etc..
+
 ### Releases v1.0.14
 
 1. Fix dynamicParams bug in v1.0.13. Again thanks to [thorathome in GitHub](https://github.com/thorathome) and [thorathome in Blynk](https://community.blynk.cc/u/thorathome)
@@ -55,13 +64,13 @@ With version `v1.0.5` or later, you now can configure:
 1. [`Arduino IDE 1.8.12 or later` for Arduino](https://www.arduino.cc/en/Main/Software)
 2. [`Blynk library 0.6.1 or later`](https://github.com/blynkkk/blynk-library/releases)
 3. [`ESP32 core 1.0.4 or later`](https://github.com/espressif/arduino-esp32/releases) for ESP32 boards
-4. [`ESP8266 core 2.6.3 or later` for Arduino](https://github.com/esp8266/Arduino#installing-with-boards-manager) for ESP8266 boards.
-5. [`ESP_DoubleResetDetector library 1.0.2 or later`](https://github.com/khoih-prog/ESP_DoubleResetDetector) 
+4. [`ESP8266 core 2.6.3 or later` for Arduino](https://github.com/esp8266/Arduino#installing-with-boards-manager) for ESP8266 boards. To use ESP8266 core 2.7.1+ for LittleFS.
+5. [`ESP_DoubleResetDetector library 1.0.3 or later`](https://github.com/khoih-prog/ESP_DoubleResetDetector) to use LittleFS. 
 
 ### Installation
 
 1. Be certain you have installed the most up to date version of Arduino IDE.
-2. Be certain you have installed the most up-to-date Blynk library.  
+2. Be certain you have installed the most up-to-date Blynk library.
 3. Using Arduino IDE, 
 * either *use the zip file*
 	 * **Navigate to the** [Blynk_WiFiManager](https://github.com/khoih-prog/Blynk_WM) page in Github.
@@ -1224,6 +1233,17 @@ uint16_t NUM_MENU_ITEMS = 0;
 17. DoubleDetectDetector to force Config Portal when double reset is detected within predetermined time, default 10s.
 18. Configurable Config Portal Title
 19. Re-structure all examples to separate Credentials / Defines / Dynamic Params / Code so that you can change Credentials / Dynamic Params quickly for each device.
+20. Add LittleFS support to ESP8266 as SPIFFS deprecated since ESP8266 core 2.7.1.
+
+
+### Releases v1.0.15
+
+1. Update to use LittleFS for ESP8266 core 2.7.1+.
+2. Fix SSL connection bug.
+3. Fix dynamicParams loading bug in v1.0.14. 
+4. Add [Blynk_WM_Template example](examples/Blynk_WM_Template) contributed by [thorathome](https://github.com/thorathome).
+
+Again thanks to [thorathome in GitHub](https://github.com/thorathome) and [thorathome in Blynk](https://community.blynk.cc/u/thorathome) for testing, bug finding, feature adding, README rewriting, collaborating, etc..
 
 ### Releases v1.0.14
 

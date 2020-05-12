@@ -7,7 +7,7 @@
    Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
    Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
    Licensed under MIT license
-   Version: 1.0.14
+   Version: 1.0.15
 
    Original Blynk Library author:
    @file       BlynkSimpleEsp8266.h
@@ -34,6 +34,7 @@
     1.0.12    K Hoang      13/04/2020 Fix MultiWiFi/Blynk bug introduced in broken v1.0.11
     1.0.13    K Hoang      25/04/2020 Add Configurable Config Portal Title, Default Config Data and DRD. Update examples.
     1.0.14    K Hoang      03/05/2020 Fix bug and change feature in dynamicParams.
+    1.0.15    K Hoang      12/05/2020 Fix bug and Update to use LittleFS for ESP8266 core 2.7.1+. Add example.
  *****************************************************************************************************************************/
 
 #include "defines.h"
@@ -129,8 +130,13 @@ void check_status()
 void setup()
 {
   Serial.begin(115200);
+  while (!Serial);
 
-  Serial.println("\nStarting");
+#if ( USE_LITTLEFS || USE_SPIFFS)
+  Serial.print("\nStarting AM2315_ESP8266 using " + String(CurrentFileFS));  
+#else
+  Serial.print("\nStarting AM2315_ESP8266 using EEPROM");
+#endif  
 
   if (!AM2315.begin())
   {
@@ -173,12 +179,15 @@ void setup()
 
   if (Blynk.connected())
   {
-#if USE_SPIFFS
-    Serial.print("\nBlynk ESP8266 using SPIFFS connected.");
-
+#if ( USE_LITTLEFS || USE_SPIFFS)
+    Serial.println("\nBlynk ESP8288 using " + String(CurrentFileFS) + " connected.");
 #else
-    Serial.println("\nBlynk ESP8266 SSL using EEPROM connected.");
+    {
+      Serial.println("\nBlynk ESP8288 using EEPROM connected.");
+      Serial.printf("EEPROM size = %d bytes, EEPROM start address = %d / 0x%X\n", EEPROM_SIZE, EEPROM_START, EEPROM_START);
+    }
 #endif
+
 #if USE_BLYNK_WM
     Serial.println("Board Name : " + Blynk.getBoardName());
 #endif

@@ -7,7 +7,7 @@
    Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
    Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
    Licensed under MIT license
-   Version: 1.0.13a
+   Version: 1.0.15
 
    Original Blynk Library author:
    @file       BlynkSimpleEsp8266.h
@@ -33,7 +33,8 @@
     1.0.11    K Hoang      09/04/2020 Enable adding dynamic custom parameters from sketch
     1.0.12    K Hoang      13/04/2020 Fix MultiWiFi/Blynk bug introduced in broken v1.0.11
     1.0.13    K Hoang      25/04/2020 Add Configurable Config Portal Title, Default Config Data and DRD. Update examples.
-    1.0.14    K Hoang      03/05/2020 Fix bug and change feature in dynamicParams.  *****************************************************************************************************************************/
+    1.0.14    K Hoang      03/05/2020 Fix bug and change feature in dynamicParams.
+    1.0.15    K Hoang      12/05/2020 Fix bug and Update to use LittleFS for ESP8266 core 2.7.1+. Add example.  *****************************************************************************************************************************/
 
 
 #ifndef BlynkSimpleEsp8266_WM_h
@@ -58,9 +59,17 @@
 
 #include <ESP8266WebServer.h>
 
-//default to use EEPROM, otherwise, use SPIFFS
-#if USE_SPIFFS
+//default to use EEPROM, otherwise, use LittleFS or SPIFFS
+#if ( USE_LITTLEFS || USE_SPIFFS )
+
+#if USE_LITTLEFS
+#define FileFS    LittleFS
+#else
+#define FileFS    SPIFFS
+#endif
+
 #include <FS.h>
+#include <LittleFS.h>
 #else
 #include <EEPROM.h>
 #endif
@@ -69,15 +78,25 @@
 // These defines must be put before #include <ESP_DoubleResetDetector.h>
 // to select where to store DoubleResetDetector's variable.
 // For ESP32, You must select one to be true (EEPROM or SPIFFS)
-// For ESP8266, You must select one to be true (RTC, EEPROM or SPIFFS)
+// For ESP8266, You must select one to be true (RTC, EEPROM, LittleFS or SPIFFS)
+// SPIFFS is deprecated from ESP8266 core 2.7.1+
 // Otherwise, library will use default EEPROM storage
 #define ESP8266_DRD_USE_RTC     false   //true
 
-#if USE_SPIFFS
+#if ( USE_LITTLEFS || USE_SPIFFS )
 #define ESP_DRD_USE_EEPROM      false
+
+#if USE_LITTLEFS
+#define ESP_DRD_USE_LITTLEFS    true
+#define ESP_DRD_USE_SPIFFS      false
+#else
+#define ESP_DRD_USE_LITTLEFS    false
 #define ESP_DRD_USE_SPIFFS      true
+#endif
+
 #else
 #define ESP_DRD_USE_EEPROM      true
+#define ESP_DRD_USE_LITTLEFS    false
 #define ESP_DRD_USE_SPIFFS      false
 #endif
 
@@ -726,7 +745,7 @@ class BlynkWifi
       return checkSum;
     }
 
-#if USE_SPIFFS
+#if ( USE_LITTLEFS || USE_SPIFFS )
 
 #define  CONFIG_FILENAME              BLYNK_F("/wm_config.dat")
 #define  CONFIG_FILENAME_BACKUP       BLYNK_F("/wm_config.bak")
@@ -740,7 +759,7 @@ class BlynkWifi
       int readCheckSum;
       char* readBuffer;
            
-      File file = SPIFFS.open(CREDENTIALS_FILENAME, "r");
+      File file = FileFS.open(CREDENTIALS_FILENAME, "r");
       BLYNK_LOG1(BLYNK_F("LoadCredFile "));
 
       if (!file)
@@ -748,7 +767,7 @@ class BlynkWifi
         BLYNK_LOG1(BLYNK_F("failed"));
 
         // Trying open redundant config file
-        file = SPIFFS.open(CREDENTIALS_FILENAME_BACKUP, "r");
+        file = FileFS.open(CREDENTIALS_FILENAME_BACKUP, "r");
         BLYNK_LOG1(BLYNK_F("LoadBkUpCredFile "));
 
         if (!file)
@@ -834,7 +853,7 @@ class BlynkWifi
       int readCheckSum;
       totalDataSize = sizeof(Blynk8266_WM_config) + sizeof(readCheckSum);
       
-      File file = SPIFFS.open(CREDENTIALS_FILENAME, "r");
+      File file = FileFS.open(CREDENTIALS_FILENAME, "r");
       BLYNK_LOG1(BLYNK_F("LoadCredFile "));
 
       if (!file)
@@ -842,7 +861,7 @@ class BlynkWifi
         BLYNK_LOG1(BLYNK_F("failed"));
 
         // Trying open redundant config file
-        file = SPIFFS.open(CREDENTIALS_FILENAME_BACKUP, "r");
+        file = FileFS.open(CREDENTIALS_FILENAME_BACKUP, "r");
         BLYNK_LOG1(BLYNK_F("LoadBkUpCredFile "));
 
         if (!file)
@@ -891,7 +910,7 @@ class BlynkWifi
     {
       int checkSum = 0;
     
-      File file = SPIFFS.open(CREDENTIALS_FILENAME, "w");
+      File file = FileFS.open(CREDENTIALS_FILENAME, "w");
       BLYNK_LOG1(BLYNK_F("SaveCredFile "));
 
       for (int i = 0; i < NUM_MENU_ITEMS; i++)
@@ -931,7 +950,7 @@ class BlynkWifi
       BLYNK_LOG2(F("CrWCSum="), String(checkSum, HEX));
       
       // Trying open redundant Auth file
-      file = SPIFFS.open(CREDENTIALS_FILENAME_BACKUP, "w");
+      file = FileFS.open(CREDENTIALS_FILENAME_BACKUP, "w");
       BLYNK_LOG1(BLYNK_F("SaveBkUpCredFile "));
 
       for (int i = 0; i < NUM_MENU_ITEMS; i++)
@@ -971,7 +990,7 @@ class BlynkWifi
 
     void loadConfigData(void)
     {
-      File file = SPIFFS.open(CONFIG_FILENAME, "r");
+      File file = FileFS.open(CONFIG_FILENAME, "r");
       BLYNK_LOG1(BLYNK_F("LoadCfgFile "));
 
       if (!file)
@@ -979,7 +998,7 @@ class BlynkWifi
         BLYNK_LOG1(BLYNK_F("failed"));
 
         // Trying open redundant config file
-        file = SPIFFS.open(CONFIG_FILENAME_BACKUP, "r");
+        file = FileFS.open(CONFIG_FILENAME_BACKUP, "r");
         BLYNK_LOG1(BLYNK_F("LoadBkUpCfgFile "));
 
         if (!file)
@@ -997,7 +1016,7 @@ class BlynkWifi
 
     void saveConfigData(void)
     {
-      File file = SPIFFS.open(CONFIG_FILENAME, "w");
+      File file = FileFS.open(CONFIG_FILENAME, "w");
       BLYNK_LOG1(BLYNK_F("SaveCfgFile "));
 
       int calChecksum = calcChecksum();
@@ -1016,7 +1035,7 @@ class BlynkWifi
       }
 
       // Trying open redundant Auth file
-      file = SPIFFS.open(CONFIG_FILENAME_BACKUP, "w");
+      file = FileFS.open(CONFIG_FILENAME_BACKUP, "w");
       BLYNK_LOG1(BLYNK_F("SaveBkUpCfgFile "));
 
       if (file)
@@ -1034,20 +1053,24 @@ class BlynkWifi
     }
 
 
-    // Return false if init new EEPROM or SPIFFS. No more need trying to connect. Go directly to config mode
+    // Return false if init new EEPROM, LittleFS or SPIFFS. No more need trying to connect. Go directly to config mode
     bool getConfigData()
     {
       bool dynamicDataValid;   
       
       hadConfigData = false;
       
-      if (!SPIFFS.begin())
+      if (!FileFS.begin())
       {
-        BLYNK_LOG1(BLYNK_F("SPIFFS failed! Pls use EEPROM."));
+#if USE_LITTLEFS
+        BLYNK_LOG1(BLYNK_F("LittleFS failed!. Please use SPIFFS or EEPROM."));
+#else
+        BLYNK_LOG1(BLYNK_F("SPIFFS failed!. Please use LittleFS or EEPROM."));
+#endif      
         return false;
       }
 
-      if ( SPIFFS.exists(CONFIG_FILENAME) || SPIFFS.exists(CONFIG_FILENAME_BACKUP) )
+      if ( FileFS.exists(CONFIG_FILENAME) || FileFS.exists(CONFIG_FILENAME_BACKUP) )
       {
         // if config file exists, load
         loadConfigData();
@@ -1072,15 +1095,15 @@ class BlynkWifi
           BLYNK_LOG1(BLYNK_F("Valid Stored Dynamic Data"));
 #endif            
           loadDynamicData();
+          dynamicDataValid = true;
         }
 #if ( BLYNK_WM_DEBUG > 2)  
         else
         {
-          BLYNK_LOG1(BLYNK_F("Valid Stored Dynamic Data"));
+          BLYNK_LOG1(BLYNK_F("Invalid Stored Dynamic Data"));
+          dynamicDataValid = false;
         }
 #endif         
-             
-        dynamicDataValid = true;
       }
       else
       {           
@@ -1350,14 +1373,15 @@ class BlynkWifi
           BLYNK_LOG1(BLYNK_F("Valid Stored Dynamic Data"));
 #endif          
           EEPROM_getDynamicData();
+          dynamicDataValid = true;
         }
 #if ( BLYNK_WM_DEBUG > 2)  
         else
         {
           BLYNK_LOG1(BLYNK_F("Invalid Stored Dynamic Data. Ignored"));
+          dynamicDataValid = false;
         }
 #endif            
-        dynamicDataValid = true;
       }
       else
       {           
@@ -1456,7 +1480,7 @@ class BlynkWifi
 
     bool connectMultiBlynk(void)
     {
-#define BLYNK_CONNECT_TIMEOUT_MS      5000L
+#define BLYNK_CONNECT_TIMEOUT_MS      10000L
 
       for (int i = 0; i < NUM_BLYNK_CREDENTIALS; i++)
       {
@@ -1717,7 +1741,9 @@ class BlynkWifi
         // NEW
         if (number_items_Updated == NUM_CONFIGURABLE_ITEMS + NUM_MENU_ITEMS)
         {
-#if USE_SPIFFS
+#if USE_LITTLEFS
+          BLYNK_LOG2(BLYNK_F("h:UpdLittleFS:"), CONFIG_FILENAME);
+#elif USE_SPIFFS
           BLYNK_LOG2(BLYNK_F("h:UpdSPIFFS:"), CONFIG_FILENAME);
 #else
           BLYNK_LOG1(BLYNK_F("h:UpdEEPROM"));

@@ -7,7 +7,7 @@
    Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
    Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
    Licensed under MIT license
-   Version: 1.0.14
+   Version: 1.0.15
 
    Original Blynk Library author:
    @file       BlynkSimpleEsp8266.h
@@ -33,7 +33,8 @@
     1.0.11    K Hoang      09/04/2020 Enable adding dynamic custom parameters from sketch
     1.0.12    K Hoang      13/04/2020 Fix MultiWiFi/Blynk bug introduced in broken v1.0.11
     1.0.13    K Hoang      25/04/2020 Add Configurable Config Portal Title, Default Config Data and DRD. Update examples.
-    1.0.14    K Hoang      03/05/2020 Fix bug and change feature in dynamicParams. 
+    1.0.14    K Hoang      03/05/2020 Fix bug and change feature in dynamicParams.
+    1.0.15    K Hoang      12/05/2020 Fix bug and Update to use LittleFS for ESP8266 core 2.7.1+. Add example.
  *****************************************************************************************************************************/
 
 #ifndef BlynkSimpleEsp32_WM_h
@@ -1082,15 +1083,15 @@ class BlynkWifi
           BLYNK_LOG1(BLYNK_F("Valid Stored Dynamic Data"));
 #endif            
           loadDynamicData();
+          dynamicDataValid = true;
         }
 #if ( BLYNK_WM_DEBUG > 2)  
         else
         {
-          BLYNK_LOG1(BLYNK_F("Valid Stored Dynamic Data"));
+          BLYNK_LOG1(BLYNK_F("Invalid Stored Dynamic Data"));
+          dynamicDataValid = false;
         }
 #endif         
-             
-        dynamicDataValid = true;
       }
       else
       {           
@@ -1359,14 +1360,15 @@ class BlynkWifi
           BLYNK_LOG1(BLYNK_F("Valid Stored Dynamic Data"));
 #endif          
           EEPROM_getDynamicData();
+          dynamicDataValid = true;
         }
 #if ( BLYNK_WM_DEBUG > 2)  
         else
         {
           BLYNK_LOG1(BLYNK_F("Invalid Stored Dynamic Data. Ignored"));
+          dynamicDataValid = false;
         }
 #endif            
-        dynamicDataValid = true;
       }
       else
       {           
@@ -1465,7 +1467,7 @@ class BlynkWifi
 
     bool connectMultiBlynk(void)
     {
-#define BLYNK_CONNECT_TIMEOUT_MS      5000L
+#define BLYNK_CONNECT_TIMEOUT_MS      10000L
 
       for (int i = 0; i < NUM_BLYNK_CREDENTIALS; i++)
       {

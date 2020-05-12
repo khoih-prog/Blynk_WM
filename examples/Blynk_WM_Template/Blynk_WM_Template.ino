@@ -1,16 +1,14 @@
 /****************************************************************************************************************************
    Blynk_WM_Template.ino
    For ESP32/ESP8266 boards
-
    Written by Thor Johnson (https://github.com/thorathome) May 2020 as a template for
    Blynk Wifi ESP communications. See https://github.com/thorathome/Blynk_Examples
-
    Blynk_WM is a library for the ESP8266/ESP32 Arduino platform (https://github.com/esp8266/Arduino) to enable easy
    configuration/reconfiguration and autoconnect/autoreconnect of WiFi/Blynk
    Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
    Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
    Licensed under MIT license
-   Version: 1.0.14
+   Version: 1.0.15
 
    Original Blynk Library author:
    @file       BlynkSimpleEsp8266.h
@@ -37,12 +35,13 @@
     1.0.12    K Hoang      13/04/2020 Fix MultiWiFi/Blynk bug introduced in broken v1.0.11
     1.0.13    K Hoang      25/04/2020 Add Configurable Config Portal Title, Default Config Data and DRD. Update examples.
     1.0.14    K Hoang      03/05/2020 Fix bug and change feature in dynamicParams.
+    1.0.15    K Hoang      12/05/2020 Fix bug and Update to use LittleFS for ESP8266 core 2.7.1+. Add example.
  *****************************************************************************************************************************/
 
 // Sketch uses Arduino IDE-selected ESP32 and ESP8266 to select compile choices
 
 /*  
- * The Arduino/Blynk sketch Blynk_WM_Template.ino is a fully-developed
+ * The Arduino/Blynk sketch Blynk_WiFiMgr_ESP32_8266_Template_HexColor.ino is a fully-developed 
  * get-started demo program for the powerful BlynkSimpleEsp... and the newer WiFiManager (WM) libraries. 
  * This demo sketch written by Thor Johnson (https://github.com/thorathome) May 2020 as a template for
  * Blynk Wifi ESP communications. See https://github.com/thorathome/Blynk_Examples
@@ -84,17 +83,14 @@
  *
  * I hope this is as useful to you as it has been to me to understand Blynk, 
  * the BlynkSimpleEsp... and ...WiFiManager libraries, the ESP32 and ESP8266.
- * 
- * This sketch is occasionally updated at https://github.com/thorathome/Blynk_Examples
  */
 
-// Sketch uses Arduino IDE-selected ESP32 and ESP8266 to select compile choices
-
-=======
 #define SERIAL_SPEED 115200
 #define SKETCH_NAME "Blynk_WM_Template"
 
 #define BLYNK_PRINT Serial  // Generates Blynk debug prints. Comment out if not needed, saving space
+
+#define BLYNK_WM_DEBUG      0
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //// COMPILER SWITCH SELECTION - USE WIFI MANAGER OR NOT //////////////////////////////////
@@ -135,14 +131,54 @@
   ///////////////////////////////////////////////////////////////////////////////////////////
   //// COMPILER SWITCH SELECTION - USE SPIFFS OR EEPROM /////////////////////////////////////
   //// only relevant if using WiFiManager _WM
-  #define USE_SPIFFS false  // Choosing EEPROM over SPIFFS here
-  //#define USE_SPIFFS true
+  
+  #if defined(ESP8266)
+    // #define USE_SPIFFS and USE_LITTLEFS   false        => using EEPROM for configuration data in WiFiManager
+    // #define USE_LITTLEFS    true                       => using LITTLEFS for configuration data in WiFiManager
+    // #define USE_LITTLEFS    false and USE_SPIFFS true  => using SPIFFS for configuration data in WiFiManager
+    // Be sure to define USE_LITTLEFS and USE_SPIFFS before #include <BlynkSimpleEsp8266_WM.h>
+    // From ESP8266 core 2.7.1, SPIFFS will be deprecated and to be replaced by LittleFS
+    // Select USE_LITTLEFS (higher priority) or USE_SPIFFS
+  
+    #define USE_LITTLEFS                true
+    //#define USE_LITTLEFS                false
 
+    #define USE_SPIFFS false  // Choosing EEPROM over LittleFS / SPIFFS here
+    //#define USE_SPIFFS true   
+    
+    #if USE_LITTLEFS
+      //LittleFS has higher priority
+      #ifdef USE_SPIFFS
+        #undef USE_SPIFFS
+      #endif
+      #define USE_SPIFFS                  false
+      #warning Use LittleFS for ESP8266
+    #elif USE_SPIFFS
+      //#define USE_SPIFFS false  // ESP8266, Choosing EEPROM over LittleFS / SPIFFS here
+      #define USE_SPIFFS true
+      #warning Use SPIFFS for ESP8266
+    #else
+      #warning Use EEPROM for ESP8266
+    #endif  
+  #else
+    #define USE_SPIFFS false  // ESP32, Choosing EEPROM over LittleFS / SPIFFS here
+    //#define USE_SPIFFS true
+    #if USE_SPIFFS
+      #warning Use SPIFFS for ESP32
+    #else
+      #warning Use EEPROM for ESP32
+    #endif
+  #endif
 
+  #if USE_LITTLEFS
+    #define CurrentFileFS     "LittleFS"
+  #elif USE_SPIFFS
+    #define CurrentFileFS     "SPIFFS"
+  #endif  
 
   // COMPILE-TIME LOGIC: NON-VOLATILE MEMORY SELECTION (WiFiManager only) 
   // NOT NECESSARY TO MODIFY
-  #if (!USE_SPIFFS)
+  #if !( USE_LITTLEFS || USE_SPIFFS)
     // EEPROM_SIZE must be <= 2048 and >= CONFIG_DATA_SIZE (currently 172 bytes)
     #define EEPROM_SIZE    (2 * 1024)
     // EEPROM_START + CONFIG_DATA_SIZE must be <= EEPROM_SIZE
@@ -273,7 +309,6 @@
     /**************************************
     #define MAX_ID_LEN                5
     #define MAX_DISPLAY_NAME_LEN      16
-
     typedef struct
     {
     char id             [MAX_ID_LEN + 1];
@@ -335,6 +370,7 @@
     uint16_t NUM_MENU_ITEMS = 0;
   #endif // end USE_DYNAMIC_PARAMETERS    
 
+
   // NOT NECESSARY TO MODIFY - MUST BE INCLUDED
   // Force some params in Blynk, only valid for library version 1.0.1 and later
   // (from the Github doc)
@@ -366,6 +402,7 @@ int controlVpin;   // = CONTROL_DEFAULT_VPIN or set in Config Portam (WM)
 int heartbeatVpin; // = HEARTBEAT_LED_DEFAULT_VPIN or set in Config Portam (WM)
 int displayVpin;   // = DISPLAY_DEFAULT_VPIN or set in Config Portam (WM)
 
+
 // THIS SKETCH SETS UP A HEARTBEAT LED ON A TIMER TO SHOW SYSTEM IS ALIVEAND WELL
 BlynkTimer myTimer;
 // Blynk timers to blink a heartbeat LED on and off
@@ -377,8 +414,9 @@ int heartbeatLEDdurationTimerID;
 bool heartbeatLEDon = false; // this lets me use the same routine for the turn-on timer and the turn-off interval
 
 #ifdef ESP32
-  #define LED_BUILTIN 13  // NOT DEFINED IN ESP32 BOARD FILES - HMMM.  
+  #define BUILTIN_LED 13  // NOT DEFINED IN ESP32 BOARD FILES - HMMM.  
 #endif
+
 
 // SETUP WIFI, BLYNK, HEARTBEAT
  void setup() 
@@ -398,8 +436,8 @@ bool heartbeatLEDon = false; // this lets me use the same routine for the turn-o
   setupBlynkTimers();  // Establish Blynk timers after Blynk is connected
 
   // Initialize Onboard LED 
-  pinMode ( LED_BUILTIN, OUTPUT );  
-  digitalWrite ( LED_BUILTIN, LOW ); 
+  pinMode ( BUILTIN_LED, OUTPUT );  
+  digitalWrite ( BUILTIN_LED, LOW ); 
     
 
   // Set Blynk Virtual Heartbeat LED OFF
@@ -444,13 +482,6 @@ void connectToWLANandBlynk()
     
     //Blynk.config ( blynkAuth );  // not needed with WM 
     Blynk.begin ( DEVICE_HOST_NAME ); // DHCP (router) device name
-    
-    #if USE_SPIFFS
-      Serial.println("\nBlynk using SPIFFS connected. Board Name : " + Blynk.getBoardName());
-    #else
-      Serial.println("\nBlynk using EEPROM connected. Board Name : " + Blynk.getBoardName());
-      Serial.printf("EEPROM size = %d bytes, EEPROM start address = %d / 0x%X\n", EEPROM_SIZE, EEPROM_START, EEPROM_START);
-    #endif  
   
   #else//NOT using WM
     Serial.println ( "Starting WiFi.begin (no WM)" );  
@@ -475,6 +506,13 @@ void connectToWLANandBlynk()
   
   if ( Blynk.connected() ) 
   {
+    #if ( USE_LITTLEFS || USE_SPIFFS)
+      Serial.println("\nBlynk using " + String(CurrentFileFS) + " connected. Board Name : " + Blynk.getBoardName());
+    #else
+      Serial.println("\nBlynk using EEPROM connected. Board Name : " + Blynk.getBoardName());
+      Serial.printf("EEPROM size = %d bytes, EEPROM start address = %d / 0x%X\n", EEPROM_SIZE, EEPROM_START, EEPROM_START);
+    #endif  
+        
     Serial.println ( "Blynk connected just fine" ); 
     Serial.print   ( "  IP address  " ); Serial.println ( WiFi.localIP() ) ;
     Serial.print   ( "  MAC address " ); Serial.println ( WiFi.macAddress() );  
@@ -494,6 +532,7 @@ void setupBlynkTimers()
   
 } //end setupBlynkTimers
 
+
 // LED HEARTBEAT
 void heartbeatLEDblink()
 /* Blink the on-board LED AND the Virtual Blynk LED
@@ -505,14 +544,14 @@ void heartbeatLEDblink()
   {
     //heartbeatLED.off(); // Blynk Virtual LED
     
-    digitalWrite ( LED_BUILTIN, LOW ); // On-board LED
+    digitalWrite ( BUILTIN_LED, LOW ); // On-board LED
     Blynk.virtualWrite ( heartbeatVpin, 000 );  
     Serial.println ( " ..." );
   } else
   {
     //heartbeatLED.on();      // Blynk Virtual LED
     
-    digitalWrite ( LED_BUILTIN, HIGH );  // On-board LED
+    digitalWrite ( BUILTIN_LED, HIGH );  // On-board LED
     Blynk.virtualWrite ( heartbeatVpin, 255 );  
     // Set the timer to turn off the LEDs in a bit  
     heartbeatLEDdurationTimerID = myTimer.setTimeout ( heartbeatLEDduration, heartbeatLEDblink ); 
@@ -523,6 +562,7 @@ void heartbeatLEDblink()
   
   heartbeatLEDon = ! heartbeatLEDon; // flip status
 } //end heartbeatLEDblink
+
 
 // BLYNK_WRITE_DEFAULT GETS CALLED WHEN THERE IS NO SPECIFIC BLYNK_WRITE FOR THAT VIRTUAL PIN
 // This makes it a flexible - and programmable - receiver
@@ -575,6 +615,7 @@ BLYNK_WRITE_DEFAULT()
   }
 } //end BLYNK_WRITE_DEFAULT
 
+
 #if USE_WM
 // UPDATE DYNAMIC PARAMETERS 
 //  1 - CONVERTS THE char INFO FROM THE CONFIG PORTAL OR COMPILER CONSTANTS TO THE int VALUES THEY NEED TO BE FOR USE IN A SKETCH
@@ -625,6 +666,9 @@ void updateDynamicParameters()
 } // end updateDynamicParameters
 #endif // (updateDynamicParameters not needed if NOT USE_WM)
 
+
+
+
 // BLYNK_CONNECTED GETS CALLED WHEN CONNECTING TO BLYNK SERVERS
 // GETS CALLED IMMEDIATELY ON FIRST CONNECT TO BLYNK SERVER, TOO
 BLYNK_CONNECTED()
@@ -637,6 +681,7 @@ BLYNK_CONNECTED()
   #endif
 
 } // end BLYNK_CONNECTED
+
 
 // BLYNK_APP_CONNECTED GETS CALLED WHEN APP CONNECTS TO BLYNK SERVERS
 // IT IS NOT SUPER RELIABLE !  
