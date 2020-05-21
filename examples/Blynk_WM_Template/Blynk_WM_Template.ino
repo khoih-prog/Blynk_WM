@@ -37,9 +37,6 @@
     1.0.14    K Hoang      03/05/2020 Fix bug and change feature in dynamicParams.
     1.0.15    K Hoang      12/05/2020 Fix bug and Update to use LittleFS for ESP8266 core 2.7.1+. Add example.
  *****************************************************************************************************************************/
-
-// Sketch uses Arduino IDE-selected ESP32 and ESP8266 to select compile choices
-
 /*  
  * The Arduino/Blynk sketch Blynk_WiFiMgr_ESP32_8266_Template_HexColor.ino is a fully-developed 
  * get-started demo program for the powerful BlynkSimpleEsp... and the newer WiFiManager (WM) libraries. 
@@ -51,6 +48,7 @@
  * * WiFiManager Dynamic (extended) Parameters configuration and use
  * * Use of compiler constants for compile-time selection
  * * Use of Blynk's BLYNK_WRITE_DEFAULT() flexible capability
+ * * EEPROM and LittleFS (file system) to replace depricated SPIFFS
  *
  * This sketch lets end-users choose a color using ZeRGBa, colors a blinking (heartbeat) LED, 
  * and shows the HEX code for that color.
@@ -85,12 +83,12 @@
  * the BlynkSimpleEsp... and ...WiFiManager libraries, the ESP32 and ESP8266.
  */
 
-#define SERIAL_SPEED 115200
+#define SERIAL_SPEED 230400
 #define SKETCH_NAME "Blynk_WM_Template"
 
 #define BLYNK_PRINT Serial  // Generates Blynk debug prints. Comment out if not needed, saving space
 
-#define BLYNK_WM_DEBUG      0
+#define BLYNK_WM_DEBUG      0 // Can be 0-3
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //// COMPILER SWITCH SELECTION - USE WIFI MANAGER OR NOT //////////////////////////////////
@@ -107,10 +105,11 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //// COMPILER VALUE SELECTION - VIRTUAL PINS FOR THE 3 WIDGETS ////////////////////////////
-#define CONTROL_DEFAULT_VPIN "2"        // Can also be changed via Config Portal (USE_DYNAMIC_PARAMETERS)
+#define CONTROL_DEFAULT_VPIN       "2"  // Can also be changed via Config Portal (USE_DYNAMIC_PARAMETERS)
 #define HEARTBEAT_LED_DEFAULT_VPIN "3"  // Can also be changed via Config Portal (USE_DYNAMIC_PARAMETERS)
-#define DISPLAY_DEFAULT_VPIN "4"        // Can also be changed via Config Portal (USE_DYNAMIC_PARAMETERS)
+#define DISPLAY_DEFAULT_VPIN       "4"  // Can also be changed via Config Portal (USE_DYNAMIC_PARAMETERS)
 // These can all be reset using Config Portal. I have included them as default values only. */ 
+
 
 #if USE_WM
   ///////////////////////////////////////////////////////////////////////////////////////////
@@ -129,10 +128,10 @@
 
   
   ///////////////////////////////////////////////////////////////////////////////////////////
-  //// COMPILER SWITCH SELECTION - USE SPIFFS OR EEPROM /////////////////////////////////////
+  //// COMPILER SWITCH SELECTION - USE LITTLEFS (ESP8266 ONLY), SPIFFS OR EEPROM /////////////////////////////////////
   //// only relevant if using WiFiManager _WM
   
-  #if defined(ESP8266)
+  #ifdef ESP8266
     // #define USE_SPIFFS and USE_LITTLEFS   false        => using EEPROM for configuration data in WiFiManager
     // #define USE_LITTLEFS    true                       => using LITTLEFS for configuration data in WiFiManager
     // #define USE_LITTLEFS    false and USE_SPIFFS true  => using SPIFFS for configuration data in WiFiManager
@@ -156,17 +155,17 @@
     #elif USE_SPIFFS
       //#define USE_SPIFFS false  // ESP8266, Choosing EEPROM over LittleFS / SPIFFS here
       #define USE_SPIFFS true
-      #warning Use SPIFFS for ESP8266
+      #warning Using SPIFFS for ESP8266
     #else
-      #warning Use EEPROM for ESP8266
+      #warning Using EEPROM for ESP8266
     #endif  
   #else
     #define USE_SPIFFS false  // ESP32, Choosing EEPROM over LittleFS / SPIFFS here
     //#define USE_SPIFFS true
     #if USE_SPIFFS
-      #warning Use SPIFFS for ESP32
+      #warning Using SPIFFS for ESP32
     #else
-      #warning Use EEPROM for ESP32
+      #warning Using EEPROM for ESP32
     #endif
   #endif
 
@@ -370,14 +369,6 @@
     uint16_t NUM_MENU_ITEMS = 0;
   #endif // end USE_DYNAMIC_PARAMETERS    
 
-
-  // NOT NECESSARY TO MODIFY - MUST BE INCLUDED
-  // Force some params in Blynk, only valid for library version 1.0.1 and later
-  // (from the Github doc)
-  #define TIMEOUT_RECONNECT_WIFI                    10000L
-  #define RESET_IF_CONFIG_TIMEOUT                   true
-  #define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET    3  // Library default is 10 (times 2) - DEBUG SET AT 2
-
 #else // NOT USING WIFI MANAGER - SET STANDARD WIFI & BLYNK CREDENTIALS, VIRTUAL PIN CHAR VARIABLES
   ///////////////////////////////////////////////////////////////////////////////////////////
   //// COMPILER VALUE SELECTION - STANDARD WIFI CREDENTIALS /////////////////////////////////
@@ -403,7 +394,7 @@ int heartbeatVpin; // = HEARTBEAT_LED_DEFAULT_VPIN or set in Config Portam (WM)
 int displayVpin;   // = DISPLAY_DEFAULT_VPIN or set in Config Portam (WM)
 
 
-// THIS SKETCH SETS UP A HEARTBEAT LED ON A TIMER TO SHOW SYSTEM IS ALIVEAND WELL
+// THIS SKETCH SETS UP A HEARTBEAT LED ON A TIMER TO SHOW SYSTEM IS ALIVE AND WELL
 BlynkTimer myTimer;
 // Blynk timers to blink a heartbeat LED on and off
 int heartbeatLEDinterval = 3000; // interval between heartbeats for onboard and Blynk Virtual LED in millisec 
@@ -413,9 +404,25 @@ int heartbeatLEDduration = 750; // duraction of each blink in millisec (set as a
 int heartbeatLEDdurationTimerID;
 bool heartbeatLEDon = false; // this lets me use the same routine for the turn-on timer and the turn-off interval
 
+
+#include "ESP_LED_BUILTINS.h"  // Corrects for Arduino ESP8266 quirk inverting LED_BUILTIN
+
+/*
 #ifdef ESP32
-  #define BUILTIN_LED 13  // NOT DEFINED IN ESP32 BOARD FILES - HMMM.  
+  #define LED_BUILTIN 13  // NOT DEFINED IN ESP32 BOARD FILES - HMMM.  
 #endif
+
+#ifdef ESP8266  // There's a quirk in ESP8266 Arduino that has the LED_BUILTIN inverted. This corrects for it.
+  #define LED_BUILTIN_HIGH LOW
+  #define LED_BUILTIN_LOW HIGH
+#else
+  #define LED_BUILTIN_HIGH HIGH
+  #define LED_BUILTIN_LOW LOW
+#endif
+*/
+
+
+
 
 
 // SETUP WIFI, BLYNK, HEARTBEAT
@@ -436,8 +443,8 @@ bool heartbeatLEDon = false; // this lets me use the same routine for the turn-o
   setupBlynkTimers();  // Establish Blynk timers after Blynk is connected
 
   // Initialize Onboard LED 
-  pinMode ( BUILTIN_LED, OUTPUT );  
-  digitalWrite ( BUILTIN_LED, LOW ); 
+  pinMode ( LED_BUILTIN, OUTPUT );  
+  digitalWrite ( LED_BUILTIN, LED_BUILTIN_LOW ); 
     
 
   // Set Blynk Virtual Heartbeat LED OFF
@@ -448,12 +455,20 @@ bool heartbeatLEDon = false; // this lets me use the same routine for the turn-o
   
 } //end setup
 
+
+
+
+
 // KEEPING IT SIMPLE
 void loop()
 {
   Blynk.run();
   myTimer.run();  
-} 
+} // end loop
+
+
+
+
 
 // CONNECT TO WLAN WITH OR WITHOUT WM
 // Connect to Blynk once WiFi connection establishked
@@ -521,6 +536,10 @@ void connectToWLANandBlynk()
   else Serial.println ( "Blynk NOT CONNECTED \n\n" );  
 } // end connectToWLANandBlynk
 
+
+
+
+
 // SET UP BLYNK TIMER FOR HEARTBEAT (and anything eles you may want later)
 void setupBlynkTimers()
 {
@@ -531,6 +550,9 @@ void setupBlynkTimers()
   Serial.println ( "... Blynk timers set up." );  
   
 } //end setupBlynkTimers
+
+
+
 
 
 // LED HEARTBEAT
@@ -544,14 +566,14 @@ void heartbeatLEDblink()
   {
     //heartbeatLED.off(); // Blynk Virtual LED
     
-    digitalWrite ( BUILTIN_LED, LOW ); // On-board LED
+    digitalWrite ( LED_BUILTIN, LED_BUILTIN_LOW ); // On-board LED
     Blynk.virtualWrite ( heartbeatVpin, 000 );  
     Serial.println ( " ..." );
   } else
   {
     //heartbeatLED.on();      // Blynk Virtual LED
     
-    digitalWrite ( BUILTIN_LED, HIGH );  // On-board LED
+    digitalWrite ( LED_BUILTIN, LED_BUILTIN_HIGH );  // On-board LED
     Blynk.virtualWrite ( heartbeatVpin, 255 );  
     // Set the timer to turn off the LEDs in a bit  
     heartbeatLEDdurationTimerID = myTimer.setTimeout ( heartbeatLEDduration, heartbeatLEDblink ); 
@@ -562,6 +584,9 @@ void heartbeatLEDblink()
   
   heartbeatLEDon = ! heartbeatLEDon; // flip status
 } //end heartbeatLEDblink
+
+
+
 
 
 // BLYNK_WRITE_DEFAULT GETS CALLED WHEN THERE IS NO SPECIFIC BLYNK_WRITE FOR THAT VIRTUAL PIN
@@ -616,6 +641,9 @@ BLYNK_WRITE_DEFAULT()
 } //end BLYNK_WRITE_DEFAULT
 
 
+
+
+
 #if USE_WM
 // UPDATE DYNAMIC PARAMETERS 
 //  1 - CONVERTS THE char INFO FROM THE CONFIG PORTAL OR COMPILER CONSTANTS TO THE int VALUES THEY NEED TO BE FOR USE IN A SKETCH
@@ -661,8 +689,8 @@ void updateDynamicParameters()
   Serial.print ( "   Set displayVpin/displayLabel to " ) ; Serial.print ( displayVpin );
   Serial.print ( "/" ); Serial.println ( displayLabel );   
   Blynk.setProperty ( displayVpin, "label", displayLabel );  
-
   Serial.println();  
+  
 } // end updateDynamicParameters
 #endif // (updateDynamicParameters not needed if NOT USE_WM)
 
@@ -681,6 +709,9 @@ BLYNK_CONNECTED()
   #endif
 
 } // end BLYNK_CONNECTED
+
+
+
 
 
 // BLYNK_APP_CONNECTED GETS CALLED WHEN APP CONNECTS TO BLYNK SERVERS
