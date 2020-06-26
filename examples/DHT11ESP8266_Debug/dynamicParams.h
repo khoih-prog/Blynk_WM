@@ -7,15 +7,7 @@
    Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
    Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
    Licensed under MIT license
-   Version: 1.0.15
-
-   Original Blynk Library author:
-   @file       BlynkSimpleEsp8266.h
-   @author     Volodymyr Shymanskyy
-   @license    This project is released under the MIT License (MIT)
-   @copyright  Copyright (c) 2015 Volodymyr Shymanskyy
-   @date       Jan 2015
-   @brief
+   Version: 1.0.16
 
    Version    Modified By   Date      Comments
    -------    -----------  ---------- -----------
@@ -35,6 +27,7 @@
     1.0.13    K Hoang      25/04/2020 Add Configurable Config Portal Title, Default Config Data and DRD. Update examples.
     1.0.14    K Hoang      03/05/2020 Fix bug and change feature in dynamicParams.
     1.0.15    K Hoang      12/05/2020 Fix bug and Update to use LittleFS for ESP8266 core 2.7.1+. Add example.
+    1.0.16    K Hoang      25/06/2020 Fix bug and logic of USE_DEFAULT_CONFIG_DATA. Auto format SPIFFS/LittleFS.
  *****************************************************************************************************************************/
 
 #ifndef dynamicParams_h
@@ -44,7 +37,7 @@
 
 /////////////// Start dynamic Credentials ///////////////
 
-//Defined in <BlynkSimpleEsp32_WM.h> and <BlynkSimpleEsp32_SSL_WM.h>
+//Defined in <BlynkSimpleEsp8266_WM.h> and <BlynkSimpleEsp8266_SSL_WM.h>
 /**************************************
   #define MAX_ID_LEN                5
   #define MAX_DISPLAY_NAME_LEN      16

@@ -8,9 +8,16 @@
 
 I'm inspired by [`EasyBlynk8266`](https://github.com/Barbayar/EasyBlynk8266)
 
-This is a Blynk and WiFiManager Library for configuring/auto(re)connecting ESP8266/ESP32 modules to the best or available MultiWiFi APs and MultiBlynk servers at runtime. Connection is with or without SSL. Configuration data to be saved in either SPIFFS or EEPROM. Default Credentials as well as Dynamic custom parameters can be added and modified easily without coding knowledge. DoubleResetDetector is used to force Config Portal opening even if the Credentials are still valid.
+This is a Blynk and WiFiManager Library for configuring/auto(re)connecting ESP8266/ESP32 modules to the best or available MultiWiFi APs and MultiBlynk servers at runtime. Connection is with or without SSL. Configuration data to be saved in either LittleFS, SPIFFS or EEPROM. Default Credentials as well as Dynamic custom parameters can be added and modified easily without coding knowledge. DoubleResetDetector is used to force Config Portal opening even if the Credentials are still valid.
  
 This library is designed to help you to eliminate `hardcoding` your Wifi and Blynk credentials for ESP8266 and ESP32 (with/without SSL), and updating/reflashing every time you need to change them.
+
+---
+
+### Releases v1.0.16
+
+1. Fix bug and logic of USE_DEFAULT_CONFIG_DATA.
+2. Auto format SPIFFS/LittleFS for first time usage.
 
 ### Releases v1.0.15
 
@@ -64,7 +71,7 @@ With version `v1.0.5` or later, you now can configure:
 1. [`Arduino IDE 1.8.12 or later` for Arduino](https://www.arduino.cc/en/Main/Software)
 2. [`Blynk library 0.6.1 or later`](https://github.com/blynkkk/blynk-library/releases)
 3. [`ESP32 core 1.0.4 or later`](https://github.com/espressif/arduino-esp32/releases) for ESP32 boards
-4. [`ESP8266 core 2.6.3 or later` for Arduino](https://github.com/esp8266/Arduino#installing-with-boards-manager) for ESP8266 boards. To use ESP8266 core 2.7.1+ for LittleFS.
+4. [`ESP8266 core 2.7.1 or later` for Arduino](https://github.com/esp8266/Arduino#installing-with-boards-manager) for ESP8266 boards. To use ESP8266 core 2.7.1+ for LittleFS.
 5. [`ESP_DoubleResetDetector library 1.0.3 or later`](https://github.com/khoih-prog/ESP_DoubleResetDetector) to use LittleFS. 
 
 ### Installation
@@ -100,6 +107,7 @@ With version `v1.0.5` or later, you now can configure:
    
 5. **Open Arduino IDE.** Your library is installed.
 
+---
 
 ### How to use
 
@@ -108,18 +116,46 @@ In your code, replace
 2. `BlynkSimpleEsp8266_SSL.h` with `BlynkSimpleEsp8266_SSL_WM.h`  for ESP8266 `with SSL`
 3. `BlynkSimpleEsp32.h`       with `BlynkSimpleEsp32_WM.h`        for ESP32 `without SSL`
 4. `BlynkSimpleEsp32_SSL.h`   with `BlynkSimpleEsp32_SSL_WM.h`    for ESP32 `with SSL`
-5. then add
+
+5. For EP8266, add
 
 ```
-#define USE_SPIFFS    true
+#define USE_LITTLEFS    true
+#define USE_SPIFFS      false
 ```
+to use LittleFS or
+
+```
+#define USE_LITTLEFS    false
+#define USE_SPIFFS      true
+```
+
+to use SPIFFS or
+
+```
+#define USE_LITTLEFS    false
+#define USE_SPIFFS      false
+```
+to use EEPROM.
+
+6. For EP32, add
+
+```
+#define USE_SPIFFS      true
+```
+
 to use SPIFFS or
 
 ```
 #define USE_SPIFFS    false
 ```
-to use EEPROM, currently, data size in v1.0.13, with DRD and not including dynamic params, is 380  bytes from address EEPROM_START ) to save your configuration data.
-EEPROM_SIZE can be specified from 512 to 4096 (2048 for ESP32) bytes. See examples [ESP32WM_Config](https://github.com/khoih-prog/Blynk_WM/tree/master/examples/ESP32WM_Config) and [ESP8266WM_Config](https://github.com/khoih-prog/Blynk_WM/tree/master/examples/ESP8266WM_Config).
+to use EEPROM.
+
+Currently, data size in v1.0.13, with DRD and not including dynamic params, is 380  bytes from address EEPROM_START ) to save your configuration data.
+
+EEPROM_SIZE can be specified from 512 to 4096 (2048 for ESP32) bytes. 
+
+See examples [ESP32WM_Config](https://github.com/khoih-prog/Blynk_WM/tree/master/examples/ESP32WM_Config) and [ESP8266WM_Config](https://github.com/khoih-prog/Blynk_WM/tree/master/examples/ESP8266WM_Config).
 
 
 ```
@@ -176,6 +212,7 @@ Also see examples:
  9. [ESP8266WM_Config](examples/ESP8266WM_Config)
 10. [Blynk_WM_Template](examples/Blynk_WM_Template)
 
+---
 
 ## So, how it works?
 
@@ -221,6 +258,8 @@ Then click ***Save***. The system will auto-restart. You will see the board's bu
 // Set config portal channel, default = 1. Use 0 => random channel from 1-13 to avoid conflict
   Blynk.setConfigPortalChannel(0);
 ```
+
+---
 
 ### How to use default Credentials and have them pre-loaded onto Config Portal
 
@@ -1207,6 +1246,7 @@ uint16_t NUM_MENU_ITEMS = 0;
 #endif      //dynamicParams_h
 ```
 
+---
 
 ## TO DO
 
@@ -1230,11 +1270,17 @@ uint16_t NUM_MENU_ITEMS = 0;
 14. Permit to input special chars such as ***%*** and ***#*** into data fields.
 15. Add Dynamic Parameters with checksum
 16. Default Credentials and dynamic parameters
-17. DoubleDetectDetector to force Config Portal when double reset is detected within predetermined time, default 10s.
+17. ***DoubleDetectDetector*** to force Config Portal when double reset is detected within predetermined time, default 10s.
 18. Configurable Config Portal Title
 19. Re-structure all examples to separate Credentials / Defines / Dynamic Params / Code so that you can change Credentials / Dynamic Params quickly for each device.
-20. Add LittleFS support to ESP8266 as SPIFFS deprecated since ESP8266 core 2.7.1.
+20. Add ***LittleFS*** support to ESP8266 as SPIFFS deprecated since ***ESP8266 core 2.7.1.***
 
+---
+
+### Releases v1.0.16
+
+1. Fix bug and logic of USE_DEFAULT_CONFIG_DATA.
+2. Auto format SPIFFS/LittleFS for first time usage.
 
 ### Releases v1.0.15
 
@@ -1342,6 +1388,8 @@ Now you can easily specify and have the friendly, identifiable, RFC-952-conforme
 2. If the config data not entered completely (SSID, password, Server and Blynk token), entering config portal
 
 3. Correct the operation of BUILTIN_LED
+
+---
 
 ### Contributions and thanks
 

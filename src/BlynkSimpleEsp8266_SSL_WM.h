@@ -7,7 +7,7 @@
    Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
    Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
    Licensed under MIT license
-   Version: 1.0.15
+   Version: 1.0.16
 
    Original Blynk Library author:
    @file       BlynkSimpleEsp8266.h
@@ -35,6 +35,7 @@
     1.0.13    K Hoang      25/04/2020 Add Configurable Config Portal Title, Default Config Data and DRD. Update examples.
     1.0.14    K Hoang      03/05/2020 Fix bug and change feature in dynamicParams.
     1.0.15    K Hoang      12/05/2020 Fix bug and Update to use LittleFS for ESP8266 core 2.7.1+. Add example.
+    1.0.16    K Hoang      25/06/2020 Fix bug and logic of USE_DEFAULT_CONFIG_DATA. Auto format SPIFFS/LittleFS.
  *****************************************************************************************************************************/
 
 #ifndef BlynkSimpleEsp8266_SSL_WM_h
@@ -424,9 +425,13 @@ class BlynkWifi
         noConfigPortal = false;
       }
       //// New DRD ////
-#if ( BLYNK_WM_DEBUG > 2)      
-      BLYNK_LOG1(BLYNK_F("======= Start Default Config Data ======="));
-      displayConfigData(defaultConfig);
+      
+#if ( BLYNK_WM_DEBUG > 2)    
+      if (LOAD_DEFAULT_CONFIG_DATA) 
+      {   
+        BLYNK_LOG1(BLYNK_F("======= Start Default Config Data ======="));
+        displayConfigData(defaultConfig);
+      }
 #endif
 
       WiFi.mode(WIFI_STA);
@@ -446,11 +451,7 @@ class BlynkWifi
       }
 
       BLYNK_LOG2(BLYNK_F("Hostname="), RFC952_hostname);
-      
-#if ( BLYNK_WM_DEBUG > 2)        
-        BLYNK_LOG1(noConfigPortal? BLYNK_F("bg: noConfigPortal = true") : BLYNK_F("bg: noConfigPortal = false"));
-#endif       
-
+          
       //// New DRD ////
       //  noConfigPortal when getConfigData() OK and no DRD'ed
       if (getConfigData() && noConfigPortal)
@@ -939,7 +940,7 @@ class BlynkWifi
       BLYNK_LOG1(BLYNK_F("OK"));
       file.close();
       
-      BLYNK_LOG4(F("CrCCsum="), String(checkSum, HEX), F(",CrRCsum="), String(readCheckSum, HEX));
+      BLYNK_LOG4(F("CrCCsum=0x"), String(checkSum, HEX), F(",CrRCsum=0x"), String(readCheckSum, HEX));
       
       // Free buffer
       if (readBuffer != NULL)
@@ -1005,7 +1006,7 @@ class BlynkWifi
       BLYNK_LOG1(BLYNK_F("OK"));
       file.close();
       
-      BLYNK_LOG4(F("CrCCsum="), String(checkSum, HEX), F(",CrRCsum="), String(readCheckSum, HEX));
+      BLYNK_LOG4(F("CrCCsum=0x"), String(checkSum, HEX), F(",CrRCsum=0x"), String(readCheckSum, HEX));
       
       if ( checkSum != readCheckSum)
       {
@@ -1056,7 +1057,7 @@ class BlynkWifi
         BLYNK_LOG1(BLYNK_F("failed"));
       }   
            
-      BLYNK_LOG2(F("CrWCSum="), String(checkSum, HEX));
+      BLYNK_LOG2(F("CrWCSum=0x"), String(checkSum, HEX));
       
       // Trying open redundant Auth file
       file = FileFS.open(CREDENTIALS_FILENAME_BACKUP, "w");
@@ -1157,7 +1158,11 @@ class BlynkWifi
       {
         BLYNK_LOG1(BLYNK_F("failed"));
       }
-      
+    }
+    
+    void saveAllConfigData(void)
+    {
+      saveConfigData();     
       saveDynamicData();
     }
 
@@ -1165,61 +1170,81 @@ class BlynkWifi
     // Return false if init new EEPROM, LittleFS or SPIFFS. No more need trying to connect. Go directly to config mode
     bool getConfigData()
     {
-      bool dynamicDataValid;   
+      bool dynamicDataValid; 
+      int calChecksum;  
       
       hadConfigData = false;
       
       if (!FileFS.begin())
       {
+        FileFS.format();
+        
+        if (!FileFS.begin())
+        {
 #if USE_LITTLEFS
-        BLYNK_LOG1(BLYNK_F("LittleFS failed!. Please use SPIFFS or EEPROM."));
+          BLYNK_LOG1(BLYNK_F("LittleFS failed!. Please use SPIFFS or EEPROM."));
 #else
-        BLYNK_LOG1(BLYNK_F("SPIFFS failed!. Please use LittleFS or EEPROM."));
+          BLYNK_LOG1(BLYNK_F("SPIFFS failed!. Please use LittleFS or EEPROM."));
 #endif 
-        return false;
+          return false;
+        }
       }
-
-      if ( FileFS.exists(CONFIG_FILENAME) || FileFS.exists(CONFIG_FILENAME_BACKUP) )
-      {
-        // if config file exists, load
-        loadConfigData();
-#if ( BLYNK_WM_DEBUG > 2)      
-        BLYNK_LOG1(BLYNK_F("======= Start Stored Config Data ======="));
-        displayConfigData(Blynk8266_WM_config);
-#endif      
-      }
-
-      int calChecksum = calcChecksum();
-
-      BLYNK_LOG4(BLYNK_F("CCSum=0x"), String(calChecksum, HEX),
-                 BLYNK_F(",RCSum=0x"), String(Blynk8266_WM_config.checkSum, HEX));
 
       if (LOAD_DEFAULT_CONFIG_DATA)
       {
-        // Load default dynamicData, if checkSum OK => valid data => load
-        // otherwise, use default in sketch and just assume it's OK
-        if (checkDynamicData())
+        // Load Config Data from Sketch
+        memcpy(&Blynk8266_WM_config, &defaultConfig, sizeof(Blynk8266_WM_config));
+        strcpy(Blynk8266_WM_config.header, BLYNK_BOARD_TYPE);
+        
+        // Including config and dynamic data, and assume valid
+        saveAllConfigData();
+        
+#if ( BLYNK_WM_DEBUG > 2)      
+        BLYNK_LOG1(BLYNK_F("======= Start Loaded Config Data ======="));
+        displayConfigData(Blynk8266_WM_config);
+#endif
+
+        // Don't need Config Portal anymore
+        return true; 
+      }
+      else if ( ( FileFS.exists(CONFIG_FILENAME)      || FileFS.exists(CONFIG_FILENAME_BACKUP) ) &&
+                ( FileFS.exists(CREDENTIALS_FILENAME) || FileFS.exists(CREDENTIALS_FILENAME_BACKUP) ) )
+      {
+        // if config file exists, load
+        loadConfigData();
+        
+#if ( BLYNK_WM_DEBUG > 2)      
+        BLYNK_LOG1(BLYNK_F("======= Start Stored Config Data ======="));
+        displayConfigData(Blynk8266_WM_config);
+#endif
+
+        calChecksum = calcChecksum();
+
+        BLYNK_LOG4(BLYNK_F("CCSum=0x"), String(calChecksum, HEX),
+                   BLYNK_F(",RCSum=0x"), String(Blynk8266_WM_config.checkSum, HEX));
+                 
+        // Load dynamic data
+        dynamicDataValid = loadDynamicData();
+        
+        if (dynamicDataValid)
         {
 #if ( BLYNK_WM_DEBUG > 2)      
           BLYNK_LOG1(BLYNK_F("Valid Stored Dynamic Data"));
-#endif            
-          loadDynamicData();
-          dynamicDataValid = true;
+#endif          
         }
 #if ( BLYNK_WM_DEBUG > 2)  
         else
         {
-          BLYNK_LOG1(BLYNK_F("Invalid Stored Dynamic Data"));
-          dynamicDataValid = false;
+          BLYNK_LOG1(BLYNK_F("Invalid Stored Dynamic Data. Ignored"));
         }
-#endif                      
+#endif
       }
-      else
-      {           
-        dynamicDataValid = loadDynamicData();  
-      }   
+      else    
+      {
+        // Not loading Default config data, but having no config file => Config Portal
+        return false;
+      }    
       
-
       if ( (strncmp(Blynk8266_WM_config.header, BLYNK_BOARD_TYPE, strlen(BLYNK_BOARD_TYPE)) != 0) ||
            (calChecksum != Blynk8266_WM_config.checkSum) || !dynamicDataValid )
                       
@@ -1235,13 +1260,7 @@ class BlynkWifi
         else
         {
           memset(&Blynk8266_WM_config, 0, sizeof(Blynk8266_WM_config));
-
-          for (int i = 0; i < NUM_MENU_ITEMS; i++)
-          {
-            // Actual size of pdata is [maxlen + 1]
-            memset(myMenuItems[i].pdata, 0, myMenuItems[i].maxlen + 1);
-          }
-              
+                      
           strcpy(Blynk8266_WM_config.WiFi_Creds[0].wifi_ssid,       NO_CONFIG);
           strcpy(Blynk8266_WM_config.WiFi_Creds[0].wifi_pw,         NO_CONFIG);
           strcpy(Blynk8266_WM_config.WiFi_Creds[1].wifi_ssid,       NO_CONFIG);
@@ -1255,6 +1274,8 @@ class BlynkWifi
           
           for (int i = 0; i < NUM_MENU_ITEMS; i++)
           {
+            // Actual size of pdata is [maxlen + 1]
+            memset(myMenuItems[i].pdata, 0, myMenuItems[i].maxlen + 1);
             strncpy(myMenuItems[i].pdata, NO_CONFIG, myMenuItems[i].maxlen);
           }
         }
@@ -1271,7 +1292,7 @@ class BlynkWifi
         // Don't need
         Blynk8266_WM_config.checkSum = 0;
 
-        saveConfigData();
+        saveAllConfigData();
 
         return false;
       }
@@ -1298,7 +1319,7 @@ class BlynkWifi
 #else
 
 #ifndef EEPROM_SIZE
-#define EEPROM_SIZE     1024
+#define EEPROM_SIZE     2048
 #else
 #if (EEPROM_SIZE > 4096)
 #warning EEPROM_SIZE must be <= 4096. Reset to 4096
@@ -1375,7 +1396,7 @@ class BlynkWifi
 
       EEPROM.get(offset, readCheckSum);
            
-      BLYNK_LOG4(F("ChkCrR:CrCCsum="), String(checkSum, HEX), F(",CrRCsum="), String(readCheckSum, HEX));
+      BLYNK_LOG4(F("ChkCrR:CrCCsum=0x"), String(checkSum, HEX), F(",CrRCsum=0x"), String(readCheckSum, HEX));
            
       if ( checkSum != readCheckSum)
       {
@@ -1415,7 +1436,7 @@ class BlynkWifi
       
       EEPROM.get(offset, readCheckSum);
       
-      BLYNK_LOG4(F("CrCCsum="), String(checkSum, HEX), F(",CrRCsum="), String(readCheckSum, HEX));
+      BLYNK_LOG4(F("CrCCsum=0x"), String(checkSum, HEX), F(",CrRCsum=0x"), String(readCheckSum, HEX));
       
       if ( checkSum != readCheckSum)
       {
@@ -1449,59 +1470,73 @@ class BlynkWifi
       EEPROM.put(offset, checkSum);
       //EEPROM.commit();
       
-      BLYNK_LOG2(F("CrWCSum="), String(checkSum, HEX));
+      BLYNK_LOG2(F("CrWCSum=0x"), String(checkSum, HEX));
     }
     
     bool getConfigData()
     {
-      bool dynamicDataValid;   
+      bool dynamicDataValid;
+      int calChecksum;
       
       hadConfigData = false; 
       
       EEPROM.begin(EEPROM_SIZE);
       BLYNK_LOG2(BLYNK_F("EEPROMsz:"), EEPROM_SIZE);
-      EEPROM.get(BLYNK_EEPROM_START, Blynk8266_WM_config);
-
-#if ( BLYNK_WM_DEBUG > 2)      
-      BLYNK_LOG1(BLYNK_F("======= Start Stored Config Data ======="));
-      displayConfigData(Blynk8266_WM_config);
-#endif      
-
-      int calChecksum = calcChecksum();
-
-      BLYNK_LOG4(BLYNK_F("CCSum=0x"), String(calChecksum, HEX),
-                 BLYNK_F(",RCSum=0x"), String(Blynk8266_WM_config.checkSum, HEX));
-                 
+      
       if (LOAD_DEFAULT_CONFIG_DATA)
       {
-        // Load default dynamicData, if checkSum OK => valid data => load
-        // otherwise, use default in sketch and just assume it's OK        
-        if (checkDynamicData())
+        // Load Config Data from Sketch
+        memcpy(&Blynk8266_WM_config, &defaultConfig, sizeof(Blynk8266_WM_config));
+        strcpy(Blynk8266_WM_config.header, BLYNK_BOARD_TYPE);
+        
+        // Including config and dynamic data, and assume valid
+        saveAllConfigData();
+                 
+#if ( BLYNK_WM_DEBUG > 2)      
+        BLYNK_LOG1(BLYNK_F("======= Start Loaded Config Data ======="));
+        displayConfigData(Blynk8266_WM_config);
+#endif
+
+        // Don't need Config Portal anymore
+        return true;             
+      }
+      else
+      {
+        // Load data from EEPROM
+        EEPROM.get(BLYNK_EEPROM_START, Blynk8266_WM_config);
+        
+#if ( BLYNK_WM_DEBUG > 2)      
+        BLYNK_LOG1(BLYNK_F("======= Start Stored Config Data ======="));
+        displayConfigData(Blynk8266_WM_config);
+#endif
+
+        calChecksum = calcChecksum();
+
+        BLYNK_LOG4(BLYNK_F("CCSum=0x"), String(calChecksum, HEX),
+                   BLYNK_F(",RCSum=0x"), String(Blynk8266_WM_config.checkSum, HEX));
+                 
+        // Load dynamic data from EEPROM
+        dynamicDataValid = EEPROM_getDynamicData();
+        
+        if (dynamicDataValid)
         {
 #if ( BLYNK_WM_DEBUG > 2)      
           BLYNK_LOG1(BLYNK_F("Valid Stored Dynamic Data"));
 #endif          
-          EEPROM_getDynamicData();
-          dynamicDataValid = true;
         }
 #if ( BLYNK_WM_DEBUG > 2)  
         else
         {
           BLYNK_LOG1(BLYNK_F("Invalid Stored Dynamic Data. Ignored"));
-          dynamicDataValid = false;
         }
-#endif            
+#endif
       }
-      else
-      {           
-        dynamicDataValid = EEPROM_getDynamicData();    
-      }  
-      
+        
       if ( (strncmp(Blynk8266_WM_config.header, BLYNK_BOARD_TYPE, strlen(BLYNK_BOARD_TYPE)) != 0) ||
            (calChecksum != Blynk8266_WM_config.checkSum) || !dynamicDataValid )
       {       
         // Including Credentials CSum
-        BLYNK_LOG4(F("InitEEPROM,sz="), EEPROM_SIZE, F(",Datasz="), totalDataSize);
+        BLYNK_LOG4(F("InitEEPROM,sz="), EEPROM_SIZE, F(",DataSz="), totalDataSize);
 
         // doesn't have any configuration        
         if (LOAD_DEFAULT_CONFIG_DATA)
@@ -1511,13 +1546,7 @@ class BlynkWifi
         else
         {
           memset(&Blynk8266_WM_config, 0, sizeof(Blynk8266_WM_config));
-
-          for (int i = 0; i < NUM_MENU_ITEMS; i++)
-          {
-            // Actual size of pdata is [maxlen + 1]
-            memset(myMenuItems[i].pdata, 0, myMenuItems[i].maxlen + 1);
-          }
-              
+             
           strcpy(Blynk8266_WM_config.WiFi_Creds[0].wifi_ssid,       NO_CONFIG);
           strcpy(Blynk8266_WM_config.WiFi_Creds[0].wifi_pw,         NO_CONFIG);
           strcpy(Blynk8266_WM_config.WiFi_Creds[1].wifi_ssid,       NO_CONFIG);
@@ -1531,6 +1560,8 @@ class BlynkWifi
           
           for (int i = 0; i < NUM_MENU_ITEMS; i++)
           {
+            // Actual size of pdata is [maxlen + 1]
+            memset(myMenuItems[i].pdata, 0, myMenuItems[i].maxlen + 1);
             strncpy(myMenuItems[i].pdata, NO_CONFIG, myMenuItems[i].maxlen);
           }
         }
@@ -1547,9 +1578,7 @@ class BlynkWifi
         // Don't need
         Blynk8266_WM_config.checkSum = 0;
 
-        EEPROM.put(BLYNK_EEPROM_START, Blynk8266_WM_config);
-        EEPROM_putDynamicData();
-        EEPROM.commit();
+        saveAllConfigData();
 
         return false;
       }
@@ -1577,9 +1606,20 @@ class BlynkWifi
     {
       int calChecksum = calcChecksum();
       Blynk8266_WM_config.checkSum = calChecksum;
-      BLYNK_LOG4(BLYNK_F("SaveEEPROM,sz="), EEPROM.length(), BLYNK_F(",CSum=0x"), String(calChecksum, HEX))
+      BLYNK_LOG4(BLYNK_F("SaveEEPROM,sz="), EEPROM_SIZE, BLYNK_F(",CSum=0x"), String(calChecksum, HEX))
 
       EEPROM.put(BLYNK_EEPROM_START, Blynk8266_WM_config);
+      
+      EEPROM.commit();
+    }
+    
+    void saveAllConfigData(void)
+    {
+      int calChecksum = calcChecksum();
+      Blynk8266_WM_config.checkSum = calChecksum;
+      BLYNK_LOG4(BLYNK_F("SaveEEPROM,sz="), EEPROM_SIZE, BLYNK_F(",CSum=0x"), String(calChecksum, HEX))
+
+      EEPROM.put(BLYNK_EEPROM_START, Blynk8266_WM_config);   
       EEPROM_putDynamicData();
       
       EEPROM.commit();
@@ -1858,7 +1898,7 @@ class BlynkWifi
           BLYNK_LOG1(BLYNK_F("h:UpdEEPROM"));
 #endif
 
-          saveConfigData();
+          saveAllConfigData();
 
           BLYNK_LOG1(BLYNK_F("h:Rst"));
 
