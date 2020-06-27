@@ -87,7 +87,7 @@
 #define BLYNK_PRINT Serial  // Generates Blynk debug prints. Comment out if not needed, saving space
 #define BLYNK_WM_DEBUG    0 // Can be 0-3 (3 = detailed)
 
-// These two .h files are in my libraries folder and contain my personal SSID, WiFi passowrd and Blynk authcodes
+// These two .h files are in my libraries folder and contain my personal SSID, WiFi password and Blynk authcodes
 #include "MY_WIFI_CREDENTIALS.h"   // #defines MY_WIFI_SSID AND MY_WIFI_PASSWORD
 #include "MY_BLYNK_CREDENTIALS.h"  // #defines MY_BLYNK_SERVER and MY_xxx_AUTHCODEs (where xxx is a particular project)
 // Each Blynk authcode has a unique name in the MY_BLYNK_CREDENTIALS.h file. 
@@ -135,7 +135,7 @@
   ///////////////////////////////////////////////////////////////////////////////////////////
   //// COMPILER SWITCH SELECTION - CHOOSE: WF TO USE LITTLEFS (ESP8266 ONLY), SPIFFS OR EEPROM ////////////
   
-  #ifdef ESP8266
+  #if ESP8266
     // #define USE_SPIFFS and USE_LITTLEFS   false        => using EEPROM for configuration data in WiFiManager
     // #define USE_LITTLEFS    true                       => using LITTLEFS for configuration data in WiFiManager
     // #define USE_LITTLEFS    false and USE_SPIFFS true  => using SPIFFS for configuration data in WiFiManager
@@ -240,10 +240,10 @@
   //// COMPILER VALUE SELECTION - CONFIG PORTAL'S OWN SSID AND password /////////////////////
   //// Config Portal turns on when WiFiManager cannot connect to WiFi or Blynk
   //// only relevant if using WiFiManager _WM
-  #define CONFIG_PORTAL_SSID "Config_Blynk_WM_Template"   // SSID for device-generated WiFi beacon
-  #define CONFIG_PORTAL_PASSWORD "12345678"     // password for device-generated WiFi beacon - 8+ characters
-  #define CONFIG_PORTAL_IPADDRESS 192,168,220,1 // IP address of Config Portal once connected to WiFi beacon
-  #define DEVICE_HOST_NAME "Blynk_WM_Template"  // DHCP Host name for device
+  #define CONFIG_PORTAL_SSID        "Config_Blynk_WM_Template"    // SSID for device-generated WiFi beacon
+  #define CONFIG_PORTAL_PASSWORD    "12345678"                    // password for device-generated WiFi beacon - 8+ characters
+  #define CONFIG_PORTAL_IPADDRESS   192,168,220,1                 // IP address of Config Portal once connected to WiFi beacon
+  #define DEVICE_HOST_NAME          "Blynk_WM_Template"           // DHCP Host name for device
 
 
   #if USE_DEFAULT_CONFIG_DATA // FORCE default values for fields presented in Config Portal
@@ -424,16 +424,22 @@ bool heartbeatLEDon = false; // this lets me use the same routine for the turn-o
 
 #include "ESP_LED_BUILTINS.h"  // Corrects for Arduino ESP8266 quirk inverting LED_BUILTIN - (#included code below)
 /* Here's the code in ESP_LED_BUILTINS
-#ifdef ESP32
-  #define LED_BUILTIN 13  // NOT DEFINED IN ESP32 BOARD FILES - HMMM.  
+ *  
+#if ESP8266  // There's a quirk in Arduino that has the LED_BUILTIN inverted. This corrects for it.
+  #define LED_BUILTIN_HIGH      LOW
+  #define LED_BUILTIN_LOW       HIGH
+#else
+  #define LED_BUILTIN_HIGH      HIGH
+  #define LED_BUILTIN_LOW       LOW
 #endif
 
-#ifdef ESP8266  // There's a quirk in ESP8266 Arduino that has the LED_BUILTIN inverted. This corrects for it.
-  #define LED_BUILTIN_HIGH LOW
-  #define LED_BUILTIN_LOW HIGH
-#else
-  #define LED_BUILTIN_HIGH HIGH
-  #define LED_BUILTIN_LOW LOW
+// Also the ESP32 board manager files appear to NOT have LED_BUILTIN assigned correctly
+// This fixes that
+#if ESP32
+  #ifdef LED_BUILTIN
+    #undef LED_BUILTIN      
+  #endif 
+  #define LED_BUILTIN           13  // NOT DEFINED IN ESP32 BOARD FILES - HMMM.
 #endif
 */
 
@@ -737,4 +743,3 @@ BLYNK_APP_CONNECTED()
   Serial.println ( "\nBLYNK_APP_CONNECTED..." );  
 
 } // end BLYNK_APP_CONNECTED
-
