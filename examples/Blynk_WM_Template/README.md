@@ -1,5 +1,7 @@
 # Detailed Blynk WiFi Examples
 
+Updated 27 June 2020 to Blynk_WiFiManager (WM) library update 1.0.16
+
 The Arduino/Blynk sketch **Blynk_WM_Template.ino** is a fully-developed get-started demo program for the powerful BlynkSimpleEsp... and the newer WiFiManager (WM) libraries. It demonstrates 
  * **WiFiManager Config Portal** configuration and use
  * **WiFiManager Dynamic (extended) Parameters** configuration and use
