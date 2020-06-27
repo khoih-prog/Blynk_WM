@@ -111,8 +111,8 @@
   //// SELECT IF YOU WANT CONFIG PORTAL FIELDS INITIALIZED TO SOMETHING OTHER THAN BLANK ////
   //// This data only gets loaded on an initial compile and upload and after Config Portal data gets deleted
   //// such as by using DRD (Double Reset) or the Blynk command Blynk.clearConfigData()
-  #define USE_DEFAULT_CONFIG_DATA true
-//#define USE_DEFAULT_CONFIG_DATA false
+// #define USE_DEFAULT_CONFIG_DATA true
+#define USE_DEFAULT_CONFIG_DATA false
 
 
   ///////////////////////////////////////////////////////////////////////////////////////////
@@ -605,7 +605,7 @@ BLYNK_WRITE_DEFAULT()
 } //end BLYNK_WRITE_DEFAULT
 
 
-#if USE_WM
+#if (USE_WM && USE_DYNAMIC_PARAMETERS)
 // UPDATE DYNAMIC PARAMETERS 
 //  1 - CONVERTS THE char INFO FROM THE CONFIG PORTAL OR COMPILER CONSTANTS TO THE int VALUES THEY NEED TO BE FOR USE IN A SKETCH
 //  2 -   UPDATES BLYNK WITH OTHER DYNAMIC PARAMETERS (WIDGET LABELS) 
@@ -664,7 +664,7 @@ BLYNK_CONNECTED()
 {
   Serial.println ( "\nBLYNK_CONNECTED..." );  
 
-  #if USE_WM
+  #if (USE_WM && USE_DYNAMIC_PARAMETERS)
     // Convert the Config Portal (or compiler constant) Virtual Pin char values to Blynk-usable ints
     updateDynamicParameters();  
   #endif
