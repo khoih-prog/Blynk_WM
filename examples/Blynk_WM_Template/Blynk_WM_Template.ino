@@ -34,31 +34,34 @@
 // Sketch uses Arduino IDE-selected ESP32 and ESP8266 to select compile choices
 
 /*  
- * The Arduino/Blynk sketch Blynk_WiFiMgr_ESP32_8266_Template_HexColor.ino is a fully-developed 
- * get-started demo program for the powerful BlynkSimpleEsp... and the newer WiFiManager (WM) libraries. 
+ * The Arduino/Blynk sketch Blynk_WM_Template.ino is a fully-developed 
+ * get-started demo program for the powerful BlynkSimpleESP... and the newer WiFiManager (WM) libraries. 
  * This demo sketch written by Thor Johnson (https://github.com/thorathome) May 2020 as a template for
  * Blynk Wifi ESP communications. See https://github.com/thorathome/Blynk_Examples
+ * 
+ * Updated 27 June 2020 - bug fixes, updating USE_DEFAULT_DATA (WM libaray) documentation
  * 
  * It demonstrates
  * * WiFiManager Config Portal configuration and use
  * * WiFiManager Dynamic (extended) Parameters configuration and use
  * * Use of compiler constants for compile-time selection
  * * Use of Blynk's BLYNK_WRITE_DEFAULT() flexible capability
+ * * EEPROM and LittleFS (file system to replace depricated SPIFFS)
  *
  * This sketch lets end-users choose a color using ZeRGBa, colors a blinking (heartbeat) LED, 
  * and shows the HEX code for that color.
  *
- * It requires:
+ * This sketch requires:
  * * Blynk ZeRGBa configured in MERGE mode with values between 0 and 255
  * * Blynk LED
  * * Blynk Value Display
  * * Blynk master library installed
- * * Blynk_WiFiManager installed
- * * ESP32 or ESP8266 devices
+ * * Blynk_WiFiManager library installed
+ * * ESP32 or ESP8266 device
  *
  * As in all Blynk sketches using WiFi, you will need
- * * Your WiFi SSID or SSIDs and passwords
- * * Your Blynk authcode or authcodes
+ * * Your WiFi SSID or SSIDs and passwords (I put mine in my library as a .h file)
+ * * Your Blynk authcode or authcodes (I put mine in my library as a .h file)
  * * Your Blynk server URL (Main US Blyk server is blynk-cloud.com.)
  *
  * These values do not need to be coded into the sketch as they may be entered at runtime (once) 
@@ -78,12 +81,18 @@
  * the BlynkSimpleEsp... and ...WiFiManager libraries, the ESP32 and ESP8266.
  */
 
-#define SERIAL_SPEED 115200
+#define SERIAL_SPEED 230400
 #define SKETCH_NAME "Blynk_WM_Template"
 
 #define BLYNK_PRINT Serial  // Generates Blynk debug prints. Comment out if not needed, saving space
+#define BLYNK_WM_DEBUG    0 // Can be 0-3 (3 = detailed)
 
-#define BLYNK_WM_DEBUG      3
+// These two .h files are in my libraries folder and contain my personal SSID, WiFi passowrd and Blynk authcodes
+#include "MY_WIFI_CREDENTIALS.h"   // #defines MY_WIFI_SSID AND MY_WIFI_PASSWORD
+#include "MY_BLYNK_CREDENTIALS.h"  // #defines MY_BLYNK_SERVER and MY_xxx_AUTHCODEs (where xxx is a particular project)
+// Each Blynk authcode has a unique name in the MY_BLYNK_CREDENTIALS.h file. 
+#define MY_BLYNK_AUTHCODE MY_WM_TEMPLATE_AUTHCODE   // My authcode for development and testing new capabilities
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //// COMPILER SWITCH SELECTION - USE WIFI MANAGER OR NOT //////////////////////////////////
@@ -100,21 +109,13 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //// COMPILER VALUE SELECTION - VIRTUAL PINS FOR THE 3 WIDGETS ////////////////////////////
-#define CONTROL_DEFAULT_VPIN "2"        // Can also be changed via Config Portal (USE_DYNAMIC_PARAMETERS)
-#define HEARTBEAT_LED_DEFAULT_VPIN "3"  // Can also be changed via Config Portal (USE_DYNAMIC_PARAMETERS)
-#define DISPLAY_DEFAULT_VPIN "4"        // Can also be changed via Config Portal (USE_DYNAMIC_PARAMETERS)
+#define CONTROL_DEFAULT_VPIN       "2"  // Can also be changed via Config Portal ( if USE_DYNAMIC_PARAMETERS )
+#define HEARTBEAT_LED_DEFAULT_VPIN "3"  // Can also be changed via Config Portal ( if USE_DYNAMIC_PARAMETERS )
+#define DISPLAY_DEFAULT_VPIN       "4"  // Can also be changed via Config Portal ( if USE_DYNAMIC_PARAMETERS )
 // These can all be reset using Config Portal. I have included them as default values only. */ 
 
+
 #if USE_WM
-  ///////////////////////////////////////////////////////////////////////////////////////////
-  //// COMPILER SWITCH SELECTION - USE DEFAULT CONFIG PORTAL FIELD DATA OR NOT //////////////
-  //// SELECT IF YOU WANT CONFIG PORTAL FIELDS INITIALIZED TO SOMETHING OTHER THAN BLANK ////
-  //// This data only gets loaded on an initial compile and upload and after Config Portal data gets deleted
-  //// such as by using DRD (Double Reset) or the Blynk command Blynk.clearConfigData()
-// #define USE_DEFAULT_CONFIG_DATA true
-#define USE_DEFAULT_CONFIG_DATA false
-
-
   ///////////////////////////////////////////////////////////////////////////////////////////
   //// COMPILER SWITCH SELECTION - USE DYNAMIC (CUSTOM) CONFIG PORTAL FIELDS OR NOT /////////
   #define USE_DYNAMIC_PARAMETERS true
@@ -122,10 +123,19 @@
 
   
   ///////////////////////////////////////////////////////////////////////////////////////////
-  //// COMPILER SWITCH SELECTION - USE SPIFFS OR EEPROM /////////////////////////////////////
-  //// only relevant if using WiFiManager _WM
+  //// COMPILER SWITCH SELECTION - USE DEFAULT CONFIG PORTAL FIELD DATA OR NOT //////////////
+  //// WIFI_MANAGER USES THE CONFIG DATA STORED ON THE DEVICE.                           ////
+  ////   IF THERE IS NO GOOD DATA OR WM CANNOT CONNECT TO WIFI OR TO BLYNK,              ////
+  ////   THE CONFIG PORTAL ACTIVATES AUTOMATICALLY
+  //// USE_DEFAULT_CONFIG_DATA FORCES THE USE OF YOUR CODED CONFIG DATA EACH TIME        ////
+  #define USE_DEFAULT_CONFIG_DATA true  // Used mostly for development and debugging. FORCES default values to be loaded each run.
+  //#define USE_DEFAULT_CONFIG_DATA false   // Used mostly once debugged. Assumes good data already saved in device.  
+
+
+  ///////////////////////////////////////////////////////////////////////////////////////////
+  //// COMPILER SWITCH SELECTION - CHOOSE: WF TO USE LITTLEFS (ESP8266 ONLY), SPIFFS OR EEPROM ////////////
   
-  #if defined(ESP8266)
+  #ifdef ESP8266
     // #define USE_SPIFFS and USE_LITTLEFS   false        => using EEPROM for configuration data in WiFiManager
     // #define USE_LITTLEFS    true                       => using LITTLEFS for configuration data in WiFiManager
     // #define USE_LITTLEFS    false and USE_SPIFFS true  => using SPIFFS for configuration data in WiFiManager
@@ -149,17 +159,17 @@
     #elif USE_SPIFFS
       //#define USE_SPIFFS false  // ESP8266, Choosing EEPROM over LittleFS / SPIFFS here
       #define USE_SPIFFS true
-      #warning Use SPIFFS for ESP8266
+      #warning Using SPIFFS for ESP8266
     #else
-      #warning Use EEPROM for ESP8266
+      #warning Using EEPROM for ESP8266
     #endif  
   #else
-    #define USE_SPIFFS false  // ESP32, Choosing EEPROM over LittleFS / SPIFFS here
-    //#define USE_SPIFFS true
+    //#define USE_SPIFFS false  // ESP32, Choosing EEPROM over LittleFS / SPIFFS here
+    #define USE_SPIFFS true
     #if USE_SPIFFS
-      #warning Use SPIFFS for ESP32
+      #warning Using SPIFFS for ESP32
     #else
-      #warning Use EEPROM for ESP32
+      #warning Using EEPROM for ESP32
     #endif
   #endif
 
@@ -182,12 +192,13 @@
   // NOT NECESSARY TO MODIFY - MUST BE INCLUDED
   // Force some params in Blynk, only valid for library version 1.0.1 and later
   // (from the Github doc)
-  #define TIMEOUT_RECONNECT_WIFI                    10000L
-  #define RESET_IF_CONFIG_TIMEOUT                   true
+  // Blynk tries to reconnect X times before posting the Config Portal. Default is 10. I like 3.  
   #define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET    3  // Library default is 10 (times 2) - DEBUG SET AT 2
+  #define RESET_IF_CONFIG_TIMEOUT                   true
+
 
   // NOT NECESSARY TO MODIFY
-  // COMPILE-TIME LOGIC: AUTOMATIC LIBRARY SELECTION 
+  // COMPILE-TIME LOGIC: AUTOMATIC WIFI LIBRARY SELECTION 
   #if USE_SSL
     #if ESP8266
       #include <BlynkSimpleEsp8266_SSL_WM.h>
@@ -229,13 +240,15 @@
   //// COMPILER VALUE SELECTION - CONFIG PORTAL'S OWN SSID AND password /////////////////////
   //// Config Portal turns on when WiFiManager cannot connect to WiFi or Blynk
   //// only relevant if using WiFiManager _WM
-  #define CONFIG_PORTAL_SSID "MyConfigPortal"   // SSID for device-generated WiFi beacon
+  #define CONFIG_PORTAL_SSID "Config_Blynk_WM_Template"   // SSID for device-generated WiFi beacon
   #define CONFIG_PORTAL_PASSWORD "12345678"     // password for device-generated WiFi beacon - 8+ characters
   #define CONFIG_PORTAL_IPADDRESS 192,168,220,1 // IP address of Config Portal once connected to WiFi beacon
-  #define DEVICE_HOST_NAME "Configurator-Demo"  // DHCP Host name for device
+  #define DEVICE_HOST_NAME "Blynk_WM_Template"  // DHCP Host name for device
 
 
-  #if USE_DEFAULT_CONFIG_DATA // Set default values for "standard" fields presented in Config Portal
+  #if USE_DEFAULT_CONFIG_DATA // FORCE default values for fields presented in Config Portal
+  // This feature is primarily used in development to force a known set of values as Config Data
+  // It will NOT force the Config Portal to activate. Use DRD or erase Config Data with Blynk.clearConfigData()
     bool LOAD_DEFAULT_CONFIG_DATA = true;  //do not modify - used by library
     
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -255,7 +268,7 @@
       //// COMPILER SWITCH SELECTIONS - SET UP TO TWO SSIDs & TWO passwords /////////////////////
       //WiFi_Credentials  WiFi_Creds  [NUM_WIFI_CREDENTIALS]
       //WiFi_Creds.wifi_ssid and WiFi_Creds.wifi_pw
-      "SSID",  "password",              // Config Portal WiFi SSID & PWD field values
+      MY_WIFI_SSID,  MY_WIFI_PASSWORD,  // Config Portal WiFi SSID & PWD field values
       "SSID1", "password1",             // Config Portal WiFi SSID1 & PWD1 field values
     
       ///////////////////////////////////////////////////////////////////////////////////////////
@@ -263,9 +276,8 @@
       // Blynk_Credentials Blynk_Creds [NUM_BLYNK_CREDENTIALS];
       // Blynk_Creds.blynk_server and Blynk_Creds.blynk_token
       "account.bogus.org", "token1",    // Config Portal Blynk Server & Token field values
-      "blynk-cloud.com", "<authcode>",  // Config Portal Blynk Server1 & Token1 field values
+      MY_BLYNK_SERVER, MY_BLYNK_AUTHCODE, //Config Portal Blynk Server1 & Token1 field values
       
-  
       ///////////////////////////////////////////////////////////////////////////////////////////
       //// COMPILER SWITCH SELECTIONS - SET DEFAULT PORTS (FOR SSL OR NON-SSL) //////////////////
       //int  blynk_port;
@@ -278,7 +290,7 @@
       ///////////////////////////////////////////////////////////////////////////////////////////
       //// COMPILER SWITCH SELECTIONS - SET DEFAULT BOARD NAME //////////////////////////////////
       //char board_name     [24];
-      "Air-Control",                    // Config Portal Board Name field value
+      "Blynk_WM_Template",              // Config Portal Board Name field value
     
       // terminate the list
       //int  checkSum, dummy, not used
@@ -287,12 +299,12 @@
     };
    
   #else // not using USE_DEFAULT_CONFIG_DATA 
-    // Set up the "standard" Config Portal fields
+    // Set up the Config Portal fields
     bool LOAD_DEFAULT_CONFIG_DATA = false;
     
-    // AUTOMATICALLY GENERATE THE "STANDARD"CONFIG PORTAL DATA STRUCTURE
+    // AUTOMATICALLY GENERATE THE CONFIG PORTAL DATA STRUCTURE
     // NOT NECESSARY TO MODIFY
-    Blynk_WM_Configuration defaultConfig;  // loads t4he default confir portal data type with blacnk defaults  
+    Blynk_WM_Configuration defaultConfig;  // loads the default Config Portal data type with blank defaults  
   #endif
 
   
@@ -356,38 +368,39 @@
     };
 
     // Automatically calculate the # of DYNAMIC PARAMETERS menu items - DO NOT TOUCH
-    uint16_t NUM_MENU_ITEMS = sizeof(myMenuItems) / sizeof(MenuItem);  //MenuItemSize;
+    uint16_t NUM_MENU_ITEMS = sizeof ( myMenuItems ) / sizeof ( MenuItem );  //MenuItemSize;
 
   #else // not using USE_DYNAMIC_PARAMETERS - SET UP NULL (DYNAMIC) MENU
     // NOT NECESSARY TO MODIFY
     MenuItem myMenuItems [] = {};
     uint16_t NUM_MENU_ITEMS = 0;
+    
   #endif // end USE_DYNAMIC_PARAMETERS    
-
-
-  // NOT NECESSARY TO MODIFY - MUST BE INCLUDED
-  // Force some params in Blynk, only valid for library version 1.0.1 and later
-  // (from the Github doc)
-  #define TIMEOUT_RECONNECT_WIFI                    10000L
-  #define RESET_IF_CONFIG_TIMEOUT                   true
-  #define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET    3  // Library default is 10 (times 2) - DEBUG SET AT 2
 
 #else // NOT USING WIFI MANAGER - SET STANDARD WIFI & BLYNK CREDENTIALS, VIRTUAL PIN CHAR VARIABLES
   ///////////////////////////////////////////////////////////////////////////////////////////
   //// COMPILER VALUE SELECTION - STANDARD WIFI CREDENTIALS /////////////////////////////////
   //// Will be used in standard WiFi/begin() and Blynk.config() commands below //////////////
-  char WiFiSSID[] = "<my ssid";  // network SSID (name)
-  char WiFiPass[] = "<my passcode>";  // network password
+  char WiFiSSID[] =       MY_WIFI_SSID;  // network SSID (name)
+  char WiFiPass[] =       MY_WIFI_PASSWORD;  // network password
 
   ///////////////////////////////////////////////////////////////////////////////////////////
   //// COMPILER VALUE SELECTION - BLYNK AUTH /////////////////////////////////
   //// Will be used in standard WiFi/begin() and Blynk.config() commands below //////////////
-  char blynkAuth[] = "<my_auth>"; // BLYNK Auth 
+  char blynkAuth[] =      MY_BLYNK_AUTHCODE; // BLYNK Auth 
+#endif
 
+
+#if ! USE_WM || ! USE_DYNAMIC_PARAMETERS // NOT using WifiManager OR NOT using Dynamic Parameters
   // Will be converted to int values in Setup
   char controlVpinC[] =   CONTROL_DEFAULT_VPIN;
   char heartbeatVpinC[] = HEARTBEAT_LED_DEFAULT_VPIN;
   char displayVpinC[] =   DISPLAY_DEFAULT_VPIN;
+
+  // Widget labels when not using WiFIManager or not using Dynamic Parameters
+  char controlLabel[] =   "Select a color";
+  char heartbeatLabel[] = "My Beating Heart";  
+  char displayLabel[] =   "HEX Color Value"; 
 #endif
 
 
@@ -397,7 +410,8 @@ int heartbeatVpin; // = HEARTBEAT_LED_DEFAULT_VPIN or set in Config Portam (WM)
 int displayVpin;   // = DISPLAY_DEFAULT_VPIN or set in Config Portam (WM)
 
 
-// THIS SKETCH SETS UP A HEARTBEAT LED ON A TIMER TO SHOW SYSTEM IS ALIVEAND WELL
+
+// THIS SKETCH SETS UP A HEARTBEAT LED ON A TIMER TO SHOW SYSTEM IS ALIVE AND WELL
 BlynkTimer myTimer;
 // Blynk timers to blink a heartbeat LED on and off
 int heartbeatLEDinterval = 3000; // interval between heartbeats for onboard and Blynk Virtual LED in millisec 
@@ -406,6 +420,26 @@ int heartbeatLEDtimerID;
 int heartbeatLEDduration = 750; // duraction of each blink in millisec (set as an interval timer)
 int heartbeatLEDdurationTimerID;
 bool heartbeatLEDon = false; // this lets me use the same routine for the turn-on timer and the turn-off interval
+
+
+#include "ESP_LED_BUILTINS.h"  // Corrects for Arduino ESP8266 quirk inverting LED_BUILTIN - (#included code below)
+/* Here's the code in ESP_LED_BUILTINS
+#ifdef ESP32
+  #define LED_BUILTIN 13  // NOT DEFINED IN ESP32 BOARD FILES - HMMM.  
+#endif
+
+#ifdef ESP8266  // There's a quirk in ESP8266 Arduino that has the LED_BUILTIN inverted. This corrects for it.
+  #define LED_BUILTIN_HIGH LOW
+  #define LED_BUILTIN_LOW HIGH
+#else
+  #define LED_BUILTIN_HIGH HIGH
+  #define LED_BUILTIN_LOW LOW
+#endif
+*/
+
+
+
+
 
 // SETUP WIFI, BLYNK, HEARTBEAT
  void setup() 
@@ -416,7 +450,7 @@ bool heartbeatLEDon = false; // this lets me use the same routine for the turn-o
   Serial.println ( "\n\n=======================================" );
   Serial.print ( SKETCH_NAME ); 
   #if USE_SSL
-    Serial.println ( " ** Using SSL ** \n" );  
+    Serial.print ( " ** Using SSL **" );  
   #endif
   Serial.println();
 
@@ -426,23 +460,31 @@ bool heartbeatLEDon = false; // this lets me use the same routine for the turn-o
 
   // Initialize Onboard LED 
   pinMode ( LED_BUILTIN, OUTPUT );  
-  digitalWrite ( LED_BUILTIN, LOW ); 
+  digitalWrite ( LED_BUILTIN, LED_BUILTIN_LOW ); 
     
-
   // Set Blynk Virtual Heartbeat LED OFF
   Blynk.virtualWrite ( heartbeatVpin, 000 );  
-  heartbeatLEDblink(); // first heartbeat 
+  heartbeatLEDblink(); // start first heartbeat 
   
   Serial.println ( "\nSetup complete \n" );    
   
 } //end setup
+
+
+
+
 
 // KEEPING IT SIMPLE
 void loop()
 {
   Blynk.run();
   myTimer.run();  
-} 
+  
+} // end loop
+
+
+
+
 
 // CONNECT TO WLAN WITH OR WITHOUT WM
 // Connect to Blynk once WiFi connection establishked
@@ -460,8 +502,10 @@ void connectToWLANandBlynk()
   #if USE_WM
     Serial.println ( "Starting Blynk.begin (with WM)" );  
 
-    Blynk.setConfigPortal ( CONFIG_PORTAL_SSID, CONFIG_PORTAL_PASSWORD );
-    Blynk.setConfigPortalIP ( IPAddress ( CONFIG_PORTAL_IPADDRESS ) );  
+    // SET UP THE CONFIG PORTAL CREDENTIALS AND CONNECTION INFO
+    Blynk.setConfigPortalChannel ( 0 );  // 0 -> Use a random WiFi 2.4GHz channel for the Config Portal
+    Blynk.setConfigPortal ( CONFIG_PORTAL_SSID, CONFIG_PORTAL_PASSWORD ); // Set up Config Portal SSID & Password
+    Blynk.setConfigPortalIP ( IPAddress ( CONFIG_PORTAL_IPADDRESS ) ); // Set up IP address for COnfig Portal once connected to WiFi
 
     Serial.print ( "Blynk.setConfigPortal(" ); 
     Serial.print ( CONFIG_PORTAL_SSID ); Serial.print ( "," );  
@@ -492,16 +536,17 @@ void connectToWLANandBlynk()
     Blynk.config ( blynkAuth );
     Blynk.connect ( 2500 ); // Don't get stuck hanging for more than 2500 millis.
   #endif // using WM
-  
+
   if ( Blynk.connected() ) 
   {
-    #if ( USE_LITTLEFS || USE_SPIFFS)
-      Serial.println("\nBlynk using " + String(CurrentFileFS) + " connected. Board Name : " + Blynk.getBoardName());
-    #else
-      Serial.println("\nBlynk using EEPROM connected. Board Name : " + Blynk.getBoardName());
-      Serial.printf("EEPROM size = %d bytes, EEPROM start address = %d / 0x%X\n", EEPROM_SIZE, EEPROM_START, EEPROM_START);
-    #endif  
-        
+    #if USE_WM
+      #if ( USE_LITTLEFS || USE_SPIFFS )
+        Serial.println ( "\nBlynk using " + String(CurrentFileFS) + " connected. Board Name : " + Blynk.getBoardName() );
+      #else
+         Serial.println ( "\nBlynk using EEPROM connected. Board Name : " + Blynk.getBoardName() );
+         Serial.printf( "EEPROM size = %d bytes, EEPROM start address = %d / 0x%X\n", EEPROM_SIZE, EEPROM_START, EEPROM_START );
+      #endif  
+    #endif      
     Serial.println ( "Blynk connected just fine" ); 
     Serial.print   ( "  IP address  " ); Serial.println ( WiFi.localIP() ) ;
     Serial.print   ( "  MAC address " ); Serial.println ( WiFi.macAddress() );  
@@ -509,6 +554,10 @@ void connectToWLANandBlynk()
   }
   else Serial.println ( "Blynk NOT CONNECTED \n\n" );  
 } // end connectToWLANandBlynk
+
+
+
+
 
 // SET UP BLYNK TIMER FOR HEARTBEAT (and anything eles you may want later)
 void setupBlynkTimers()
@@ -522,6 +571,9 @@ void setupBlynkTimers()
 } //end setupBlynkTimers
 
 
+
+
+
 // LED HEARTBEAT
 void heartbeatLEDblink()
 /* Blink the on-board LED AND the Virtual Blynk LED
@@ -533,24 +585,27 @@ void heartbeatLEDblink()
   {
     //heartbeatLED.off(); // Blynk Virtual LED
     
-    digitalWrite ( LED_BUILTIN, LOW ); // On-board LED
+    digitalWrite ( LED_BUILTIN, LED_BUILTIN_LOW ); // On-board LED
     Blynk.virtualWrite ( heartbeatVpin, 000 );  
     Serial.println ( " ..." );
   } else
   {
     //heartbeatLED.on();      // Blynk Virtual LED
     
-    digitalWrite ( LED_BUILTIN, HIGH );  // On-board LED
+    digitalWrite ( LED_BUILTIN, LED_BUILTIN_HIGH );  // On-board LED
     Blynk.virtualWrite ( heartbeatVpin, 255 );  
     // Set the timer to turn off the LEDs in a bit  
     heartbeatLEDdurationTimerID = myTimer.setTimeout ( heartbeatLEDduration, heartbeatLEDblink ); 
-
+    
     Serial.print ( "... heartbeat of " ); Serial.print ( SKETCH_NAME ); 
-    Serial.print ( " WiFi.status() = " ); Serial.print ( WiFi.status() );
+    Serial.print ( " WiFi.status() = " ); Serial.print ( WiFi.status() );  
   }
   
   heartbeatLEDon = ! heartbeatLEDon; // flip status
 } //end heartbeatLEDblink
+
+
+
 
 
 // BLYNK_WRITE_DEFAULT GETS CALLED WHEN THERE IS NO SPECIFIC BLYNK_WRITE FOR THAT VIRTUAL PIN
@@ -605,16 +660,19 @@ BLYNK_WRITE_DEFAULT()
 } //end BLYNK_WRITE_DEFAULT
 
 
-#if (USE_WM && USE_DYNAMIC_PARAMETERS)
-// UPDATE DYNAMIC PARAMETERS 
+
+
+
+// UPDATE DYNAMIC PARAMETERS (Static parameters if we are not using WM)
 //  1 - CONVERTS THE char INFO FROM THE CONFIG PORTAL OR COMPILER CONSTANTS TO THE int VALUES THEY NEED TO BE FOR USE IN A SKETCH
 //  2 -   UPDATES BLYNK WITH OTHER DYNAMIC PARAMETERS (WIDGET LABELS) 
 void updateDynamicParameters()
 {
 
-  Serial.print ( "\nupdateDynamicParameters has: \n   controlVpinC/label = """ ); Serial.print ( controlVpinC ); Serial.print ( """/" ); Serial.print ( controlLabel ); 
+  Serial.print ( "\nupdateDynamicParameters has: " ); 
+  Serial.print ( "\n   controlVpinC/label = """ );   Serial.print ( controlVpinC );   Serial.print ( """/" ); Serial.print ( controlLabel ); 
   Serial.print ( "\n   heartbeatVpinC/label = """ ); Serial.print ( heartbeatVpinC ); Serial.print ( """/" ); Serial.print ( heartbeatLabel ); 
-  Serial.print ( "\n   displayVpinC/label = """ ); Serial.print ( displayVpinC ); Serial.print ( """/" ); Serial.print ( displayLabel ); 
+  Serial.print ( "\n   displayVpinC/label = """ );   Serial.print ( displayVpinC );   Serial.print ( """/" ); Serial.print ( displayLabel ); 
   Serial.println ( "\n" );  
     
   // Convert char Virtual Pin numbers to int in preperation for Blynk connect
@@ -650,10 +708,9 @@ void updateDynamicParameters()
   Serial.print ( "   Set displayVpin/displayLabel to " ) ; Serial.print ( displayVpin );
   Serial.print ( "/" ); Serial.println ( displayLabel );   
   Blynk.setProperty ( displayVpin, "label", displayLabel );  
-
   Serial.println();  
+  
 } // end updateDynamicParameters
-#endif // (updateDynamicParameters not needed if NOT USE_WM)
 
 
 
@@ -664,12 +721,13 @@ BLYNK_CONNECTED()
 {
   Serial.println ( "\nBLYNK_CONNECTED..." );  
 
-  #if (USE_WM && USE_DYNAMIC_PARAMETERS)
-    // Convert the Config Portal (or compiler constant) Virtual Pin char values to Blynk-usable ints
-    updateDynamicParameters();  
-  #endif
+  // Convert the Config Portal (or compiler constant) Virtual Pin char values to Blynk-usable ints
+  updateDynamicParameters();  
 
 } // end BLYNK_CONNECTED
+
+
+
 
 
 // BLYNK_APP_CONNECTED GETS CALLED WHEN APP CONNECTS TO BLYNK SERVERS
@@ -679,3 +737,4 @@ BLYNK_APP_CONNECTED()
   Serial.println ( "\nBLYNK_APP_CONNECTED..." );  
 
 } // end BLYNK_APP_CONNECTED
+
