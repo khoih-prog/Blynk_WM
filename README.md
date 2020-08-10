@@ -889,7 +889,7 @@ RBRBRBRBRBRBRB RBRB
 ---
 ---
 
-### More explanations about MultiWiFi-MultiBlynk features
+### Why using this [Blynk_WiFiManager](https://github.com/khoih-prog/Blynk_WM) with MultiWiFi-MultiBlynk features
 
 You can see that the system ***automatically detects and connects to the best or avaiable WiFi APs and/or Blynk Servers***, whenever interruption happens. This feature is very useful for systems requiring high degree of reliability.
 
@@ -1464,8 +1464,8 @@ Submit issues to: [Blynk_WM issues](https://github.com/khoih-prog/Blynk_WM/issue
     <td align="center"><a href="https://github.com/chriskio"><img src="https://github.com/chriskio.png" width="100px;" alt="chriskio"/><br /><sub><b>chriskio</b></sub></a><br /></td>
     <td align="center"><a href="https://github.com/brondolin"><img src="https://github.com/brondolin.png" width="100px;" alt="brondolin"/><br /><sub><b>brondolin</b></sub></a><br /></td>
     <td align="center"><a href="https://github.com/thorathome"><img src="https://github.com/thorathome.png" width="100px;" alt="thorathome"/><br /><sub><b>thorathome</b></sub></a><br /></td>
+    <td align="center"><a href="https://github.com/kevinleberge"><img src="https://github.com/kevinleberge.png" width="100px;" alt="kevinleberge"/><br /><sub><b>kevinleberge</b></sub></a><br /></td>
   </tr> 
-  <td align="center"><a href="https://github.com/kevinleberge"><img src="https://github.com/kevinleberge.png" width="100px;" alt="kevinleberge"/><br /><sub><b>kevinleberge</b></sub></a><br /></td>
 </table>
 
 ---
