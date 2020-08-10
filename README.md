@@ -701,7 +701,7 @@ Subs Topics = default-mqtt-SubTopic
 Pubs Topics = default-mqtt-PubTopic
 ```
 
--
+---
 
 5. ***No DRD detected*** => no Config Portal with valid Credentials
 
@@ -761,7 +761,7 @@ Saving config file...
 Saving config file OK
 ```
 
--
+---
 
 6. ***DRD detected*** => Config Portal even with valid Credentials
 
@@ -806,7 +806,7 @@ Pubs Topics = default-mqtt-PubTopic
 RF
 ```
 
--
+---
 
 7. Testing WiFi and Blynk Server lost to verify auto-reconnection
 
@@ -886,6 +886,7 @@ RBRBRBRBRBRBRB RBRB
 
 ```
 
+---
 ---
 
 ### More explanations about MultiWiFi-MultiBlynk features
@@ -1462,8 +1463,9 @@ Submit issues to: [Blynk_WM issues](https://github.com/khoih-prog/Blynk_WM/issue
   <tr>
     <td align="center"><a href="https://github.com/chriskio"><img src="https://github.com/chriskio.png" width="100px;" alt="chriskio"/><br /><sub><b>chriskio</b></sub></a><br /></td>
     <td align="center"><a href="https://github.com/brondolin"><img src="https://github.com/brondolin.png" width="100px;" alt="brondolin"/><br /><sub><b>brondolin</b></sub></a><br /></td>
-    <td align="center"><a href="https://github.com/thorathome"><img src="https://github.com/.png" width="100px;" alt="thorathome"/><br /><sub><b>thorathome</b></sub></a><br /></td>
+    <td align="center"><a href="https://github.com/thorathome"><img src="https://github.com/thorathome.png" width="100px;" alt="thorathome"/><br /><sub><b>thorathome</b></sub></a><br /></td>
   </tr> 
+  <td align="center"><a href="https://github.com/kevinleberge"><img src="https://github.com/kevinleberge.png" width="100px;" alt="kevinleberge"/><br /><sub><b>kevinleberge</b></sub></a><br /></td>
 </table>
 
 ---
