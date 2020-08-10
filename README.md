@@ -6,9 +6,11 @@
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](#Contributing)
 [![GitHub issues](https://img.shields.io/github/issues/khoih-prog/Blynk_WM.svg)](http://github.com/khoih-prog/Blynk_WM/issues)
 
-I'm inspired by [`EasyBlynk8266`](https://github.com/Barbayar/EasyBlynk8266)
+---
 
-This is a Blynk and WiFiManager Library for configuring/auto(re)connecting ESP8266/ESP32 modules to the best or available MultiWiFi APs and MultiBlynk servers at runtime. Connection is with or without SSL. Configuration data to be saved in either LittleFS, SPIFFS or EEPROM. Default Credentials as well as Dynamic custom parameters can be added and modified easily without coding knowledge. DoubleResetDetector is used to force Config Portal opening even if the Credentials are still valid.
+I'm originally inspired by [`EasyBlynk8266`](https://github.com/Barbayar/EasyBlynk8266)
+
+This is a Blynk and WiFiManager Library for configuring/auto(re)connecting ***ESP8266/ESP32*** modules to the best or available MultiWiFi APs and MultiBlynk servers at runtime. Connection is with or without SSL. Configuration data to be saved in either LittleFS, SPIFFS or EEPROM. Default Credentials as well as Dynamic custom parameters can be added and modified easily without coding knowledge. DoubleResetDetector is used to force Config Portal opening even if the Credentials are still valid.
  
 This library is designed to help you to eliminate `hardcoding` your Wifi and Blynk credentials for ESP8266 and ESP32 (with/without SSL), and updating/reflashing every time you need to change them.
 
@@ -19,7 +21,7 @@ This library is designed to help you to eliminate `hardcoding` your Wifi and Bly
 1. Fix bug and logic of USE_DEFAULT_CONFIG_DATA.
 2. Auto format SPIFFS/LittleFS for first time usage.
 
-### Releases v1.0.15
+#### Releases v1.0.15
 
 1. Update to use LittleFS for ESP8266 core 2.7.1+.
 2. Fix SSL connection bug.
@@ -28,11 +30,11 @@ This library is designed to help you to eliminate `hardcoding` your Wifi and Bly
 
 Again thanks to [thorathome in GitHub](https://github.com/thorathome) and [thorathome in Blynk](https://community.blynk.cc/u/thorathome) for testing, bug finding, feature adding, README rewriting, collaborating, etc..
 
-### Releases v1.0.14
+#### Releases v1.0.14
 
 1. Fix dynamicParams bug in v1.0.13. Again thanks to [thorathome in GitHub](https://github.com/thorathome) and [thorathome in Blynk](https://community.blynk.cc/u/thorathome)
 
-### Releases v1.0.13
+#### Releases v1.0.13
 
 1. Optional default ***Credentials as well as Dynamic parameters to be optionally autoloaded into Config Portal*** to use or change instead of manually input.
 2. ***DoubleDetectDetector*** feature to force Config Portal when double reset is detected within predetermined time, default 10s.
@@ -45,17 +47,19 @@ Thanks to [thorathome in GitHub](https://github.com/thorathome) to test, suggest
 
 1. Fix severe bug in v1.0.11
 
-### Releases v1.0.11
+#### Releases v1.0.11
 
 #### Severe connecting bug. Don't use
 
 1. New ***powerful-yet-simple-to-use feature to enable adding dynamic custom parameters*** from sketch and input using the same Config Portal. Config Portal will be auto-adjusted to match the number of dynamic parameters.
 2. Dynamic custom parameters to be saved ***automatically in EEPROM, or SPIFFS***.
 
-### Releases v1.0.10
+#### Releases v1.0.10
 
 1. WiFi Password max length is 63, according to WPA2 standard
 2. Permit to input special chars such as ***~, !, @, #, $, %, ^, &, _, -, space,etc.*** into data fields. Thanks to [brondolin](https://github.com/brondolin) to provide the amazing fix.
+
+---
 
 With version `v1.0.7` or later, you now can configure:
 
@@ -67,14 +71,21 @@ With version `v1.0.5` or later, you now can configure:
 1. `Config Portal Static IP address, Name and Password.`
 2. `Static IP address, Gateway, Subnet Mask and 2 DNS Servers IP addresses.`
 
-## Prerequisite
-1. [`Arduino IDE 1.8.12 or later` for Arduino](https://www.arduino.cc/en/Main/Software)
-2. [`Blynk library 0.6.1 or later`](https://github.com/blynkkk/blynk-library/releases)
-3. [`ESP32 core 1.0.4 or later`](https://github.com/espressif/arduino-esp32/releases) for ESP32 boards
-4. [`ESP8266 core 2.7.1 or later` for Arduino](https://github.com/esp8266/Arduino#installing-with-boards-manager) for ESP8266 boards. To use ESP8266 core 2.7.1+ for LittleFS.
-5. [`ESP_DoubleResetDetector library 1.0.3 or later`](https://github.com/khoih-prog/ESP_DoubleResetDetector) to use LittleFS. 
+---
 
-### Installation
+## Prerequisite
+
+1. [`Arduino IDE 1.8.12+` for Arduino](https://www.arduino.cc/en/Main/Software)
+2. [`Blynk library 0.6.1+`](https://github.com/blynkkk/blynk-library/releases)
+3. [`ESP32 core 1.0.4+`](https://github.com/espressif/arduino-esp32/releases) for ESP32 boards
+4. [`ESP8266 core 2.7.3+` for Arduino](https://github.com/esp8266/Arduino#installing-with-boards-manager) for ESP8266 boards. To use ESP8266 core 2.7.1+ for LittleFS.
+5. [`ESP_DoubleResetDetector library 1.0.3+`](https://github.com/khoih-prog/ESP_DoubleResetDetector) to use DRD feature. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/ESP_DoubleResetDetector.svg?)](https://www.ardu-badge.com/ESP_DoubleResetDetector).
+
+---
+
+## Installation
+
+### I) For Arduino IDE
 
 1. Be certain you have installed the most up to date version of Arduino IDE.
 2. Be certain you have installed the most up-to-date Blynk library.
@@ -107,6 +118,14 @@ With version `v1.0.5` or later, you now can configure:
    
 5. **Open Arduino IDE.** Your library is installed.
 
+### II) For VS Code & PlatformIO:
+
+1. Install [VS Code](https://code.visualstudio.com/)
+2. Install [PlatformIO](https://platformio.org/platformio-ide)
+3. Install **Blynk_WiFiManager** library by using [Library Manager](https://docs.platformio.org/en/latest/librarymanager/). Search for Blynk_WiFiManager in [Platform.io Author's Libraries](https://platformio.org/lib/search?query=author:%22Khoi%20Hoang%22)
+4. Use included [platformio.ini](examples/platformio/platformio.ini) file from examples to ensure that all dependent libraries will installed automatically.
+
+---
 ---
 
 ### How to use
@@ -157,13 +176,11 @@ EEPROM_SIZE can be specified from 512 to 4096 (2048 for ESP32) bytes.
 
 See examples [ESP32WM_Config](https://github.com/khoih-prog/Blynk_WM/tree/master/examples/ESP32WM_Config) and [ESP8266WM_Config](https://github.com/khoih-prog/Blynk_WM/tree/master/examples/ESP8266WM_Config).
 
-
 ```
 // Force some params in Blynk, only valid for library version 1.0.1 and later
 #define TIMEOUT_RECONNECT_WIFI                    10000L
 #define RESET_IF_CONFIG_TIMEOUT                   true
 #define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET    5
-
 ```
 
 To use personalized Config Portal AP SSID and Password, as well as IP Address, channel e.g. call :
@@ -200,7 +217,10 @@ in your code. Keep `Blynk.run()` intact.
 
 That's it.
 
-Also see examples: 
+---
+
+### Examples
+
  1. [AM2315_ESP32_SSL](examples/AM2315_ESP32_SSL)
  2. [AM2315_ESP8266](examples/AM2315_ESP8266)
  3. [DHT11ESP32](examples/DHT11ESP32) 
@@ -248,6 +268,9 @@ Enter your WiFi and Blynk Credentials:
 
 Then click ***Save***. The system will auto-restart. You will see the board's built-in LED turned OFF. That means, it's already connected to your Blynk server successfully.
 
+---
+---
+
 ### Important notes
 1. Now you can use special chars such as ***~, !, @, #, $, %, ^, &, _, -, space,etc.*** thanks to [brondolin](https://github.com/brondolin) to provide the amazing fix in v1.0.10 to permit input special chars such as ***%*** and ***#*** into data fields. See [Issue 3](https://github.com/khoih-prog/Blynk_WM/issues/3).
 2. The SSIDs, Passwords, BlynkServers and Tokens must be input (or to make them different from ***nothing***). Otherwise, the Config Portal will re-open until those fields have been changed. If you don't need any field, just input anything or use duplicated data from similar field.
@@ -261,21 +284,23 @@ Then click ***Save***. The system will auto-restart. You will see the board's bu
 
 ---
 
-### How to use default Credentials and have them pre-loaded onto Config Portal
+### HOWTO Use default Credentials and have them pre-loaded onto Config Portal
 
 See this example and modify as necessary
 
-1. To load [Default Credentials](examples/ESP32WM_Config/Credentials.h)
+#### 1. To load [Default Credentials](examples/ESP32WM_Config/Credentials.h)
+
 ```
 bool LOAD_DEFAULT_CONFIG_DATA = true;
 ```
 
-2. To use system default to load "blank" when there is no valid Credentials
+#### 2. To use system default to load "blank" when there is no valid Credentials
+
 ```
 bool LOAD_DEFAULT_CONFIG_DATA = false;
 ```
 
-3. Example of [Default Credentials](examples/ESP32WM_Config/Credentials.h)
+#### 3. Example of [Default Credentials](examples/ESP32WM_Config/Credentials.h)
 
 ```cpp
 /// Start Default Config Data //////////////////
@@ -350,7 +375,7 @@ Blynk_WM_Configuration defaultConfig =
 /////////// End Default Config Data /////////////
 ```
 
-### How to add dynamic parameters from sketch
+### 4. How to add dynamic parameters from sketch
 
 - To add custom parameters, just modify the example below
 
@@ -416,7 +441,9 @@ uint16_t NUM_MENU_ITEMS = 0;
 /////// // End dynamic Credentials ///////////
 
 ```
-- If you don't need to add dynamic parameters, use the following in sketch
+#### 5. If you don't need to add dynamic parameters
+
+Use the following code snippet in sketch
 
 ```
 #define USE_DYNAMIC_PARAMETERS     false
@@ -433,6 +460,9 @@ uint16_t NUM_MENU_ITEMS = 0;
 /////// // End dynamic Credentials ///////////
 
 ```
+
+---
+---
 
 ### Important Notes for using Dynamic Parameters' ids
 
@@ -452,7 +482,9 @@ Please be noted that the following ***reserved names are already used in library
 "pt"    for Blynk Port
 "nm"    for Board Name
 ```
+---
 
+### Debug Termimal Output Samples
 
 The following is the sample terminal output when running example [ESP8266WM_Config](examples/ESP8266WM_Config)
 
@@ -508,6 +540,7 @@ RF
 [103301] CrCCSum=10662
 [103329] h:Rst
 ```
+---
 
 2. Input valid credentials with ***LOAD_DEFAULT_CONFIG_DATA = true*** => reboot
 
@@ -558,6 +591,8 @@ MQTT PWD = default-mqtt-password
 Subs Topics = default-mqtt-SubTopic
 Pubs Topics = default-mqtt-PubTopic
 ```
+
+---
 
 3. No Config Data with ***LOAD_DEFAULT_CONFIG_DATA = false*** => Config Portal loads "blank" to all fields
 
@@ -613,6 +648,8 @@ RF[186385] h2:myMenuItems[0]=default-mqtt-server
 [186495] h:Rst
 ```
 
+---
+
 4. Input valid credentials with ***LOAD_DEFAULT_CONFIG_DATA = false*** => reboot
 
 ```
@@ -663,6 +700,8 @@ MQTT PWD = default-mqtt-password
 Subs Topics = default-mqtt-SubTopic
 Pubs Topics = default-mqtt-PubTopic
 ```
+
+-
 
 5. ***No DRD detected*** => no Config Portal with valid Credentials
 
@@ -722,6 +761,8 @@ Saving config file...
 Saving config file OK
 ```
 
+-
+
 6. ***DRD detected*** => Config Portal even with valid Credentials
 
 ```
@@ -764,6 +805,8 @@ Subs Topics = default-mqtt-SubTopic
 Pubs Topics = default-mqtt-PubTopic
 RF
 ```
+
+-
 
 7. Testing WiFi and Blynk Server lost to verify auto-reconnection
 
@@ -843,9 +886,14 @@ RBRBRBRBRBRBRB RBRB
 
 ```
 
-You can see that the system automatically detects and connects to the best or avaiable WiFi APs and/or Blynk Servers, whenever interruption happens. This feature is very useful for systems requiring high degree of reliability.
+---
 
-Moreover, this `Blynk.begin()` is ***not a blocking call***, so you can use it for critical functions requiring in loop(). 
+### More explanations about MultiWiFi-MultiBlynk features
+
+You can see that the system ***automatically detects and connects to the best or avaiable WiFi APs and/or Blynk Servers***, whenever interruption happens. This feature is very useful for systems requiring high degree of reliability.
+
+Moreover, this `Blynk.begin()` is ***not a blocking call***, so you can use it for critical functions requiring in loop().
+
 Anyway, this is better for projects using Blynk just for GUI (graphical user interface).
 
 In operation, if WiFi or Blynk connection is lost, `Blynk.run()` will try reconnecting automatically. Therefore, `Blynk.run()` must be called in the `loop()` function. Don't use:
@@ -869,11 +917,14 @@ void loop()
 }
 ```
 
-## Example [ESP32WM_Config](examples/ESP32WM_Config)
+---
+---
+
+### Example [ESP32WM_Config](examples/ESP32WM_Config)
 
 Please take a look at other examples, as well.
 
-1. File [ESP32WM_Config.ino](examples/ESP32WM_Config/ESP32WM_Config.ino)
+#### 1. File [ESP32WM_Config.ino](examples/ESP32WM_Config/ESP32WM_Config.ino)
 
 ```cpp
 #include "defines.h"
@@ -1040,7 +1091,7 @@ void loop()
 }
 ```
 
-2. File [defines.h](examples/ESP32WM_Config/defines.h)
+#### 2. File [defines.h](examples/ESP32WM_Config/defines.h)
 
 ```cpp
 #ifndef defines_h
@@ -1095,7 +1146,7 @@ void loop()
 #endif      //defines_h
 ```
 
-3. File [Credentials.h](examples/ESP32WM_Config/Credentials.h)
+#### 3. File [Credentials.h](examples/ESP32WM_Config/Credentials.h)
 
 ```cpp
 #ifndef Credentials_h
@@ -1177,7 +1228,7 @@ Blynk_WM_Configuration defaultConfig =
 ```
 
 
-4. File [dynamicParams.h](examples/ESP32WM_Config/dynamicParams.h)
+#### 4. File [dynamicParams.h](examples/ESP32WM_Config/dynamicParams.h)
 
 ```cpp
 #ifndef dynamicParams_h
@@ -1247,10 +1298,12 @@ uint16_t NUM_MENU_ITEMS = 0;
 ```
 
 ---
+---
 
 ## TO DO
 
 1. Fix bug. Add enhancement
+
 
 ## DONE
 
@@ -1276,13 +1329,14 @@ uint16_t NUM_MENU_ITEMS = 0;
 20. Add ***LittleFS*** support to ESP8266 as SPIFFS deprecated since ***ESP8266 core 2.7.1.***
 
 ---
+---
 
 ### Releases v1.0.16
 
 1. Fix bug and logic of USE_DEFAULT_CONFIG_DATA.
 2. Auto format SPIFFS/LittleFS for first time usage.
 
-### Releases v1.0.15
+#### Releases v1.0.15
 
 1. Update to use LittleFS for ESP8266 core 2.7.1+.
 2. Fix SSL connection bug.
@@ -1291,45 +1345,45 @@ uint16_t NUM_MENU_ITEMS = 0;
 
 Again thanks to [thorathome in GitHub](https://github.com/thorathome) and [thorathome in Blynk](https://community.blynk.cc/u/thorathome) for testing, bug finding, feature adding, README rewriting, collaborating, etc..
 
-### Releases v1.0.14
+#### Releases v1.0.14
 
 1. Fix dynamicParams bug in v1.0.13. Again thanks to [thorathome in GitHub](https://github.com/thorathome) and [thorathome in Blynk](https://community.blynk.cc/u/thorathome)
 
-### Releases v1.0.13
+#### Releases v1.0.13
 
 1. Optional default ***Credentials as well as Dynamic parameters to be optionally autoloaded into Config Portal*** to use or change instead of manually input.
 2. ***DoubleDetectDetector*** feature to force Config Portal when double reset is detected within predetermined time, default 10s.
 3. Configurable ***Config Portal Title*** to be either Hostname, BoardName or default undistinguishable names.
 4. Examples are redesigned to separate Credentials / Defines / Dynamic Params / Code so that you can change Credentials / Dynamic Params quickly for each device
 
-### Releases v1.0.12
+#### Releases v1.0.12
 
 1. Fix severe bug in v1.0.11
 
-### Releases v1.0.11
+#### Releases v1.0.11
 
-#### Severe connecting bug. Don't use
+***Severe connecting bug. Don't use***
 
 1. New ***powerful-yet-simple-to-use feature to enable adding dynamic custom parameters*** from sketch and input using the same Config Portal. Config Portal will be auto-adjusted to match the number of dynamic parameters.
 2. Dynamic custom parameters to be saved ***automatically in EEPROM, or SPIFFS***.
 
-### Releases v1.0.10
+#### Releases v1.0.10
 
 ***Why this version***
 
 1. WiFi Password max length is 63, according to WPA2 standard.
 2. Permit to input special chars such as ***~, !, @, #, $, %, ^, &, *, (, ), _, -, space,etc"*** into data fields. Thanks to [brondolin](https://github.com/brondolin) to provide the amazing fix.
 
-### Releases v1.0.9
+#### Releases v1.0.9
 
 1. Enhance Config Portal GUI. Not using the terrible GUI of the original version. Finally had some time to get this out of the bucket list.
 
-### Releases v1.0.8
+#### Releases v1.0.8
 
 1. Fix [AP-staying-open bug](https://github.com/khoih-prog/Blynk_WM/issues/2). Thanks to [chriskio](https://github.com/chriskio) to report.
 2. Add clearConfigData().
 
-### Releases v1.0.7
+#### Releases v1.0.7
 
 ***Why this version***
 
@@ -1337,11 +1391,11 @@ Again thanks to [thorathome in GitHub](https://github.com/thorathome) and [thora
 2. Add MultiWiFi feature to enable reconnect to the best / available WiFi AP.
 3. Add MultiBlynk feature to enable reconnect to the best / available Blynk Server.
 
-### Releases v1.0.6
+#### Releases v1.0.6
 
 Optimize, fix ESP32 EEPROM size to 2K from 4K, shorten code size, add functions, use dynamically allocated Config Portal WebServer.
 
-### Releases v1.0.5
+#### Releases v1.0.5
 
 Normally, the `default Portal IP (192.168.4.1)`, SSID and PW as well as the `dynamically allocated` board's IP address are good enough.
 In special cases where there is conflict, if static IP is required or bad router's DNS settings, you can use the new features to force the configurable IP addresses. ***But please use with care to avoid potential issues.***
@@ -1353,7 +1407,7 @@ Add new features to enable :
 1. configuring Portal Static IP address, Name and Password.
 2. configuring Static IP address, Gateway, Subnet Mask and 2 DNS Servers IP addresses.
 
-### Releases v1.0.4
+#### Releases v1.0.4
 
 I'm really fed-up with the unfriendly, confusing and cryptic DHCP hostnames such as `ESP_XXXXXX`, `espressif` using ChipID. Thanks to an issue opened in library [ESP_WiFiManager](https://github.com/khoih-prog/ESP_WiFiManager), I decided to add this option to have built-in, yet configurable DHCP hostname to these libraries.
 
@@ -1365,13 +1419,13 @@ Now you can easily specify and have the friendly, identifiable, RFC-952-conforme
 
 2. Modify examples to use new feature
 
-### Releases v1.0.3
+#### Releases v1.0.3
 
 1. Modify code to be compatible with ESP8266 core pre-2.5.2. But it's still advisable to update to the latest stable core, such as 2.6.3
 
 2. Add examples
 
-### Releases v1.0.2
+#### Releases v1.0.2
 
 ***Features***
 
@@ -1391,6 +1445,12 @@ Now you can easily specify and have the friendly, identifiable, RFC-952-conforme
 
 ---
 
+### Issues ###
+
+Submit issues to: [Blynk_WM issues](https://github.com/khoih-prog/Blynk_WM/issues)
+
+---
+
 ### Contributions and thanks
 
 1. Thanks to [chriskio](https://github.com/chriskio) to report [AP-staying-open bug](https://github.com/khoih-prog/Blynk_WM/issues/2). 
@@ -1398,6 +1458,15 @@ Now you can easily specify and have the friendly, identifiable, RFC-952-conforme
 3. Thanks to [thorathome in GitHub](https://github.com/thorathome) and [thorathome in Blynk](https://community.blynk.cc/u/thorathome) to test, find bug, suggest and encourage to add those new features in v1.0.13, such as Default Credentials/Dynamic Parms, Configurable Config Portal Title, DRD. The powerful [Blynk_WM_Template](examples/Blynk_WM_Template) is written by [thorathome](https://github.com/thorathome) and is included in the examples with his permission. See [WM Config Portal using BlynkSimpleEsp32/8266_WM.h](https://community.blynk.cc/t/wm-config-portal-using-blynksimpleesp32-8266-wm-h/45402).
 4. Thanks to [thorathome](https://github.com/thorathome) and [kevinleberge](https://github.com/kevinleberge) to help locate the bugs, discuss the USE_DEFAULT_CONFIG_DATA solution leading to release v1.0.16. See [Can’t load defaults](https://github.com/khoih-prog/Blynk_WM/issues/15) and [Setting "#define USE_DYNAMIC_PARAMETERS false" on Blynk_WM_Template.ino results in compile error](https://github.com/khoih-prog/Blynk_WM/issues/16)
 
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/chriskio"><img src="https://github.com/chriskio.png" width="100px;" alt="chriskio"/><br /><sub><b>chriskio</b></sub></a><br /></td>
+    <td align="center"><a href="https://github.com/brondolin"><img src="https://github.com/brondolin.png" width="100px;" alt="brondolin"/><br /><sub><b>brondolin</b></sub></a><br /></td>
+    <td align="center"><a href="https://github.com/thorathome"><img src="https://github.com/.png" width="100px;" alt="thorathome"/><br /><sub><b>thorathome</b></sub></a><br /></td>
+  </tr> 
+</table>
+
+---
 
 ## Contributing
 
@@ -1407,6 +1476,14 @@ If you want to contribute to this project:
 - Create issues and pull requests
 - Tell other people about this library
 
-## Copyright
+---
+
+### License
+
+- The library is licensed under [MIT](https://github.com/khoih-prog/WebSockets2_Generic/blob/master/LICENSE)
+
+---
+
+### Copyright
 
 Copyright 2020- Khoi Hoang
