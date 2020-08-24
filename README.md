@@ -8,7 +8,30 @@
 
 ---
 
-I'm originally inspired by [`EasyBlynk8266`](https://github.com/Barbayar/EasyBlynk8266)
+### Important Note
+
+This [**Blynk_WiFiManager**](https://github.com/khoih-prog/Blynk_WM) has just been modified to create the new [**Blynk_Async_WM**](https://github.com/khoih-prog/Blynk_Async_WM) in order to use the better and more efficient [**ESPAsyncWebServer Library**](https://github.com/me-no-dev/ESPAsyncWebServer), instead of the (ESP8266)WebServer library.
+
+The new [**Blynk_Async_WM**](https://github.com/khoih-prog/Blynk_Async_WM) is based on and sync'ed with [**Blynk_WiFiManager**](https://github.com/khoih-prog/Blynk_WM). Therefore, all the features currently supported by this [**Blynk_WiFiManager**](https://github.com/khoih-prog/Blynk_WM) will be available to the new library. The code change is to port to the new library is also very negligible, **mostly just changing the include file from `BlynkSimpleEspxxxx_WM.h` to `BlynkSimpleEspxxxx_Async_WM.h`.**
+
+---
+
+#### Why do we need the new Async [ESPAsync_WiFiManager library](https://github.com/khoih-prog/ESPAsync_WiFiManager)
+
+- Using asynchronous network means that you can handle **more than one connection at the same time**
+- **You are called once the request is ready and parsed**
+- When you send the response, you are **immediately ready** to handle other connections while the server is taking care of sending the response in the background
+- **Speed is OMG**
+- **Easy to use API, HTTP Basic and Digest MD5 Authentication (default), ChunkedResponse**
+- Easily extensible to handle **any type of content**
+- Supports Continue 100
+- **Async WebSocket plugin offering different locations without extra servers or ports**
+- Async EventSource (Server-Sent Events) plugin to send events to the browser
+- URL Rewrite plugin for conditional and permanent url rewrites
+- ServeStatic plugin that supports cache, Last-Modified, default index and more
+- Simple template processing engine to handle templates
+
+---
 
 This is a Blynk and WiFiManager Library for configuring/auto(re)connecting ***ESP8266/ESP32*** modules to the best or available MultiWiFi APs and MultiBlynk servers at runtime. Connection is with or without SSL. Configuration data to be saved in either LittleFS, SPIFFS or EEPROM. Default Credentials as well as Dynamic custom parameters can be added and modified easily without coding knowledge. DoubleResetDetector is used to force Config Portal opening even if the Credentials are still valid.
  
@@ -138,20 +161,20 @@ In your code, replace
 
 5. For EP8266, add
 
-```
+```cpp
 #define USE_LITTLEFS    true
 #define USE_SPIFFS      false
 ```
 to use LittleFS or
 
-```
+```cpp
 #define USE_LITTLEFS    false
 #define USE_SPIFFS      true
 ```
 
 to use SPIFFS or
 
-```
+```cpp
 #define USE_LITTLEFS    false
 #define USE_SPIFFS      false
 ```
@@ -159,13 +182,13 @@ to use EEPROM.
 
 6. For EP32, add
 
-```
+```cpp
 #define USE_SPIFFS      true
 ```
 
 to use SPIFFS or
 
-```
+```cpp
 #define USE_SPIFFS    false
 ```
 to use EEPROM.
@@ -176,7 +199,7 @@ EEPROM_SIZE can be specified from 512 to 4096 (2048 for ESP32) bytes.
 
 See examples [ESP32WM_Config](https://github.com/khoih-prog/Blynk_WM/tree/master/examples/ESP32WM_Config) and [ESP8266WM_Config](https://github.com/khoih-prog/Blynk_WM/tree/master/examples/ESP8266WM_Config).
 
-```
+```cpp
 // Force some params in Blynk, only valid for library version 1.0.1 and later
 #define TIMEOUT_RECONNECT_WIFI                    10000L
 #define RESET_IF_CONFIG_TIMEOUT                   true
@@ -185,8 +208,8 @@ See examples [ESP32WM_Config](https://github.com/khoih-prog/Blynk_WM/tree/master
 
 To use personalized Config Portal AP SSID and Password, as well as IP Address, channel e.g. call :
 
-```
-// Set config portal SSID and Password
+```cpp
+  // Set config portal SSID and Password
   Blynk.setConfigPortal("TestPortal-ESP8266", "TestPortalPass");
   // Set config portal IP address
   Blynk.setConfigPortalIP(IPAddress(192, 168, 200, 1));
@@ -196,8 +219,8 @@ To use personalized Config Portal AP SSID and Password, as well as IP Address, c
 
 You can specify STA-mode Static IP address,  Gateway, Subnet Mask, as well as DNS server 1 and 2:
 
-```
-// From v1.0.5, select either one of these to set static IP
+```cpp
+  // From v1.0.5, select either one of these to set static IP
   Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 220), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0));
   //Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 220), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0),
   //                           IPAddress(192, 168, 2, 1), IPAddress(8, 8, 8, 8));
@@ -232,6 +255,7 @@ That's it.
  9. [ESP8266WM_Config](examples/ESP8266WM_Config)
 10. [Blynk_WM_Template](examples/Blynk_WM_Template)
 
+---
 ---
 
 ## So, how it works?
@@ -277,7 +301,7 @@ Then click ***Save***. The system will auto-restart. You will see the board's bu
 3. WiFi password max length now is 63 chars according to WPA2 standard.
 4. Sometimes, it's hard or not possible to connect to Config Portal WiFi AP, the majority cases are caused by WiFi channel conflict if there are too many WiFi APs running around. Please use ***random ConfigPortal WiFi AP channel*** in sketch (see code snippet below) and reset the board so that another channel is used. Repeat until connection is OK
 
-```
+```cpp
 // Set config portal channel, default = 1. Use 0 => random channel from 1-13 to avoid conflict
   Blynk.setConfigPortalChannel(0);
 ```
@@ -290,13 +314,13 @@ See this example and modify as necessary
 
 #### 1. To load [Default Credentials](examples/ESP32WM_Config/Credentials.h)
 
-```
+```cpp
 bool LOAD_DEFAULT_CONFIG_DATA = true;
 ```
 
 #### 2. To use system default to load "blank" when there is no valid Credentials
 
-```
+```cpp
 bool LOAD_DEFAULT_CONFIG_DATA = false;
 ```
 
@@ -379,7 +403,7 @@ Blynk_WM_Configuration defaultConfig =
 
 - To add custom parameters, just modify the example below
 
-```
+```cpp
 #define USE_DYNAMIC_PARAMETERS      true
 
 /////////////// Start dynamic Credentials ///////////////
@@ -445,13 +469,13 @@ uint16_t NUM_MENU_ITEMS = 0;
 
 Use the following code snippet in sketch
 
-```
+```cpp
 #define USE_DYNAMIC_PARAMETERS     false
 ```
 
 or
 
-```
+```cpp
 /////////////// Start dynamic Credentials ///////////////
 
 MenuItem myMenuItems [] = {};
