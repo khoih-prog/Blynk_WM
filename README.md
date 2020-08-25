@@ -16,7 +16,7 @@ The new [**Blynk_Async_WM**](https://github.com/khoih-prog/Blynk_Async_WM) is ba
 
 ---
 
-#### Why do we need the new Async [ESPAsync_WiFiManager library](https://github.com/khoih-prog/ESPAsync_WiFiManager)
+#### Why do we need the new Async [Blynk_Async_WM library](https://github.com/khoih-prog/Blynk_Async_WM)
 
 - Using asynchronous network means that you can handle **more than one connection at the same time**
 - **You are called once the request is ready and parsed**
