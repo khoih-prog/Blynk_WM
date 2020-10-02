@@ -5,6 +5,7 @@
 [![GitHub](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/khoih-prog/Blynk_WiFiManager/blob/master/LICENSE)
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](#Contributing)
 [![GitHub issues](https://img.shields.io/github/issues/khoih-prog/Blynk_WM.svg)](http://github.com/khoih-prog/Blynk_WM/issues)
+[![star this repo](https://githubbadges.com/star.svg?user=khoih-prog&repo=Blynk_WM&style=default)](https://github.com/khoih-prog/Blynk_WM)
 
 ---
 ---
