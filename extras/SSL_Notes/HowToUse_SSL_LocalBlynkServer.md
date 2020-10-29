@@ -1,5 +1,5 @@
 
-Don't forget to forward from your Internet Router to your local Blynk server:
+### Don't forget to port-forward from your Internet Router to your local Blynk server:
 
 1. Port 9443 for SSL hardware connection or Web admin.
 2. Port 8080 for hardware connection.
@@ -50,15 +50,17 @@ To use SSL for ESP8266, in Arduino IDE Tools menu, it's OK to select either **Ba
       ```
   
 #### 2. Using DDNS service for Local Blynk Server
+
   
-      - Server and name must use **DDNS hostname**, for example: `account.duckdns.org` / `account.no-ip.org` / `account.ddns.net`. Local IP Address won't work (e.g. `192.168.x.y`, `10.10.x.y`, etc.). Otherwise, you will get the following error:
+      - Server and name must use **DDNS hostname**, for example: `account.duckdns.org`, `account.no-ip.org`, `account.ddns.net`. Local IP Address won't work (e.g. `192.168.x.y`, `10.10.x.y`, etc.). Otherwise, you will get the following error:
+      
   
-      ```
+      ```cpp
       Error BSSL:_wait_for_handshake: failed
       BSSL:Couldn't connect. Error = 'Expected server name was not found in the chain.'
       ```
       
-      Numbered Public IP ( e.g. `222.222.111.111`) is also not supported. This is the limitation of Let's Encrypt. Also have in mind that `account.duckdns.org` / `account.no-ip.org` / `account.ddns.net` must be resolved by public DNS severs. 
+      Numbered Public IP ( e.g. `222.222.111.111`) is also not supported. This is the limitation of Let's Encrypt. Also have in mind that `account.duckdns.org`, `account.no-ip.org`, `account.ddns.net` must be resolved by public DNS severs. 
       
       Use ping command to test. For example:
       
@@ -88,6 +90,7 @@ To use SSL for ESP8266, in Arduino IDE Tools menu, it's OK to select either **Ba
       server.host=xxxx.duckdns.org
       ```
       or
+      
       ```
       server.host=xxxx.no-ip.org
       ```
@@ -172,14 +175,14 @@ To use SSL for ESP8266, in Arduino IDE Tools menu, it's OK to select either **Ba
 
 #### 2. Using DDNS service for Local Blynk Server
 
-      - Server and name must use **DDNS hostname**, for example: `account.duckdns.org` / `account.no-ip.org` / `account.ddns.net`. Local IP Address won't work (e.g. `192.168.x.y`, `10.10.x.y`, etc.). Otherwise, you will get the following error:
+      - Server and name must use **DDNS hostname**, for example: `account.duckdns.org`, `account.no-ip.org`, `account.ddns.net`. Local IP Address won't work (e.g. `192.168.x.y`, `10.10.x.y`, etc.). Otherwise, you will get the following error:
   
       ```
       Error BSSL:_wait_for_handshake: failed
       BSSL:Couldn't connect. Error = 'Expected server name was not found in the chain.'
       ```
       
-      Numbered Public IP ( e.g. `222.222.111.111`) is also not supported. This is the limitation of Let's Encrypt. Also have in mind that `account.duckdns.org` / `account.no-ip.org` / `account.ddns.net` must be resolved by public DNS severs. 
+      Numbered Public IP ( e.g. `222.222.111.111`) is also not supported. This is the limitation of Let's Encrypt. Also have in mind that `account.duckdns.org`, `account.no-ip.org`, `account.ddns.net` must be resolved by public DNS severs. 
       
       Use ping command to test. For example:
       
