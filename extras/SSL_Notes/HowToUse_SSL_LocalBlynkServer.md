@@ -42,7 +42,7 @@ To use SSL for ESP8266, in Arduino IDE Tools menu, it's OK to select either **Ba
 
 #### 1. Modify Blynk Library so that ESP8266 boards will use Let's Encrypt SSL Certificates for Local Blynk Server 
   
-      - In `libraries/Blynk/src/Blynk/BlynkConfig.h`, uncomment to use `#define BLYNK_SSL_USE_LETSENCRYPT`
+      In `libraries/Blynk/src/Blynk/BlynkConfig.h`, uncomment to use `#define BLYNK_SSL_USE_LETSENCRYPT`
   
       ```cpp
       // Uncomment to use Let's Encrypt Root CA
@@ -52,7 +52,7 @@ To use SSL for ESP8266, in Arduino IDE Tools menu, it's OK to select either **Ba
 #### 2. Using DDNS service for Local Blynk Server
 
   
-      - Server and name must use **DDNS hostname**, for example: `account.duckdns.org`, `account.no-ip.org`, `account.ddns.net`. Local IP Address won't work (e.g. `192.168.x.y`, `10.10.x.y`, etc.). Otherwise, you will get the following error:
+      Server and name must use **DDNS hostname**, for example: `account.duckdns.org`, `account.no-ip.org`, `account.ddns.net`. Local IP Address won't work (e.g. `192.168.x.y`, `10.10.x.y`, etc.). Otherwise, you will get the following error:
       
   
       ```cpp
@@ -84,7 +84,7 @@ To use SSL for ESP8266, in Arduino IDE Tools menu, it's OK to select either **Ba
 
 #### 3. Modifying Local Blynk Server's server.properties to use DDNS server name
       
-      - Add `server.host` property in `server.properties` file. For example :
+      Add `server.host` property in `server.properties` file. For example :
       
       ```
       server.host=xxxx.duckdns.org
@@ -97,7 +97,7 @@ To use SSL for ESP8266, in Arduino IDE Tools menu, it's OK to select either **Ba
       
 #### 4. Modifying Local Blynk Server's server.properties to use Let's Encrypt SSL certificates
   
-      - Modifying `/home/pi/Blynk-Server/server.properties` (assuming your Blynk Server was installed in `/home/pi/Blynk-Server`, replacing with your correct path). You can try either of the following ways:
+      Modifying `/home/pi/Blynk-Server/server.properties` (assuming your Blynk Server was installed in `/home/pi/Blynk-Server`, replacing with your correct path). You can try either of the following ways:
   
       a) OK
       
@@ -117,12 +117,12 @@ To use SSL for ESP8266, in Arduino IDE Tools menu, it's OK to select either **Ba
 
 #### 5. Create Let's Encrypt SSL certificates on Local Blynk Server
       
-      - Create LetsEncrypt Certificate. The files, fullchain.crt, privkey.pem and user.pem, are created in `/` (root) with permission `664` or `rw-rw-r--`
+      Create LetsEncrypt Certificate. The files, fullchain.crt, privkey.pem and user.pem, are created in `/` (root) with permission `664` or `rw-rw-r--`
   
 #### 6. Convert Let's Encrypt SSL certificates to Blynk-accepted format
 
-      - Copy the Let's Encrypt SSL certificate files to Ubuntu machine running Arduino IDE.
-      - To convert `fullchain.crt` into `fullchain_der.h`, use the following command in Ubuntu:
+      Copy the Let's Encrypt SSL certificate files to Ubuntu machine running Arduino IDE.
+      To convert `fullchain.crt` into `fullchain_der.h`, use the following command in Ubuntu:
   
       ```
       $ cd ~/Blynk_Server
@@ -145,7 +145,7 @@ To use SSL for ESP8266, in Arduino IDE Tools menu, it's OK to select either **Ba
      
 #### 7. Replacing Let's Encrypt SSL certificates in Blynk Library so that ESP8266 boards will have Let's Encrypt SSL Certificate for Local Blynk Server
      
-      - Replacing certificate files in `~/Arduino/libraries/Blynk/src/certs/` (assuming Arduino libraries are stored in `~/Arduino/libraries/`. Replacing with your correct path) with `fullchain_der.h`.
+      Replacing certificate files in `~/Arduino/libraries/Blynk/src/certs/` (assuming Arduino libraries are stored in `~/Arduino/libraries/`. Replacing with your correct path) with `fullchain_der.h`.
   
       a) `~/Arduino/libraries/Blynk/src/certs/blynkcloud_der.h` (if don't use `#define BLYNK_SSL_USE_LETSENCRYPT`) 
       b) `~/Arduino/libraries/Blynk/src/certs/dst_der.h` (if use `#define BLYNK_SSL_USE_LETSENCRYPT`)
@@ -166,7 +166,7 @@ To use SSL for ESP8266, in Arduino IDE Tools menu, it's OK to select either **Ba
 
 #### 1. Modify Blynk Library so that ESP8266 boards will use OpenSSL SSL Certificates for Local Blynk Server 
 
-      - In `libraries/Blynk/src/Blynk/BlynkConfig.h`, comment out to not use `#define BLYNK_SSL_USE_LETSENCRYPT`
+      In `libraries/Blynk/src/Blynk/BlynkConfig.h`, comment out to not use `#define BLYNK_SSL_USE_LETSENCRYPT`
   
       ```
       // Uncomment to use Let's Encrypt Root CA
@@ -175,7 +175,7 @@ To use SSL for ESP8266, in Arduino IDE Tools menu, it's OK to select either **Ba
 
 #### 2. Using DDNS service for Local Blynk Server
 
-      - Server and name must use **DDNS hostname**, for example: `account.duckdns.org`, `account.no-ip.org`, `account.ddns.net`. Local IP Address won't work (e.g. `192.168.x.y`, `10.10.x.y`, etc.). Otherwise, you will get the following error:
+      Server and name must use **DDNS hostname**, for example: `account.duckdns.org`, `account.no-ip.org`, `account.ddns.net`. Local IP Address won't work (e.g. `192.168.x.y`, `10.10.x.y`, etc.). Otherwise, you will get the following error:
   
       ```
       Error BSSL:_wait_for_handshake: failed
@@ -206,7 +206,7 @@ To use SSL for ESP8266, in Arduino IDE Tools menu, it's OK to select either **Ba
       
 #### 3. Modifying Local Blynk Server's server.properties to use DDNS server name
       
-      - Add `server.host` property in `server.properties` file. For example :
+      Add `server.host` property in `server.properties` file. For example :
       
       ```
       server.host=xxxx.duckdns.org
@@ -218,7 +218,7 @@ To use SSL for ESP8266, in Arduino IDE Tools menu, it's OK to select either **Ba
             
 #### 4. Create OpenSSL certificates on Blynk Local Server
             
-      - Create OpenSSL Certificates (in the example, we'll make a new `~/Blynk-Server/SSL` directory to store to-be-created SSL certificates):
+      Create OpenSSL Certificates (in the example, we'll make a new `~/Blynk-Server/SSL` directory to store to-be-created SSL certificates):
   
       ```
       pi@raspberrypi:~/Blynk-Server/SSL $ openssl req -x509 -nodes -days 1825 -newkey rsa:2048 -keyout server.key -out server.crt
@@ -258,7 +258,7 @@ To use SSL for ESP8266, in Arduino IDE Tools menu, it's OK to select either **Ba
 
 #### 5. Modifying Local Blynk Server's server.properties to use OpenSSL certificates
 
-      - Modify file `server.properties` in Local Blynk Server
+      Modify file `server.properties` in Local Blynk Server
        
       ```
       server.ssl.cert=/home/pi/Blynk-Server/server.crt
@@ -268,7 +268,7 @@ To use SSL for ESP8266, in Arduino IDE Tools menu, it's OK to select either **Ba
 
 #### 6. Convert OpenSSL certificates to Blynk-accepted format
       
-      - Convert `server.crt` into `server_der.h`:
+      Convert `server.crt` into `server_der.h`:
       
       ```
       pi@raspberrypi:~ $ cd ~/Blynk_Server
@@ -291,9 +291,9 @@ To use SSL for ESP8266, in Arduino IDE Tools menu, it's OK to select either **Ba
 
 #### 7. Replacing OpenSSL certificates in Blynk Library so that ESP8266 boards will have OpenSSL Certificates for Local Blynk Server
 
-      - Copy the OpenSSL certificate files to Ubuntu machine running Arduino IDE.
+      Copy the OpenSSL certificate files to Ubuntu machine running Arduino IDE.
           
-      - Replacing certificate files in `~/Arduino/libraries/Blynk/src/certs/` (assuming Arduino libraries are stored in `~/Arduino/libraries/`. Replacing with your correct path) with `server_der.h`.
+      Replacing certificate files in `~/Arduino/libraries/Blynk/src/certs/` (assuming Arduino libraries are stored in `~/Arduino/libraries/`. Replacing with your correct path) with `server_der.h`.
       
       a) `~/Arduino/libraries/Blynk/src/certs/blynkcloud_der.h` (if not using `#define BLYNK_SSL_USE_LETSENCRYPT`) 
       b) `~/Arduino/libraries/Blynk/src/certs/dst_der.h` (if using `#define BLYNK_SSL_USE_LETSENCRYPT`)
@@ -315,7 +315,7 @@ To use SSL for ESP8266, in Arduino IDE Tools menu, it's OK to select either **Ba
 
 ### 1. Using LetsEncrypt Certificates (valid only 3 months, can be 1 year with paid subscription)
 
-      - In `libraries/Blynk/src/Blynk/BlynkConfig.h`, uncomment to use `#define BLYNK_SSL_USE_LETSENCRYPT`
+      In `libraries/Blynk/src/Blynk/BlynkConfig.h`, uncomment to use `#define BLYNK_SSL_USE_LETSENCRYPT`
   
       ```cpp
       // Uncomment to use Let's Encrypt Root CA
@@ -326,7 +326,7 @@ To use SSL for ESP8266, in Arduino IDE Tools menu, it's OK to select either **Ba
 
 ### 2. Using OpenSSL Certificate (valid 5 years)
 
-      - In `libraries/Blynk/src/Blynk/BlynkConfig.h`, comment out `#define BLYNK_SSL_USE_LETSENCRYPT`
+      In `libraries/Blynk/src/Blynk/BlynkConfig.h`, comment out `#define BLYNK_SSL_USE_LETSENCRYPT`
   
       ```cpp
       // Uncomment to use Let's Encrypt Root CA
@@ -353,7 +353,7 @@ To use SSL for ESP8266, in Arduino IDE Tools menu, it's OK to select either **Ba
 
 #### 4. Convert LetsEncrypt or OpenSSL certificates to Blynk-accepted format
 
-    - To create file `blynkcloud_pem.h` / `letsencrypt_pem.h` from localServer certificate file OpenSSL `server.crt` or LetsEncrypt `fullchain.crt`, just copy and add `"`,`"`,`\n` and `;` to the end of each line similar to the original file. (You can write a simple C program to do this converting task).
+    To create file `blynkcloud_pem.h` / `letsencrypt_pem.h` from localServer certificate file OpenSSL `server.crt` or LetsEncrypt `fullchain.crt`, just copy and add `"`,`"`,`\n` and `;` to the end of each line similar to the original file. (You can write a simple C program to do this converting task).
    
    This file is OK to use (both `blynkcloud_pem.h` / `letsencrypt_pem.h` are the same) even if BLYNK_SSL_USE_LETSENCRYPT is defined or not.
    
