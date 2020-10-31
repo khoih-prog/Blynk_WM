@@ -330,7 +330,7 @@ After you connected, please, go to http://192.168.4.1 or the configured AP IP. T
 Enter your WiFi and Blynk Credentials:
 
 <p align="center">
-    <img src="https://github.com/khoih-prog/Blynk_WM/blob/master/pics/ConfigPortal.png">
+    <img src="https://github.com/khoih-prog/Blynk_WM/blob/main/pics/ConfigPortal.png">
 </p>
 
 Then click **Save**. The system will auto-restart. You will see the board's built-in LED turned OFF. That means, it's already connected to your Blynk server successfully.
