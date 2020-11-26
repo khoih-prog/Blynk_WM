@@ -100,7 +100,7 @@ With version `v1.0.5` or later, you now can configure:
 ---
 ---
 
-## Prerequisite
+## Prerequisites
 
 1. [`Arduino IDE 1.8.13+`](https://www.arduino.cc/en/Main/Software)
 2. [`Blynk library 0.6.1+`](https://github.com/blynkkk/blynk-library/releases)
@@ -149,7 +149,7 @@ With version `v1.0.5` or later, you now can configure:
 
 1. Install [VS Code](https://code.visualstudio.com/)
 2. Install [PlatformIO](https://platformio.org/platformio-ide)
-3. Install **Blynk_WiFiManager** library by using [Library Manager](https://docs.platformio.org/en/latest/librarymanager/). Search for **Blynk_WiFiManager** in [Platform.io Author's Libraries](https://platformio.org/lib/search?query=author:%22Khoi%20Hoang%22)
+3. Install [**Blynk_WiFiManager** library](https://platformio.org/lib/show/6925/Blynk_WiFiManager) by using [Library Manager](https://platformio.org/lib/show/6925/Blynk_WiFiManager/installation). Search for **Blynk_WiFiManager** in [Platform.io Author's Libraries](https://platformio.org/lib/search?query=author:%22Khoi%20Hoang%22)
 4. Use included [platformio.ini](platformio/platformio.ini) file from examples to ensure that all dependent libraries will installed automatically. Please visit documentation for the other options and examples at [Project Configuration File](https://docs.platformio.org/page/projectconf.html)
 
 ---
@@ -330,7 +330,7 @@ After you connected, please, go to http://192.168.4.1 or the configured AP IP. T
 Enter your WiFi and Blynk Credentials:
 
 <p align="center">
-    <img src="https://github.com/khoih-prog/Blynk_WM/blob/main/pics/ConfigPortal.png">
+    <img src="https://github.com/khoih-prog/Blynk_WM/blob/master/pics/ConfigPortal.png">
 </p>
 
 Then click **Save**. The system will auto-restart. You will see the board's built-in LED turned OFF. That means, it's already connected to your Blynk server successfully.
