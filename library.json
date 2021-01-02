@@ -1,6 +1,6 @@
 {
   "name": "Blynk_WM",
-  "version": "1.1.1",
+  "version": "1.1.0",
   "description": "Library for configuring/auto(re)connecting ESP8266/ESP32 modules to best or available MultiWiFi APs and MultiBlynk servers at runtime. Enable adding dynamic custom parameters from sketch and input using the same Config Portal. Config Portal will be auto-adjusted to match the number of dynamic parameters. Optional default Credentials to be autoloaded into Config Portal to use or change instead of manually input. Static STA IP and DHCP Hostname as well as Config Portal AP channel, IP, SSID, Password can be configured. Multi or Double DetectDetector feature permits entering Config Portal as requested.",
   "keywords": "sensors, control, device, smartphone, mobile, app, web, cloud, communication, protocol, iot, m2m, wifi, ble, bluetooth, ethernet, usb, serial, gsm, gprs, 3g, data, esp8266, esp32, http, drd, mrd, double-reset, multi-reset, configportal, portal, credentials",
   "authors":
