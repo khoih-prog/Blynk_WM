@@ -1151,7 +1151,7 @@ uint16_t NUM_MENU_ITEMS = 0;
 
 ### Debug Terminal Output Samples
 
-#### 1. ESP8266WM_MRD_Config using LittleFS with SSL on ESP8266_NODEMCU
+### 1. ESP8266WM_MRD_Config using LittleFS with SSL on ESP8266_NODEMCU
 
 The following is the sample terminal output when running example [ESP8266WM_MRD_Config](examples/ESP8266WM_MRD_Config) on **ESP8266_NODEMCU**
 
@@ -1295,7 +1295,7 @@ FFFFFRFFFF FFRF
 
 ---
 
-#### 2. DHT11ESP8266_SSL using LittleFS with SSL on ESP8266_NODEMCU
+### 2. DHT11ESP8266_SSL using LittleFS with SSL on ESP8266_NODEMCU
 
 The following is the sample terminal output when running example [DHT11ESP8266_SSL](examples/DHT11ESP8266_SSL) on **ESP8266_NODEMCU**
 
@@ -1351,7 +1351,7 @@ Pubs Topics = default-mqtt-PubTopic
 
 ---
 
-#### 3. ESP32WM_MRD_Config using LITTLEFS without SSL on ESP32_DEV
+### 3. ESP32WM_MRD_Config using LITTLEFS without SSL on ESP32_DEV
 
 The following is the sample terminal output when running example [ESP32WM_MRD_Config](examples/ESP32WM_MRD_Config) on **ESP32_DEV**
 
@@ -1612,7 +1612,7 @@ RBRBRBRBRBRBRBRBRBRB RBRBRBRBRBRBRBRBRBRB RBRBRBRBRBRBRB
 
 ---
 
-#### 4. DHT11ESP32_SSL using LITTLEFS with SSL on ESP32_DEV
+### 4. DHT11ESP32_SSL using LITTLEFS with SSL on ESP32_DEV
 
 The following is the sample terminal output when running example [DHT11ESP8266_SSL](examples/DHT11ESP8266_SSL) on **ESP8266_NODEMCU**
 
