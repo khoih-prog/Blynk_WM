@@ -65,15 +65,15 @@
   * [4. File dynamicParams.h](#4-file-dynamicparamsh) 
 * [Debug Terminal Output Samples](#debug-terminal-output-samples)
   * [1. ESP8266WM_MRD_Config using LittleFS with SSL on ESP8266_NODEMCU](#1-esp8266wm_mrd_config-using-littlefs-with-ssl-on-esp8266_nodemcu)
-    * [1.1. No MultiReset Detected => Running normally](#11-no--multireset-detected--running-normally)
+    * [1.1. No MultiReset Detected => Running normally](#11-no-multireset-detected--running-normally
     * [1.2. MultiReset Detected => Enter Config Portal](#12-multireset-detected--enter-config-portal)
   * [2. DHT11ESP8266_SSL using LittleFS with SSL on ESP8266_NODEMCU](#2-dht11esp8266_ssl-using-littlefs-with-ssl-on-esp8266_nodemcu)
-  * [3. ESP32WM_MRD_Config using LITTLEFS without SSL on ESP32_DEV](#3-esp32wm_mrd_config-using-littlefs-without-ssl-on-es32_dev)
-    * [3.1. No MultiReset Detected => Running normally](#31-no--multireset-detected--running-normally)
+  * [3. ESP32WM_MRD_Config using LITTLEFS without SSL on ESP32_DEV](#3-esp32wm_mrd_config-using-littlefs-without-ssl-on-esp32_dev)
+    * [3.1. No MultiReset Detected => Running normally](#31-no-multireset-detected--running-normally)
     * [3.2. MultiReset Detected => Enter Config Portal](#32-multireset-detected--enter-config-portal)
     * [3.3. Exit Config Portal with Data](#33-exit-config-portal-with-data)
     * [3.4. WiFi Lost => AutoReconnect WiFi and Blynk.](#34-wifi-lost--autoreconnect-wifi-and-blynk)
-  * [4. DHT11ESP32_SSL using LittleFS with SSL on ESP32_DEV](#4-dht11esp32_ssl-using-littlefs-with-ssl-on-es32_dev)
+  * [4. DHT11ESP32_SSL using LittleFS with SSL on ESP32_DEV](4-dht11esp32_ssl-using-littlefs-with-ssl-on-esp32_dev)
 * [Debug](#debug)
 * [Troubleshooting](#troubleshooting)
 * [Releases](#releases)
@@ -185,7 +185,7 @@ Again thanks to [Thor Johnson](https://github.com/thorathome) and [Thor Johnson 
 
 Thanks to [Thor Johnson](https://github.com/thorathome) to test, suggest and encourage to add those new features in v1.0.13, such as Default Credentials/Dynamic Params, Configurable Config Portal Title, DRD.
 
-### Releases v1.0.12
+#### Releases v1.0.12
 
 1. Fix severe bug in v1.0.11
 
