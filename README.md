@@ -73,7 +73,7 @@
     * [3.2. MultiReset Detected => Enter Config Portal](#32-multireset-detected--enter-config-portal)
     * [3.3. Exit Config Portal with Data](#33-exit-config-portal-with-data)
     * [3.4. WiFi Lost => AutoReconnect WiFi and Blynk.](#34-wifi-lost--autoreconnect-wifi-and-blynk)
-  * [4. DHT11ESP32_SSL using LittleFS with SSL on ESP32_DEV](4-dht11esp32_ssl-using-littlefs-with-ssl-on-esp32_dev)
+  * [4. DHT11ESP32_SSL using LittleFS with SSL on ESP32_DEV](#4-dht11esp32_ssl-using-littlefs-with-ssl-on-esp32_dev)
 * [Debug](#debug)
 * [Troubleshooting](#troubleshooting)
 * [Releases](#releases)
