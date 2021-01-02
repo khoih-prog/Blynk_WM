@@ -1,5 +1,5 @@
-/****************************************************************************************************************************
-   defines.h for AM2315_ESP32_SSL.ino
+/*******************************************************************************************************************************
+   defines.h for ESP32WM_Config.ino
    For ESP32 boards
 
    Blynk_WM is a library for the ESP8266/ESP32 Arduino platform (https://github.com/esp8266/Arduino) to enable easy
@@ -28,20 +28,54 @@
     1.0.14    K Hoang      03/05/2020 Fix bug and change feature in dynamicParams.
     1.0.15    K Hoang      12/05/2020 Fix bug and Update to use LittleFS for ESP8266 core 2.7.1+. Add example.
     1.0.16    K Hoang      25/06/2020 Fix bug and logic of USE_DEFAULT_CONFIG_DATA. Auto format SPIFFS/LittleFS.
-    1.1.0     K Hoang      01/01/2021 Add support to ESP32 LittleFS. Remove possible compiler warnings. Update examples
- *****************************************************************************************************************************/
+    1.1.0     K Hoang      01/01/2021 Add support to ESP32 LittleFS. Remove possible compiler warnings. Update examples. Add MRD
+ ********************************************************************************************************************************/
 
 #ifndef defines_h
 #define defines_h
 
 #ifndef ESP32
-#error This code is intended to run on the ESP32 platform! Please check your Tools->Board setting.
+  #error This code is intended to run on the ESP32 platform! Please check your Tools->Board setting.
 #endif
 
 #define BLYNK_PRINT Serial
 
-#define DOUBLERESETDETECTOR_DEBUG     false
-#define BLYNK_WM_DEBUG                0
+#define BLYNK_WM_DEBUG                3
+
+#define USING_MRD     true
+
+#if USING_MRD
+  // These definitions must be placed before #include <ESP_MultiResetDetector.h> to be used
+  // Otherwise, default values (MRD_TIMES = 3, MRD_TIMEOUT = 10 seconds and MRD_ADDRESS = 0) will be used
+  // Number of subsequent resets during MRD_TIMEOUT to activate
+  #define MRD_TIMES               3
+  
+  // Number of seconds after reset during which a subseqent reset will be considered a mlti reset.
+  #define MRD_TIMEOUT             10
+  
+  // RTC/EEPPROM Address for the MultiResetDetector to use
+  #define MRD_ADDRESS             0
+
+  #define MULTIRESETDETECTOR_DEBUG       true 
+  
+  #warning Using MultiResetDetector MRD
+#else
+  // These definitions must be placed before #include <ESP_DoubleResetDetector.h> to be used
+  // Otherwise, default values (DRD_TIMEOUT = 10 seconds and DRD_ADDRESS = 0) will be used
+  // Number of subsequent resets during DRD_TIMEOUT to activate
+  
+  // Number of seconds after reset during which a subseqent reset will be considered a mlti reset.
+  #define DRD_TIMEOUT             10
+
+// RTC/EEPPROM Address for the DoubleResetDetector to use
+  #define DRD_ADDRESS             0
+
+  #define DOUBLERESETDETECTOR_DEBUG     false
+  
+  #warning Using DoubleResetDetector DRD 
+#endif
+
+#define BLYNK_PRINT Serial
 
 // Not use #define USE_LITTLEFS and #define USE_SPIFFS  => using SPIFFS for configuration data in WiFiManager
 // (USE_LITTLEFS == false) and (USE_SPIFFS == false)    => using EEPROM for configuration data in WiFiManager
@@ -52,7 +86,6 @@
 
 #define USE_LITTLEFS          true
 #define USE_SPIFFS            false
-
 
 #if !( USE_SPIFFS || USE_LITTLEFS)
   // EEPROM_SIZE must be <= 2048 and >= CONFIG_DATA_SIZE (currently 172 bytes)
@@ -67,57 +100,19 @@
 #define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET    5
 // Those above #define's must be placed before #include <BlynkSimpleEsp8266_WM.h>
 
-//You have to download Blynk WiFiManager Blynk_WM library at //https://github.com/khoih-prog/Blynk_WM
-// In order to enable (USE_BLYNK_WM = true). Otherwise, use (USE_BLYNK_WM = false)
-#define USE_BLYNK_WM   true
-//#define USE_BLYNK_WM   false
+//#define USE_SSL   true
+#define USE_SSL   false
 
-
-//#define USE_SSL     true
-#define USE_SSL     false
-
-#if USE_BLYNK_WM
 #if USE_SSL
-#include <BlynkSimpleEsp32_SSL_WM.h>        //https://github.com/khoih-prog/Blynk_WM
+#include <BlynkSimpleEsp32_SSL_WM.h>
 #else
-#include <BlynkSimpleEsp32_WM.h>            //https://github.com/khoih-prog/Blynk_WM
+#include <BlynkSimpleEsp32_WM.h>
 #endif
 
-#include "Credentials.h"
-#include "dynamicParams.h"
+#define PIN_D22   22            // Pin D22 mapped to pin GPIO22/SCL of ESP32
 
-#else
-#if USE_SSL
-#include <BlynkSimpleEsp32_SSL.h>
-#define BLYNK_HARDWARE_PORT     9443
-#else
-#include <BlynkSimpleEsp32.h>
-#define BLYNK_HARDWARE_PORT     8080
-#endif
-#endif
-
-#if !USE_BLYNK_WM
-
-#ifndef LED_BUILTIN
-#define LED_BUILTIN       2         // Pin D2 mapped to pin GPIO2/ADC12 of ESP32, control on-board LED
-#endif
-
-#define USE_LOCAL_SERVER    true
-//#define USE_LOCAL_SERVER    false
-
-// If local server
-#if USE_LOCAL_SERVER
-char blynk_server[]   = "yourname.duckdns.org";
-#endif
-
-char auth[]     = "***";
-char ssid[]     = "***";
-char pass[]     = "***";
-
-#endif
-
-#define PIN_D21           21        // Pin D21 mapped to pin GPIO21/SDA of ESP32
-#define PIN_D22           22        // Pin D22 mapped to pin GPIO22/SCL of ESP32
+#define DHT_PIN     PIN_D22     // pin DATA @ D22 / GPIO22
+#define DHT_TYPE    DHT11
 
 #define HOST_NAME   "ESP32-Master-Controller"
 

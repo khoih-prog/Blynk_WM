@@ -8,7 +8,7 @@
    Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
    Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
    Licensed under MIT license
-   Version: 1.0.16
+   Version: 1.1.0
 
    Version    Modified By   Date      Comments
    -------    -----------  ---------- -----------
@@ -29,6 +29,7 @@
     1.0.14    K Hoang      03/05/2020 Fix bug and change feature in dynamicParams.
     1.0.15    K Hoang      12/05/2020 Fix bug and Update to use LittleFS for ESP8266 core 2.7.1+. Add example.
     1.0.16    K Hoang      25/06/2020 Fix bug and logic of USE_DEFAULT_CONFIG_DATA. Auto format SPIFFS/LittleFS.
+    1.1.0     K Hoang      01/01/2021 Add support to ESP32 LittleFS. Remove possible compiler warnings. Update examples
  *****************************************************************************************************************************/
 
 // Sketch uses Arduino IDE-selected ESP32 and ESP8266 to select compile choices
@@ -164,13 +165,24 @@
       #warning Using EEPROM for ESP8266
     #endif  
   #else
-    //#define USE_SPIFFS false  // ESP32, Choosing EEPROM over LittleFS / SPIFFS here
-    #define USE_SPIFFS true
-    #if USE_SPIFFS
-      #warning Using SPIFFS for ESP32
+    // Not use #define USE_LITTLEFS and #define USE_SPIFFS  => using SPIFFS for configuration data in WiFiManager
+    // (USE_LITTLEFS == false) and (USE_SPIFFS == false)    => using EEPROM for configuration data in WiFiManager
+    // (USE_LITTLEFS == true) and (USE_SPIFFS == false)     => using LITTLEFS for configuration data in WiFiManager
+    // (USE_LITTLEFS == true) and (USE_SPIFFS == true)      => using LITTLEFS for configuration data in WiFiManager
+    // (USE_LITTLEFS == false) and (USE_SPIFFS == true)     => using SPIFFS for configuration data in WiFiManager
+    // Those above #define's must be placed before #include <BlynkSimpleEsp32_WFM.h>
+    
+    #define USE_LITTLEFS          true
+    #define USE_SPIFFS            false
+
+    #if USE_LITTLEFS
+      #warning Using LittleFS for ESP32
+    #elif USE_SPIFFS
+      #warning Using SPIFFS for ESP32  
     #else
       #warning Using EEPROM for ESP32
     #endif
+
   #endif
 
   #if USE_LITTLEFS
@@ -453,12 +465,26 @@ bool heartbeatLEDon = false; // this lets me use the same routine for the turn-o
   // HELP DEBUG THIS SKETCH WITH GOOD PRINTOUTS
   Serial.begin ( SERIAL_SPEED );
   delay ( 500 );  
-  Serial.println ( "\n\n=======================================" );
-  Serial.print ( SKETCH_NAME ); 
-  #if USE_SSL
-    Serial.print ( " ** Using SSL **" );  
-  #endif
-  Serial.println();
+  Serial.println ( F("\n\n=======================================") );
+  Serial.print ( SKETCH_NAME );
+
+#if (USE_LITTLEFS)
+  Serial.print( F(" ** Using LITTLEFS **") );
+#elif (USE_SPIFFS)
+  Serial.print( F(" ** Using SPIFFS **") );  
+#else
+  Serial.print( F(" ** Using EEPROM **") );
+#endif
+  
+#if USE_SSL
+  Serial.print ( F(" ** Using SSL **") );  
+#endif
+Serial.println();
+
+#if USE_WM
+  Serial.println(BLYNK_WM_VERSION);
+  Serial.println(ESP_DOUBLE_RESET_DETECTOR_VERSION);
+#endif
 
   connectToWLANandBlynk();  // Connect to WiFi, then to Blynk server
 
@@ -472,12 +498,9 @@ bool heartbeatLEDon = false; // this lets me use the same routine for the turn-o
   Blynk.virtualWrite ( heartbeatVpin, 000 );  
   heartbeatLEDblink(); // start first heartbeat 
   
-  Serial.println ( "\nSetup complete \n" );    
+  Serial.println ( F("\nSetup complete \n") );    
   
 } //end setup
-
-
-
 
 
 // KEEPING IT SIMPLE
@@ -498,34 +521,34 @@ void loop()
 void connectToWLANandBlynk()
 {
   // Setup WLAN and Blynk
-  Serial.print ( "\nSetting up WLAN and Blynk " );  
+  Serial.print ( F("\nSetting up WLAN and Blynk ") );  
   #if USE_WM
-    Serial.println ( "WITH WiFiManager" ); 
+    Serial.println ( F("WITH WiFiManager") ); 
   #else
-    Serial.println ( "WITHOUT WiFiManager" );  
+    Serial.println ( F("WITHOUT WiFiManager") );  
   #endif
   
   #if USE_WM
-    Serial.println ( "Starting Blynk.begin (with WM)" );  
+    Serial.println ( F("Starting Blynk.begin (with WM)") );  
 
     // SET UP THE CONFIG PORTAL CREDENTIALS AND CONNECTION INFO
     Blynk.setConfigPortalChannel ( 0 );  // 0 -> Use a random WiFi 2.4GHz channel for the Config Portal
     Blynk.setConfigPortal ( CONFIG_PORTAL_SSID, CONFIG_PORTAL_PASSWORD ); // Set up Config Portal SSID & Password
     Blynk.setConfigPortalIP ( IPAddress ( CONFIG_PORTAL_IPADDRESS ) ); // Set up IP address for COnfig Portal once connected to WiFi
 
-    Serial.print ( "Blynk.setConfigPortal(" ); 
-    Serial.print ( CONFIG_PORTAL_SSID ); Serial.print ( "," );  
-    Serial.print ( CONFIG_PORTAL_PASSWORD ); Serial.println ( ")" );   
-    Serial.print ( "  Config Portal will be found at IP: " ); Serial.print ( IPAddress ( CONFIG_PORTAL_IPADDRESS ) );  
-    Serial.println ( "\n" );  
+    Serial.print ( F("Blynk.setConfigPortal(") ); 
+    Serial.print ( CONFIG_PORTAL_SSID ); Serial.print ( F(",") );  
+    Serial.print ( CONFIG_PORTAL_PASSWORD ); Serial.println ( F(")") );   
+    Serial.print ( F("  Config Portal will be found at IP: ") ); Serial.print ( IPAddress ( CONFIG_PORTAL_IPADDRESS ) );  
+    Serial.println ( F("\n") );  
     
     //Blynk.config ( blynkAuth );  // not needed with WM 
     Blynk.begin ( DEVICE_HOST_NAME ); // DHCP (router) device name
   
   #else//NOT using WM
-    Serial.println ( "Starting WiFi.begin (no WM)" );  
+    Serial.println ( F("Starting WiFi.begin (no WM)") );  
     WiFi.begin ( WiFiSSID, WiFiPass );
-    Serial.println ( "... waiting a few seconds for WiFi ..." );    
+    Serial.println ( F("... waiting a few seconds for WiFi ...") );    
     #if ESP8266
       delay ( 7500 );  // For esp8266, it needs a delay to realize it has connected
     #endif
@@ -533,7 +556,7 @@ void connectToWLANandBlynk()
     // REBOOT if we do not have a good WiFi connection
     if ( WiFi.status() != WL_CONNECTED )
     {
-      Serial.println ( "Resetting in a few seconds...\n\n\n\n\n" );
+      Serial.println ( F("Resetting in a few seconds...\n\n\n\n\n") );
       delay ( 3000 );  
       ESP.restart();
     } 
@@ -547,18 +570,20 @@ void connectToWLANandBlynk()
   {
     #if USE_WM
       #if ( USE_LITTLEFS || USE_SPIFFS )
-        Serial.println ( "\nBlynk using " + String(CurrentFileFS) + " connected. Board Name : " + Blynk.getBoardName() );
+        Serial.print ( F("\nBlynk using ") ); Serial.print ( CurrentFileFS );
+        Serial.print ( F(" connected. Board Name : ") ); Serial.println ( Blynk.getBoardName() );
       #else
-         Serial.println ( "\nBlynk using EEPROM connected. Board Name : " + Blynk.getBoardName() );
+         Serial.print ( F("\nBlynk using EEPROM connected. Board Name : ") );
+         Serial.println ( Blynk.getBoardName() );
          Serial.printf( "EEPROM size = %d bytes, EEPROM start address = %d / 0x%X\n", EEPROM_SIZE, EEPROM_START, EEPROM_START );
       #endif  
     #endif      
-    Serial.println ( "Blynk connected just fine" ); 
-    Serial.print   ( "  IP address  " ); Serial.println ( WiFi.localIP() ) ;
-    Serial.print   ( "  MAC address " ); Serial.println ( WiFi.macAddress() );  
+    Serial.println ( F("Blynk connected just fine") ); 
+    Serial.print   ( F("  IP address  ") ); Serial.println ( WiFi.localIP() ) ;
+    Serial.print   ( F("  MAC address ") ); Serial.println ( WiFi.macAddress() );  
     Serial.println();  
   }
-  else Serial.println ( "Blynk NOT CONNECTED \n\n" );  
+  else Serial.println ( F("Blynk NOT CONNECTED \n\n") );  
 } // end connectToWLANandBlynk
 
 
@@ -568,11 +593,11 @@ void connectToWLANandBlynk()
 // SET UP BLYNK TIMER FOR HEARTBEAT (and anything eles you may want later)
 void setupBlynkTimers()
 {
-  Serial.println ( "Setting up Blynk timers" );  
+  Serial.println ( F("Setting up Blynk timers") );  
   // Interval timer for heartbeatLED (Blynk LED and onboard LED
   heartbeatLEDtimerID = myTimer.setInterval ( heartbeatLEDinterval, heartbeatLEDblink );  
 
-  Serial.println ( "... Blynk timers set up." );  
+  Serial.println ( F("... Blynk timers set up.") );  
   
 } //end setupBlynkTimers
 
@@ -593,7 +618,7 @@ void heartbeatLEDblink()
     
     digitalWrite ( LED_BUILTIN, LED_BUILTIN_LOW ); // On-board LED
     Blynk.virtualWrite ( heartbeatVpin, 000 );  
-    Serial.println ( " ..." );
+    Serial.println ( F(" ...") );
   } else
   {
     //heartbeatLED.on();      // Blynk Virtual LED
@@ -603,8 +628,8 @@ void heartbeatLEDblink()
     // Set the timer to turn off the LEDs in a bit  
     heartbeatLEDdurationTimerID = myTimer.setTimeout ( heartbeatLEDduration, heartbeatLEDblink ); 
     
-    Serial.print ( "... heartbeat of " ); Serial.print ( SKETCH_NAME ); 
-    Serial.print ( " WiFi.status() = " ); Serial.print ( WiFi.status() );  
+    Serial.print ( F("... heartbeat of ") ); Serial.print ( SKETCH_NAME ); 
+    Serial.print ( F(" WiFi.status() = ") ); Serial.print ( WiFi.status() );  
   }
   
   heartbeatLEDon = ! heartbeatLEDon; // flip status
@@ -622,17 +647,17 @@ BLYNK_WRITE_DEFAULT()
   // THE VIRTUAL PIN THAT SENT THE MESSAGE TO BLYNK
   int writeVpin = request.pin; 
   
-  Serial.print ( "\nRECEIVED BLYNK SIGNAL FROM V");
+  Serial.print ( F("\nRECEIVED BLYNK SIGNAL FROM V") );
   Serial.print ( writeVpin );
-  Serial.println ( ": " );
+  Serial.println ( F(": ") );
   
   // Print all parameter values
   for ( auto i = param.begin(); i < param.end(); ++i ) 
   {
-    Serial.print ( "* param = " ); 
+    Serial.print ( F("* param = ") ); 
     Serial.println ( i.asString() );  
   }
-  Serial.println ( "*****\n" );  
+  Serial.println ( F("*****\n") );  
 
   if ( writeVpin == controlVpin ) // We have color input from ZeRGBa
   {
@@ -641,21 +666,21 @@ BLYNK_WRITE_DEFAULT()
     int g = param[1].asInt();
     int b = param[2].asInt();
 
-    Serial.print ( "\n\nHORSE sent r, g, b (HEX) = " );
-    Serial.print ( r, HEX ); Serial.print ( ", " );  
-    Serial.print ( g, HEX ); Serial.print ( ", " );  
+    Serial.print ( F("\n\nHORSE sent r, g, b (HEX) = ") );
+    Serial.print ( r, HEX ); Serial.print ( F(", ") );  
+    Serial.print ( g, HEX ); Serial.print ( F(", ") );  
     Serial.print ( b, HEX ); Serial.println(); 
 
     String rS = String ( r, HEX ); if ( rS.length() < 2 ) rS = "0" + rS;  
     String gS = String ( g, HEX ); if ( gS.length() < 2 ) gS = "0" + gS;   
     String bS = String ( b, HEX ); if ( bS.length() < 2 ) bS = "0" + bS;  
-    Serial.print ( "HEX = " );
-    Serial.print ( rS ); Serial.print ( ", " );  
-    Serial.print ( gS ); Serial.print ( ", " );  
+    Serial.print ( F("HEX = ") );
+    Serial.print ( rS ); Serial.print ( F(", ") );  
+    Serial.print ( gS ); Serial.print ( F(", ") );  
     Serial.print ( bS ); Serial.println();  
 
     String rgbHEX = "#" + rS + gS + bS;
-    Serial.print ( "Color = " ); Serial.println ( rgbHEX ); Serial.println();  
+    Serial.print ( F("Color = ") ); Serial.println ( rgbHEX ); Serial.println();  
 
     // UPDATE THE HEARTBEAT LED COCLOR AND HEX DISPLAY
     Blynk.setProperty ( heartbeatVpin, "color", rgbHEX );  
@@ -675,44 +700,44 @@ BLYNK_WRITE_DEFAULT()
 void updateDynamicParameters()
 {
 
-  Serial.print ( "\nupdateDynamicParameters has: " ); 
-  Serial.print ( "\n   controlVpinC/label = """ );   Serial.print ( controlVpinC );   Serial.print ( """/" ); Serial.print ( controlLabel ); 
-  Serial.print ( "\n   heartbeatVpinC/label = """ ); Serial.print ( heartbeatVpinC ); Serial.print ( """/" ); Serial.print ( heartbeatLabel ); 
-  Serial.print ( "\n   displayVpinC/label = """ );   Serial.print ( displayVpinC );   Serial.print ( """/" ); Serial.print ( displayLabel ); 
-  Serial.println ( "\n" );  
+  Serial.print ( F("\nupdateDynamicParameters has: ") ); 
+  Serial.print ( F("\n   controlVpinC/label = """) );   Serial.print ( controlVpinC );   Serial.print ( F("""/") ); Serial.print ( controlLabel ); 
+  Serial.print ( F("\n   heartbeatVpinC/label = """) ); Serial.print ( heartbeatVpinC ); Serial.print ( F("""/") ); Serial.print ( heartbeatLabel ); 
+  Serial.print ( F("\n   displayVpinC/label = """) );   Serial.print ( displayVpinC );   Serial.print ( F("""/") ); Serial.print ( displayLabel ); 
+  Serial.println ( F("\n") );  
     
   // Convert char Virtual Pin numbers to int in preperation for Blynk connect
   controlVpin = atoi ( controlVpinC );
   if ( controlVpin < 0 || controlVpin > 255 )
   {
     controlVpin = atoi ( CONTROL_DEFAULT_VPIN );
-    Serial.print ( "**** Bad controlVpin input value of " );
+    Serial.print ( F("**** Bad controlVpin input value of ") );
     Serial.println ( controlVpinC );
   };
-  Serial.print ( "   Set controlVpin/controlLabel to " ) ; Serial.print ( controlVpin );
-  Serial.print ( "/" ); Serial.println ( controlLabel );   
+  Serial.print ( F("   Set controlVpin/controlLabel to ") ) ; Serial.print ( controlVpin );
+  Serial.print ( F("/") ); Serial.println ( controlLabel );   
   Blynk.setProperty ( controlVpin, "label", controlLabel ); 
 
   heartbeatVpin = atoi ( heartbeatVpinC );
   if ( heartbeatVpin < 0 || heartbeatVpin > 255 )
   {
     heartbeatVpin = atoi ( HEARTBEAT_LED_DEFAULT_VPIN );
-    Serial.print ( "**** Bad heartbeatVpin input value of " );
+    Serial.print ( F("**** Bad heartbeatVpin input value of ") );
     Serial.println ( heartbeatVpinC );
   }
-  Serial.print ( "   Set heartbeatVpin/heartbeatLabel to " ) ; Serial.print ( heartbeatVpin );
-  Serial.print ( "/" ); Serial.println ( heartbeatLabel );   
+  Serial.print ( F("   Set heartbeatVpin/heartbeatLabel to ") ) ; Serial.print ( heartbeatVpin );
+  Serial.print ( F("/") ); Serial.println ( heartbeatLabel );   
   Blynk.setProperty ( heartbeatVpin, "label", heartbeatLabel );  
     
   displayVpin = atoi ( displayVpinC );
   if ( displayVpin < 0 || displayVpin > 255 )
   {
     displayVpin = atoi ( DISPLAY_DEFAULT_VPIN );
-    Serial.print ( "**** Bad displayVpin input value of " );
+    Serial.print ( F("**** Bad displayVpin input value of ") );
     Serial.println ( displayVpinC );
   }
-  Serial.print ( "   Set displayVpin/displayLabel to " ) ; Serial.print ( displayVpin );
-  Serial.print ( "/" ); Serial.println ( displayLabel );   
+  Serial.print ( F("   Set displayVpin/displayLabel to ") ) ; Serial.print ( displayVpin );
+  Serial.print ( F("/") ); Serial.println ( displayLabel );   
   Blynk.setProperty ( displayVpin, "label", displayLabel );  
   Serial.println();  
   
@@ -725,7 +750,7 @@ void updateDynamicParameters()
 // GETS CALLED IMMEDIATELY ON FIRST CONNECT TO BLYNK SERVER, TOO
 BLYNK_CONNECTED()
 {
-  Serial.println ( "\nBLYNK_CONNECTED..." );  
+  Serial.println ( F("\nBLYNK_CONNECTED...") );  
 
   // Convert the Config Portal (or compiler constant) Virtual Pin char values to Blynk-usable ints
   updateDynamicParameters();  
@@ -740,6 +765,6 @@ BLYNK_CONNECTED()
 // IT IS NOT SUPER RELIABLE !  
 BLYNK_APP_CONNECTED()
 {
-  Serial.println ( "\nBLYNK_APP_CONNECTED..." );  
+  Serial.println ( F("\nBLYNK_APP_CONNECTED...") );  
 
 } // end BLYNK_APP_CONNECTED

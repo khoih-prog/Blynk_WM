@@ -7,7 +7,7 @@
    Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
    Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
    Licensed under MIT license
-   Version: 1.0.16
+   Version: 1.1.0
 
    Version    Modified By   Date      Comments
    -------    -----------  ---------- -----------
@@ -28,6 +28,7 @@
     1.0.14    K Hoang      03/05/2020 Fix bug and change feature in dynamicParams.
     1.0.15    K Hoang      12/05/2020 Fix bug and Update to use LittleFS for ESP8266 core 2.7.1+. Add example.
     1.0.16    K Hoang      25/06/2020 Fix bug and logic of USE_DEFAULT_CONFIG_DATA. Auto format SPIFFS/LittleFS.
+    1.1.0     K Hoang      01/01/2021 Add support to ESP32 LittleFS. Remove possible compiler warnings. Update examples
  *****************************************************************************************************************************/
 
 #include "defines.h"
@@ -69,11 +70,11 @@ void heartBeatPrint(void)
   {
     set_led(HIGH);
     led_ticker.once_ms(111, set_led, (byte) LOW);
-    Serial.print("B");
+    Serial.print(F("B"));
   }
   else
   {
-    Serial.print("F");
+    Serial.print(F("F"));
   }
 
   if (num == 80)
@@ -83,7 +84,7 @@ void heartBeatPrint(void)
   }
   else if (num++ % 10 == 0)
   {
-    Serial.print(" ");
+    Serial.print(F(" "));
   }
 }
 
@@ -105,11 +106,32 @@ void check_status()
 
 void setup()
 {
-  // Debug console
-  Serial.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
 
-  Serial.println("\nStarting ...");
+  // Debug console
+  Serial.begin(115200);
+  while (!Serial);
+
+  delay(200);
+
+#if (USE_LITTLEFS)
+  Serial.print(F("\nStarting DHT11ESP32_SSL using LITTLEFS"));
+#elif (USE_SPIFFS)
+  Serial.print(F("\nStarting DHT11ESP32_SSL using SPIFFS"));  
+#else
+  Serial.print(F("\nStarting DHT11ESP32_SSL using EEPROM"));
+#endif
+
+#if USE_SSL
+  Serial.print(F(" with SSL on ")); Serial.println(ARDUINO_BOARD);
+#else
+  Serial.print(F(" without SSL on ")); Serial.println(ARDUINO_BOARD);
+#endif
+
+#if USE_BLYNK_WM
+  Serial.println(BLYNK_WM_VERSION);
+  Serial.println(ESP_DOUBLE_RESET_DETECTOR_VERSION);
+#endif
 
   dht.begin();
 
@@ -150,22 +172,27 @@ void setup()
 
   timer.setInterval(60 * 1000, readAndSendData);
 
-#if USE_BLYNK_WM
   if (Blynk.connected())
   {
-#if USE_SPIFFS
-    Serial.println("\nBlynk ESP32 using SPIFFS connected. Board Name : " + Blynk.getBoardName());
+#if (USE_LITTLEFS)
+    Serial.println(F("\nBlynk ESP32 using LittleFS connected"));
+#elif (USE_SPIFFS)
+    Serial.println(F("\nBlynk ESP32 using SPIFFS connected."));
 #else
-    Serial.println("\nBlynk ESP32 using EEPROM connected. Board Name : " + Blynk.getBoardName());
+    Serial.println(F("\nBlynk ESP32 using EEPROM connected."));
+    Serial.printf("EEPROM size = %d bytes, EEPROM start address = %d / 0x%X\n", EEPROM_SIZE, EEPROM_START, EEPROM_START);
+#endif
+
+#if USE_BLYNK_WM
+    Serial.print(F("Board Name : ")); Serial.println(Blynk.getBoardName());
 #endif
   }
-#endif  
 }
 
 #if (USE_BLYNK_WM && USE_DYNAMIC_PARAMETERS)
 void displayCredentials(void)
 {
-  Serial.println("\nYour stored Credentials :");
+  Serial.println(F("\nYour stored Credentials :"));
 
   for (int i = 0; i < NUM_MENU_ITEMS; i++)
   {

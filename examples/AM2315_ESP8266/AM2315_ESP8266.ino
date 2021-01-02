@@ -7,7 +7,7 @@
    Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
    Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
    Licensed under MIT license
-   Version: 1.0.16
+   Version: 1.1.0
 
    Version    Modified By   Date      Comments
    -------    -----------  ---------- -----------
@@ -28,6 +28,7 @@
     1.0.14    K Hoang      03/05/2020 Fix bug and change feature in dynamicParams.
     1.0.15    K Hoang      12/05/2020 Fix bug and Update to use LittleFS for ESP8266 core 2.7.1+. Add example.
     1.0.16    K Hoang      25/06/2020 Fix bug and logic of USE_DEFAULT_CONFIG_DATA. Auto format SPIFFS/LittleFS.
+    1.1.0     K Hoang      01/01/2021 Add support to ESP32 LittleFS. Remove possible compiler warnings. Update examples
  *****************************************************************************************************************************/
 
 #include "defines.h"
@@ -125,11 +126,25 @@ void setup()
   Serial.begin(115200);
   while (!Serial);
 
+  delay(200);
+
 #if ( USE_LITTLEFS || USE_SPIFFS)
-  Serial.print("\nStarting AM2315_ESP8266 using " + String(CurrentFileFS));  
+  Serial.print(F("\nStarting AM2315_ESP8266 using "));
+  Serial.print(CurrentFileFS);
 #else
   Serial.print("\nStarting AM2315_ESP8266 using EEPROM");
-#endif  
+#endif
+
+#if USE_SSL
+  Serial.print(F(" with SSL on ")); Serial.println(ARDUINO_BOARD);
+#else
+  Serial.print(F(" without SSL on ")); Serial.println(ARDUINO_BOARD);
+#endif
+
+#if USE_BLYNK_WM
+  Serial.println(BLYNK_WM_VERSION);
+  Serial.println(ESP_DOUBLE_RESET_DETECTOR_VERSION);
+#endif
 
   if (!AM2315.begin())
   {
@@ -173,16 +188,18 @@ void setup()
   if (Blynk.connected())
   {
 #if ( USE_LITTLEFS || USE_SPIFFS)
-    Serial.println("\nBlynk ESP8288 using " + String(CurrentFileFS) + " connected.");
+    Serial.print(F("\nBlynk ESP8288 using "));
+    Serial.print(CurrentFileFS);
+    Serial.println(F(" connected."));
 #else
     {
-      Serial.println("\nBlynk ESP8288 using EEPROM connected.");
+      Serial.println(F("\nBlynk ESP8288 using EEPROM connected."));
       Serial.printf("EEPROM size = %d bytes, EEPROM start address = %d / 0x%X\n", EEPROM_SIZE, EEPROM_START, EEPROM_START);
     }
 #endif
 
 #if USE_BLYNK_WM
-    Serial.println("Board Name : " + Blynk.getBoardName());
+    Serial.print(F("Board Name : ")); Serial.println(Blynk.getBoardName());
 #endif
   }
 
