@@ -55,6 +55,8 @@ getBoardName  KEYWORD2
 getHWPort KEYWORD2
 getFullConfigData KEYWORD2
 clearConfigData KEYWORD2
+resetAndEnterConfigPortal KEYWORD2
+resetAndEnterConfigPortalPersistent KEYWORD2
 
 # Handler helpers
 BLYNK_READ	KEYWORD2

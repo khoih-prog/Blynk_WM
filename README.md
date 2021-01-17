@@ -18,6 +18,7 @@
   * [Features](#features)
   * [Currently supported Boards](#currently-supported-boards)
 * [Changelog](#changelog)
+  * [Releases v1.1.1](#releases-v111)
   * [Major Releases v1.1.0](#major-releases-v110)
   * [Releases v1.0.16](#releases-v1016)
   * [Releases v1.0.15](#releases-v1015)
@@ -57,9 +58,13 @@
   * [10. Blynk_WM_Template](examples/Blynk_WM_Template)
   * [11. **ESP32WM_MRD_Config**](examples/ESP32WM_MRD_Config)
   * [12. **ESP8266WM_MRD_Config**](examples/ESP8266WM_MRD_Config)
+  * [13. **ESP32WM_ForcedConfig**](examples/ESP32WM_ForcedConfig)
+  * [14. **ESP8266WM_ForcedConfig**](examples/ESP8266WM_ForcedConfig)
+  * [15. **ESP32WM_MRD_ForcedConfig**](examples/ESP32WM_MRD_ForcedConfig)
+  * [16. **ESP8266WM_MRD_ForcedConfig**](examples/ESP8266WM_MRD_ForcedConfig)
 * [So, how it works?](#so-how-it-works)
-* [Example ESP32WM_MRD_Config](#example-esp32wm_mrd_config)
-  * [1. File ESP32WM_MRD_Config.ino](#1-file-esp32wm_mrd_configino)
+* [Example ESP32WM_MRD_ForcedConfig](#example-esp32wm_mrd_forcedconfig)
+  * [1. File ESP32WM_MRD_ForcedConfig.ino](#1-file-esp32wm_mrd_forcedconfigino)
   * [2. File defines.h](#2-file-definesh) 
   * [3. File Credentials.h](#3-file-credentialsh) 
   * [4. File dynamicParams.h](#4-file-dynamicparamsh) 
@@ -74,6 +79,12 @@
     * [3.3. Exit Config Portal with Data](#33-exit-config-portal-with-data)
     * [3.4. WiFi Lost => AutoReconnect WiFi and Blynk.](#34-wifi-lost--autoreconnect-wifi-and-blynk)
   * [4. DHT11ESP32_SSL using LittleFS with SSL on ESP32_DEV](#4-dht11esp32_ssl-using-littlefs-with-ssl-on-esp32_dev)
+  * [5. ESP8266WM_MRD_ForcedConfig using non-persistent ConfigPortal virtual button](#5-esp32wm_mrd_forcedconfig-using-non-persistent-configportal-virtual-button)
+    * [5.1. Start normally then press non-persistent ConfigPortal virtual button](#51-start-normally-then-press-non-persistent-configportal-virtual-button)
+    * [5.2. Enter non-persistent ConfigPortal](#52-enter-non-persistent-configportal)
+  * [6. ESP8266WM_MRD_ForcedConfig using persistent ConfigPortal virtual button](#6-esp32wm_mrd_forcedconfig-using-persistent-configportal-virtual-button)
+    * [6.1. Start normally then press persistent ConfigPortal virtual button](#61-start-normally-then-press-persistent-configpportal-virtual-button)
+    * [6.2. Enter persistent ConfigPortal](#62-enter-persistent-configportal)
 * [Debug](#debug)
 * [Troubleshooting](#troubleshooting)
 * [Releases](#releases)
@@ -148,6 +159,12 @@ This [**BlynkESP32_BT_WF** library](https://github.com/khoih-prog/BlynkESP32_BT_
 ---
 
 ## Changelog
+
+### Releases v1.1.1
+
+1. Add functions to control Config Portal from software or Virtual Switches. Check [How to trigger a Config Portal from code #25](https://github.com/khoih-prog/Blynk_WM/issues/25)
+2. Add examples to demo the new Virtual ConfigPortal SW feature
+3. Optimize code
 
 ### Major Releases v1.1.0
 
@@ -303,6 +320,7 @@ Look in file [**adc_common.c**](https://github.com/espressif/esp-idf/blob/master
 ### How to use
 
 In your code, replace
+
 1. `BlynkSimpleEsp8266.h`     with `BlynkSimpleEsp8266_WM.h`      for ESP8266 `without SSL`
 2. `BlynkSimpleEsp8266_SSL.h` with `BlynkSimpleEsp8266_SSL_WM.h`  for ESP8266 `with SSL`
 3. `BlynkSimpleEsp32.h`       with `BlynkSimpleEsp32_WM.h`        for ESP32 `without SSL`
@@ -664,6 +682,10 @@ void loop()
 10. [Blynk_WM_Template](examples/Blynk_WM_Template)
 11. [**ESP32WM_MRD_Config**](examples/ESP32WM_MRD_Config)
 12. [**ESP8266WM_MRD_Config**](examples/ESP8266WM_MRD_Config)
+13. [**ESP32WM_ForcedConfig**](examples/ESP32WM_ForcedConfig)
+14. [**ESP8266WM_ForcedConfig**](examples/ESP8266WM_ForcedConfig)
+15. [**ESP32WM_MRD_ForcedConfig**](examples/ESP32WM_MRD_ForcedConfig)
+16. [**ESP8266WM_MRD_ForcedConfig**](examples/ESP8266WM_MRD_ForcedConfig)
 
 ---
 ---
@@ -705,9 +727,9 @@ Then click **Save**. The system will auto-restart. You will see the board's buil
 ---
 ---
 
-## Example [ESP32WM_MRD_Config](examples/ESP32WM_MRD_Config)
+## Example [ESP32WM_MRD_ForcedConfig](examples/ESP32WM_MRD_ForcedConfig)
 
-#### 1. File [ESP32WM_MRD_Config.ino](examples/ESP32WM_MRD_Config/ESP32WM_MRD_Config.ino)
+#### 1. File [ESP32WM_MRD_ForcedConfig.ino](examples/ESP32WM_MRD_ForcedConfig/ESP32WM_MRD_ForcedConfig.ino)
 
 ```
 #include "defines.h"
@@ -720,6 +742,39 @@ Then click **Save**. The system will auto-restart. You will see the board's buil
 DHT dht(DHT_PIN, DHT_TYPE);
 BlynkTimer timer;
 Ticker     led_ticker;
+
+#define BLYNK_PIN_FORCED_CONFIG           V10
+#define BLYNK_PIN_FORCED_PERS_CONFIG      V20
+
+// Use button V10 (BLYNK_PIN_FORCED_CONFIG) to forced Config Portal
+BLYNK_WRITE(BLYNK_PIN_FORCED_CONFIG)
+{ 
+  if (param.asInt())
+  {
+    Serial.println( F("CP Button Hit. Rebooting") ); 
+
+    // This will keep CP once, clear after reset, even you didn't enter CP at all.
+    Blynk.resetAndEnterConfigPortal(); 
+    
+    delay ( 8000 );  
+    ESP.restart();
+  }
+}
+
+// Use button V20 (BLYNK_PIN_FORCED_PERS_CONFIG) to forced Persistent Config Portal
+BLYNK_WRITE(BLYNK_PIN_FORCED_PERS_CONFIG)
+{ 
+  if (param.asInt())
+  {
+    Serial.println( F("Persistent CP Button Hit. Rebooting") ); 
+   
+    // This will keep CP forever, until you successfully enter CP, and Save data to clear the flag.
+    Blynk.resetAndEnterConfigPortalPersistent();
+    
+    delay ( 8000 );  
+    ESP.restart();
+  }
+}
 
 void readAndSendData()
 {
@@ -746,7 +801,7 @@ void set_led(byte status)
   digitalWrite(LED_BUILTIN, status);
 }
 
-void heartBeatPrint(void)
+void heartBeatPrint()
 {
   static int num = 1;
 
@@ -761,7 +816,7 @@ void heartBeatPrint(void)
     Serial.print(F("F"));
   }
 
-  if (num == 40)
+  if (num == 80)
   {
     Serial.println();
     num = 1;
@@ -799,11 +854,11 @@ void setup()
   delay(200);
 
 #if (USE_LITTLEFS)
-  Serial.print(F("\nStarting ESP32WM_MRD_Config using LITTLEFS"));
+  Serial.print(F("\nStarting ESP32WM_MRD_ForcedConfig using LITTLEFS"));
 #elif (USE_SPIFFS)
-  Serial.print(F("\nStarting ESP32WM_MRD_Config using SPIFFS"));  
+  Serial.print(F("\nStarting ESP32WM_MRD_ForcedConfig using SPIFFS"));  
 #else
-  Serial.print(F("\nStarting ESP32WM_MRD_Config using EEPROM"));
+  Serial.print(F("\nStarting ESP32WM_MRD_ForcedConfig using EEPROM"));
 #endif
 
 #if USE_SSL
@@ -826,7 +881,7 @@ void setup()
   // Set config portal SSID and Password
   Blynk.setConfigPortal("TestPortal-ESP32", "TestPortalPass");
   // Set config portal IP address
-  Blynk.setConfigPortalIP(IPAddress(192, 168, 220, 1));
+  //Blynk.setConfigPortalIP(IPAddress(192, 168, 220, 1));
   // Set config portal channel, default = 1. Use 0 => random channel from 1-13 to avoid conflict
   Blynk.setConfigPortalChannel(0);
 
@@ -862,7 +917,7 @@ void setup()
 }
 
 #if USE_DYNAMIC_PARAMETERS
-void displayCredentials(void)
+void displayCredentials()
 {
   Serial.println(F("\nYour stored Credentials :"));
 
@@ -902,7 +957,7 @@ void loop()
 }
 ```
 
-#### 2. File [defines.h](examples/ESP32WM_MRD_Config/defines.h)
+#### 2. File [defines.h](examples/ESP32WM_MRD_ForcedConfig/defines.h)
 
 ```cpp
 #ifndef defines_h
@@ -912,11 +967,11 @@ void loop()
   #error This code is intended to run on the ESP32 platform! Please check your Tools->Board setting.
 #endif
 
-#define BLYNK_PRINT        Serial
+#define BLYNK_PRINT Serial
 
-#define BLYNK_WM_DEBUG     3
+#define BLYNK_WM_DEBUG                3
 
-#define USING_MRD           true
+#define USING_MRD     true
 
 #if USING_MRD
   // These definitions must be placed before #include <ESP_MultiResetDetector.h> to be used
@@ -969,7 +1024,10 @@ void loop()
 // Force some params in Blynk, only valid for library version 1.0.1 and later
 #define TIMEOUT_RECONNECT_WIFI                    10000L
 #define RESET_IF_CONFIG_TIMEOUT                   true
+
 #define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET    5
+
+#define USE_DYNAMIC_PARAMETERS                    true
 // Those above #define's must be placed before #include <BlynkSimpleEsp8266_WM.h>
 
 //#define USE_SSL   true
@@ -993,7 +1051,7 @@ void loop()
 
 ---
 
-#### 3. File [Credentials.h](examples/ESP32WM_MRD_Config/Credentials.h)
+#### 3. File [Credentials.h](examples/ESP32WM_MRD_ForcedConfig/Credentials.h)
 
 ```cpp
 #ifndef Credentials_h
@@ -1076,13 +1134,13 @@ Blynk_WM_Configuration defaultConfig =
 
 ---
 
-#### 4. File [dynamicParams.h](examples/ESP32WM_MRD_Config/dynamicParams.h)
+#### 4. File [dynamicParams.h](examples/ESP32WM_MRD_ForcedConfig/dynamicParams.h)
 
 ```cpp
 #ifndef dynamicParams_h
 #define dynamicParams_h
 
-#define USE_DYNAMIC_PARAMETERS      true
+// USE_DYNAMIC_PARAMETERS defined in defined.h
 
 /////////////// Start dynamic Credentials ///////////////
 
@@ -1160,7 +1218,7 @@ The following is the sample terminal output when running example [ESP8266WM_MRD_
 
 ```
 Starting ESP8266WM_MRD_Config using LittleFS with SSL on ESP8266_NODEMCU
-Blynk_WM v1.1.0
+Blynk_WM SSL for ESP8266 v1.1.1
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFD0002
 multiResetDetectorFlag = 0xFFFD0002
@@ -1240,7 +1298,7 @@ BBBBBB
 
 ```
 Starting ESP8266WM_MRD_Config using LittleFS with SSL on ESP8266_NODEMCU
-Blynk_WM v1.1.0
+Blynk_WM SSL for ESP8266 v1.1.1
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFC0003
 multiResetDetectorFlag = 0xFFFC0003
@@ -1302,7 +1360,7 @@ The following is the sample terminal output when running example [DHT11ESP8266_S
 
 ```
 Starting DHT11ESP8266_SSL using LittleFS with SSL on ESP8266_NODEMCU
-Blynk_WM v1.1.0
+Blynk_WM SSL for ESP8266 v1.1.1
 ESP_DoubleResetDetector v1.1.1
 [293] Hostname=ESP8266-DHT11-SSL
 [316] LoadCfgFile 
@@ -1360,7 +1418,7 @@ The following is the sample terminal output when running example [ESP32WM_MRD_Co
 
 ```
 Starting ESP32WM_MRD_Config using LITTLEFS without SSL on ESP32_DEV
-Blynk_WM v1.1.0
+Blynk_WM for ESP32 v1.1.1
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -1437,7 +1495,7 @@ BBBBBB
 
 ```
 Starting ESP32WM_MRD_Config using LITTLEFS without SSL on ESP32_DEV
-Blynk_WM v1.1.0
+Blynk_WM for ESP32 v1.1.1
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFC0003
 multiResetDetectorFlag = 0xFFFC0003
@@ -1495,7 +1553,7 @@ ets Jun  8 2016 00:22:57
 
 ```
 Starting ESP32WM_MRD_Config using LITTLEFS without SSL on ESP32_DEV
-Blynk_WM v1.1.0
+Blynk_WM for ESP32 v1.1.1
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -1619,7 +1677,7 @@ The following is the sample terminal output when running example [DHT11ESP8266_S
 
 ```
 Starting DHT11ESP32_SSL using LITTLEFS with SSL on ESP32_DEV
-Blynk_WM v1.1.0
+Blynk_WM SSL for ESP32 v1.1.1
 ESP_DoubleResetDetector v1.1.1
 [346] Hostname=ESP32-DHT11-SSL
 [385] LoadCfgFile 
@@ -1667,6 +1725,338 @@ Pubs Topics = default-mqtt-PubTopic
 ```
 
 ---
+
+### 5. ESP8266WM_MRD_ForcedConfig using non-persistent ConfigPortal virtual button
+
+The following is the sample terminal output when running example [ESP8266WM_MRD_ForcedConfig](examples/ESP8266WM_MRD_ForcedConfig) on **ESP8266_NODEMCU**
+
+The function to call is 
+
+```
+// This will keep CP once, clear after reset, even you didn't enter CP at all.
+Blynk.resetAndEnterConfigPortal();
+```
+
+#### 5.1 Start normally then press non-persistent ConfigPortal virtual button
+
+```
+Starting ESP8266WM_MRD_ForcedConfig using LittleFS without SSL on ESP8266_NODEMCU
+Blynk_WM for ESP8266 v1.1.1
+ESP_MultiResetDetector v1.1.1
+LittleFS Flag read = 0xFFFE0001
+multiResetDetectorFlag = 0xFFFE0001
+lowerBytes = 0x0001, upperBytes = 0x0001
+No multiResetDetected, number of times = 1
+LittleFS Flag read = 0xFFFE0001
+Saving config file...
+Saving config file OK
+[293] Hostname=8266-Master-Controller
+[302] LoadCfgFile 
+[303] OK
+[303] ======= Start Stored Config Data =======
+[303] Hdr=ESP8266,BrdName=Air-Control
+[303] SSID=HueNet1,PW=12345678
+[304] SSID1=HueNet2,PW1=12345678
+[307] Server=account.duckdns.org,Token=token
+[313] Server1=account.duckdns.org,Token1=token1
+[320] Port=8080
+[321] ======= End Config Data =======
+[325] CCSum=0x351f,RCSum=0x351f
+[329] LoadCredFile 
+[329] CrR:pdata=new-mqtt-server,len=34
+[333] CrR:pdata=1883,len=6
+[335] CrR:pdata=new-mqtt-username,len=34
+[339] CrR:pdata=default-mqtt-password,len=34
+[344] CrR:pdata=default-mqtt-SubTopic,len=34
+[347] CrR:pdata=default-mqtt-PubTopic,len=34
+[351] OK
+[352] CrCCsum=0x2670,CrRCsum=0x2670
+[355] Valid Stored Dynamic Data
+[358] Hdr=ESP8266,BrdName=Air-Control
+[361] SSID=HueNet1,PW=12345678
+[364] SSID1=HueNet2,PW1=12345678
+[367] Server=account.duckdns.org,Token=token
+[373] Server1=account.duckdns.org,Token1=token1
+[379] Port=8080
+[381] ======= End Config Data =======
+[384] Check if isForcedCP
+[389] LoadCPFile 
+[389] OK
+[389] bg: noConfigPortal = true
+[392] Connecting MultiWifi...
+[6648] WiFi connected after time: 1
+[6648] SSID=HueNet1,RSSI=-37
+[6648] Channel=2,IP=192.168.2.87
+[6648] bg: WiFi OK. Try Blynk
+[6648] 
+    ___  __          __
+   / _ )/ /_ _____  / /__
+  / _  / / // / _ \/  '_/
+ /____/_/\_, /_//_/_/\_\
+        /___/ v0.6.1 on NodeMCU
+
+[6661] BlynkArduinoClient.connect: Connecting to account.duckdns.org:8080
+[6765] Ready (ping: 7ms).
+[6832] Connected to BlynkServer=account.duckdns.org,Token=token
+[6832] bg: WiFi+Blynk OK
+
+Blynk ESP8266 using LittleFS connected.
+Board Name : Air-Control
+B
+Your stored Credentials :
+MQTT Server = new-mqtt-server
+Port = 1883
+MQTT UserName = new-mqtt-username
+MQTT PWD = default-mqtt-password
+Subs Topics = default-mqtt-SubTopic
+Pubs Topics = default-mqtt-PubTopic
+Stop multiResetDetecting
+Saving config file...
+Saving config file OK
+BCP Button Hit. Rebooting
+[19414] setForcedCP non-Persistent  <========== Non-Persistent CP requested
+[19419] SaveCPFile 
+[19423] OK
+[19429] SaveBkUpCPFile 
+[19433] OK
+```
+
+#### 5.2 Enter non-persistent ConfigPortal
+
+Non-Persistent CP will be removed after first reset, even you didn't enter the CP. You can optionally enter CP, input and `Save` config data.
+
+```
+Starting ESP8266WM_MRD_ForcedConfig using LittleFS without SSL on ESP8266_NODEMCU
+Blynk_WM for ESP8266 v1.1.1
+ESP_MultiResetDetector v1.1.1
+LittleFS Flag read = 0xFFFE0001
+multiResetDetectorFlag = 0xFFFE0001
+lowerBytes = 0x0001, upperBytes = 0x0001
+No multiResetDetected, number of times = 1
+LittleFS Flag read = 0xFFFE0001
+Saving config file...
+Saving config file OK
+[287] Hostname=8266-Master-Controller
+[300] LoadCfgFile 
+[300] OK
+[300] ======= Start Stored Config Data =======
+[300] Hdr=ESP8266,BrdName=Air-Control
+[300] SSID=HueNet1,PW=12345678
+[302] SSID1=HueNet2,PW1=12345678
+[305] Server=account.duckdns.org,Token=token
+[311] Server1=account.duckdns.org,Token1=token1
+[317] Port=8080
+[319] ======= End Config Data =======
+[322] CCSum=0x351f,RCSum=0x351f
+[327] LoadCredFile 
+[327] CrR:pdata=new-mqtt-server,len=34
+[330] CrR:pdata=1883,len=6
+[333] CrR:pdata=new-mqtt-username,len=34
+[336] CrR:pdata=default-mqtt-password,len=34
+[341] CrR:pdata=default-mqtt-SubTopic,len=34
+[344] CrR:pdata=default-mqtt-PubTopic,len=34
+[348] OK
+[349] CrCCsum=0x2670,CrRCsum=0x2670
+[352] Valid Stored Dynamic Data
+[355] Hdr=ESP8266,BrdName=Air-Control
+[358] SSID=HueNet1,PW=12345678
+[361] SSID1=HueNet2,PW1=12345678
+[364] Server=account.duckdns.org,Token=token
+[370] Server1=account.duckdns.org,Token1=token1
+[377] Port=8080
+[378] ======= End Config Data =======
+[382] Check if isForcedCP
+[387] LoadCPFile 
+[387] OK
+[387] bg: isForcedConfigPortal = true
+[390] bg:Stay forever in CP:Forced-non-Persistent  <========== Non-Persistent CP will clear after reset
+[394] clearForcedCP
+[401] SaveCPFile 
+[405] OK
+[411] SaveBkUpCPFile 
+[415] OK
+[2467] 
+stConf:SSID=TestPortal-ESP8266,PW=TestPortalPass
+[2467] IP=192.168.4.1,ch=7
+F
+Your stored Credentials :
+MQTT Server = new-mqtt-server
+Port = 1883
+MQTT UserName = new-mqtt-username
+MQTT PWD = default-mqtt-password
+Subs Topics = default-mqtt-SubTopic
+Pubs Topics = default-mqtt-PubTopic
+Stop multiResetDetecting
+Saving config file...
+Saving config file OK
+
+```
+
+---
+
+### 6. ESP8266WM_MRD_ForcedConfig using persistent ConfigPortal virtual button
+
+The following is the sample terminal output when running example [ESP8266WM_MRD_ForcedConfig](examples/ESP8266WM_MRD_ForcedConfig) on **ESP8266_NODEMCU**
+
+The function to call is 
+
+```
+// This will keep CP once, clear after reset, even you didn't enter CP at all.
+Blynk.resetAndEnterConfigPortalPersistent();
+```
+
+#### 6.1 Start normally then press persistent ConfigPortal virtual button
+
+```
+Starting ESP8266WM_MRD_ForcedConfig using LittleFS without SSL on ESP8266_NODEMCU
+Blynk_WM for ESP8266 v1.1.1
+ESP_MultiResetDetector v1.1.1
+LittleFS Flag read = 0xFFFE0001
+multiResetDetectorFlag = 0xFFFE0001
+lowerBytes = 0x0001, upperBytes = 0x0001
+No multiResetDetected, number of times = 1
+LittleFS Flag read = 0xFFFE0001
+Saving config file...
+Saving config file OK
+[388] Hostname=8266-Master-Controller
+[403] LoadCfgFile 
+[404] OK
+[404] ======= Start Stored Config Data =======
+[404] Hdr=ESP8266,BrdName=Air-Control
+[404] SSID=HueNet1,PW=12345678
+[405] SSID1=HueNet2,PW1=12345678
+[408] Server=account.duckdns.org,Token=token
+[414] Server1=account.duckdns.org,Token1=token1
+[421] Port=8080
+[422] ======= End Config Data =======
+[426] CCSum=0x351f,RCSum=0x351f
+[431] LoadCredFile 
+[431] CrR:pdata=new-mqtt-server,len=34
+[434] CrR:pdata=1883,len=6
+[436] CrR:pdata=new-mqtt-username,len=34
+[440] CrR:pdata=default-mqtt-password,len=34
+[444] CrR:pdata=default-mqtt-SubTopic,len=34
+[448] CrR:pdata=default-mqtt-PubTopic,len=34
+[452] OK
+[453] CrCCsum=0x2670,CrRCsum=0x2670
+[456] Valid Stored Dynamic Data
+[459] Hdr=ESP8266,BrdName=Air-Control
+[462] SSID=HueNet1,PW=12345678
+[465] SSID1=HueNet2,PW1=12345678
+[468] Server=account.duckdns.org,Token=token
+[474] Server1=account.duckdns.org,Token1=token1
+[480] Port=8080
+[482] ======= End Config Data =======
+[485] Check if isForcedCP
+[490] LoadCPFile 
+[490] OK
+[490] bg: noConfigPortal = true
+[493] Connecting MultiWifi...
+[6757] WiFi connected after time: 1
+[6757] SSID=HueNet1,RSSI=-37
+[6757] Channel=2,IP=192.168.2.87
+[6757] bg: WiFi OK. Try Blynk
+[6757] 
+    ___  __          __
+   / _ )/ /_ _____  / /__
+  / _  / / // / _ \/  '_/
+ /____/_/\_, /_//_/_/\_\
+        /___/ v0.6.1 on NodeMCU
+
+[6770] BlynkArduinoClient.connect: Connecting to account.duckdns.org:8080
+[6874] Ready (ping: 9ms).
+[6941] Connected to BlynkServer=account.duckdns.org,Token=token
+[6942] bg: WiFi+Blynk OK
+
+Blynk ESP8266 using LittleFS connected.
+Board Name : Air-Control
+B
+Your stored Credentials :
+MQTT Server = new-mqtt-server
+Port = 1883
+MQTT UserName = new-mqtt-username
+MQTT PWD = default-mqtt-password
+Subs Topics = default-mqtt-SubTopic
+Pubs Topics = default-mqtt-PubTopic
+Stop multiResetDetecting
+Saving config file...
+Saving config file OK
+BPersistent CP Button Hit. Rebooting
+[23500] setForcedCP Persistent     <========== Persistent CP requested
+[23507] SaveCPFile 
+[23513] OK
+[23520] SaveBkUpCPFile 
+[23526] OK
+
+```
+
+#### 6.2 Enter persistent ConfigPortal
+
+Persistent CP will remain after resets. The only way to get rid of Config Portal is to enter CP, input (even fake data or none) and `Save` config data.
+
+```
+Starting ESP8266WM_MRD_ForcedConfig using LittleFS without SSL on ESP8266_NODEMCU
+Blynk_WM for ESP8266 v1.1.1
+ESP_MultiResetDetector v1.1.1
+LittleFS Flag read = 0xFFFE0001
+multiResetDetectorFlag = 0xFFFE0001
+lowerBytes = 0x0001, upperBytes = 0x0001
+No multiResetDetected, number of times = 1
+LittleFS Flag read = 0xFFFE0001
+Saving config file...
+Saving config file OK
+[292] Hostname=8266-Master-Controller
+[310] LoadCfgFile 
+[310] OK
+[310] ======= Start Stored Config Data =======
+[310] Hdr=ESP8266,BrdName=Air-Control
+[310] SSID=HueNet1,PW=12345678
+[312] SSID1=HueNet2,PW1=12345678
+[315] Server=account.duckdns.org,Token=token
+[321] Server1=account.duckdns.org,Token1=token1
+[327] Port=8080
+[329] ======= End Config Data =======
+[332] CCSum=0x351f,RCSum=0x351f
+[339] LoadCredFile 
+[340] CrR:pdata=new-mqtt-server,len=34
+[340] CrR:pdata=1883,len=6
+[343] CrR:pdata=new-mqtt-username,len=34
+[346] CrR:pdata=default-mqtt-password,len=34
+[350] CrR:pdata=default-mqtt-SubTopic,len=34
+[354] CrR:pdata=default-mqtt-PubTopic,len=34
+[358] OK
+[359] CrCCsum=0x2670,CrRCsum=0x2670
+[362] Valid Stored Dynamic Data
+[365] Hdr=ESP8266,BrdName=Air-Control
+[368] SSID=HueNet1,PW=12345678
+[371] SSID1=HueNet2,PW1=12345678
+[374] Server=account.duckdns.org,Token=token
+[380] Server1=account.duckdns.org,Token1=token1
+[387] Port=8080
+[388] ======= End Config Data =======
+[392] Check if isForcedCP
+[397] LoadCPFile 
+[398] OK
+[398] bg: isForcedConfigPortal = true
+[400] bg:Stay forever in CP:Forced-Persistent     <========== Persistent CP will remain after reset
+[697] 
+stConf:SSID=TestPortal-ESP8266,PW=TestPortalPass
+[697] IP=192.168.4.1,ch=6
+F
+Your stored Credentials :
+MQTT Server = new-mqtt-server
+Port = 1883
+MQTT UserName = new-mqtt-username
+MQTT PWD = default-mqtt-password
+Subs Topics = default-mqtt-SubTopic
+Pubs Topics = default-mqtt-PubTopic
+Stop multiResetDetecting
+Saving config file...
+Saving config file OK
+
+```
+
+---
 ---
 
 
@@ -1703,6 +2093,12 @@ Sometimes, the library will only work if you update the board core to the latest
 ---
 
 ## Releases
+
+### Releases v1.1.1
+
+1. Add functions to control Config Portal from software or Virtual Switches. Check [How to trigger a Config Portal from code #25](https://github.com/khoih-prog/Blynk_WM/issues/25)
+2. Add examples to demo the new Virtual ConfigPortal SW feature
+3. Optimize code
 
 ### Major Releases v1.1.0
 
@@ -1866,6 +2262,7 @@ Submit issues to: [Blynk_WM issues](https://github.com/khoih-prog/Blynk_WM/issue
 23. Clean-up all compiler warnings possible.
 24. Add Table of Contents
 25. Add Version String
+26. Add functions to control Config Portal from software or Virtual Switches.
 
 ---
 ---
@@ -1874,14 +2271,16 @@ Submit issues to: [Blynk_WM issues](https://github.com/khoih-prog/Blynk_WM/issue
 
 1. Thanks to [chriskio](https://github.com/chriskio) to report [AP-staying-open bug](https://github.com/khoih-prog/Blynk_WM/issues/2). 
 2. Thanks to [brondolin](https://github.com/brondolin) to provide the amazing fix in v1.0.10 to permit input special chars such as **%** and **#** into data fields. See [Issue 3](https://github.com/khoih-prog/Blynk_WM/issues/3).
-3. Thanks to [Thor Johnson](https://github.com/thorathome) and [Thor Johnson in Blynk](https://community.blynk.cc/u/thorathome) to test, find bug, suggest and encourage to add those new features in v1.0.13, such as Default Credentials/Dynamic Parms, Configurable Config Portal Title, DRD. The powerful [Blynk_WM_Template](examples/Blynk_WM_Template) is written by [Thor Johnson](https://github.com/thorathome) and is included in the examples with his permission. See [WM Config Portal using BlynkSimpleEsp32/8266_WM.h](https://community.blynk.cc/t/wm-config-portal-using-blynksimpleesp32-8266-wm-h/45402).
+3. Thanks to [Thor Johnson](https://github.com/thorathome) and [Thor Johnson in Blynk](https://community.blynk.cc/u/thorathome) to test, find bug, suggest and encourage to add those new features in v1.0.13, such as Default Credentials/Dynamic Parms, Configurable Config Portal Title, DRD. The powerful [Blynk_WM_Template](examples/Blynk_WM_Template) is written by [Thor Johnson](https://github.com/thorathome) and is included in the examples with his permission. Check these new features thanks to his direct contribution and/or enhancement requests :
+  * [WM Config Portal using BlynkSimpleEsp32/8266_WM.h](https://community.blynk.cc/t/wm-config-portal-using-blynksimpleesp32-8266-wm-h/45402).
+  * [How to trigger a Config Portal from code #25](https://github.com/khoih-prog/Blynk_WM/issues/25)
 4. Thanks to [Thor Johnson](https://github.com/thorathome) and [kevinleberge](https://github.com/kevinleberge) to help locate the bugs, discuss the USE_DEFAULT_CONFIG_DATA solution leading to release v1.0.16. See [Can’t load defaults](https://github.com/khoih-prog/Blynk_WM/issues/15) and [Setting "#define USE_DYNAMIC_PARAMETERS false" on Blynk_WM_Template.ino results in compile error](https://github.com/khoih-prog/Blynk_WM/issues/16)
 
 <table>
   <tr>
     <td align="center"><a href="https://github.com/chriskio"><img src="https://github.com/chriskio.png" width="100px;" alt="chriskio"/><br /><sub><b>chriskio</b></sub></a><br /></td>
     <td align="center"><a href="https://github.com/brondolin"><img src="https://github.com/brondolin.png" width="100px;" alt="brondolin"/><br /><sub><b>brondolin</b></sub></a><br /></td>
-    <td align="center"><a href="https://github.com/thorathome"><img src="https://github.com/thorathome.png" width="100px;" alt="thorathome"/><br /><sub><b>Thor Johnson</b></sub></a><br /></td>
+    <td align="center"><a href="https://github.com/thorathome"><img src="https://github.com/thorathome.png" width="100px;" alt="thorathome"/><br /><sub><b>⭐️ Thor Johnson</b></sub></a><br /></td>
     <td align="center"><a href="https://github.com/kevinleberge"><img src="https://github.com/kevinleberge.png" width="100px;" alt="kevinleberge"/><br /><sub><b>kevinleberge</b></sub></a><br /></td>
   </tr> 
 </table>

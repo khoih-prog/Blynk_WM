@@ -1,5 +1,5 @@
 /****************************************************************************************************************************
-   defines.h for AM2315_ESP8266.ino
+   defines.h for ESP8266WM_Config.ino
    For ESP8266 boards
 
    Blynk_WM is a library for the ESP8266/ESP32 Arduino platform (https://github.com/esp8266/Arduino) to enable easy
@@ -7,7 +7,7 @@
    Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
    Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
    Licensed under MIT license
-   Version: 1.1.1
+   Version: 1.1.0
 
    Version    Modified By   Date      Comments
    -------    -----------  ---------- -----------
@@ -25,11 +25,6 @@
     1.0.11    K Hoang      09/04/2020 Enable adding dynamic custom parameters from sketch
     1.0.12    K Hoang      13/04/2020 Fix MultiWiFi/Blynk bug introduced in broken v1.0.11
     1.0.13    K Hoang      25/04/2020 Add Configurable Config Portal Title, Default Config Data and DRD. Update examples.
-    1.0.14    K Hoang      03/05/2020 Fix bug and change feature in dynamicParams.
-    1.0.15    K Hoang      12/05/2020 Fix bug and Update to use LittleFS for ESP8266 core 2.7.1+. Add example.
-    1.0.16    K Hoang      25/06/2020 Fix bug and logic of USE_DEFAULT_CONFIG_DATA. Auto format SPIFFS/LittleFS.
-    1.1.0     K Hoang      01/01/2021 Add support to ESP32 LittleFS. Remove possible compiler warnings. Update examples. Add MRD
-    1.1.1     K Hoang      16/01/2021 Add functions to control Config Portal from software or Virtual Switches
     1.0.14    K Hoang      03/05/2020 Fix bug and change feature in dynamicParams.
     1.0.15    K Hoang      12/05/2020 Fix bug and Update to use LittleFS for ESP8266 core 2.7.1+. Add example.
     1.0.16    K Hoang      25/06/2020 Fix bug and logic of USE_DEFAULT_CONFIG_DATA. Auto format SPIFFS/LittleFS.
@@ -79,60 +74,27 @@
 #define EEPROM_START  768
 #endif
 
-//You have to download Blynk WiFiManager Blynk_WM library at //https://github.com/khoih-prog/Blynk_WM
-// In order to enable (USE_BLYNK_WM = true). Otherwise, use (USE_BLYNK_WM = false)
-#define USE_BLYNK_WM   true
-//#define USE_BLYNK_WM   false
+// Force some params in Blynk, only valid for library version 1.0.1 and later
+#define TIMEOUT_RECONNECT_WIFI                    10000L
+#define RESET_IF_CONFIG_TIMEOUT                   true
+#define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET    5
+// Those above #define's must be placed before #include <BlynkSimpleEsp8266_WM.h>
 
-#define USE_SSL     false
-
-#if USE_BLYNK_WM
-
-#define USE_DYNAMIC_PARAMETERS      true
+//#define USE_SSL   true
+#define USE_SSL   false
 
 #if USE_SSL
-#include <BlynkSimpleEsp8266_SSL_WM.h>        //https://github.com/khoih-prog/Blynk_WM
+#include <BlynkSimpleEsp8266_SSL_WM.h>
 #else
-#include <BlynkSimpleEsp8266_WM.h>            //https://github.com/khoih-prog/Blynk_WM
+#include <BlynkSimpleEsp8266_WM.h>
 #endif
 
-#include "Credentials.h"
-#include "dynamicParams.h"
+#define PIN_LED   2   // Pin D4 mapped to pin GPIO2/TXD1 of ESP8266, NodeMCU and WeMoS, control on-board LED
+#define PIN_D2    4   // Pin D2 mapped to pin GPIO4 of ESP8266
 
-#else
+#define DHT_PIN     PIN_D2
+#define DHT_TYPE    DHT11
 
-#if USE_SSL
-#include <BlynkSimpleEsp8266_SSL.h>
-#define BLYNK_HARDWARE_PORT     9443
-#else
-#include <BlynkSimpleEsp8266.h>
-#define BLYNK_HARDWARE_PORT     8080
-#endif
-#endif
-
-#if !USE_BLYNK_WM
-
-#ifndef LED_BUILTIN
-#define LED_BUILTIN       2         // Pin D2 mapped to pin GPIO2/ADC12 of ESP32, control on-board LED
-#endif
-
-#define USE_LOCAL_SERVER    true
-//#define USE_LOCAL_SERVER    false
-
-// If local server
-#if USE_LOCAL_SERVER
-char blynk_server[]   = "yourname.duckdns.org";
-#endif
-
-char auth[]     = "***";
-char ssid[]     = "***";
-char pass[]     = "***";
-
-#endif
-
-#define PIN_D1            5         // Pin D1 mapped to pin GPIO5/SCL of ESP8266
-#define PIN_D2            4         // Pin D2 mapped to pin GPIO4/SDA of ESP8266
-
-#define HOST_NAME   "P8266-Master-Controller"
+#define HOST_NAME   "8266-Master-Controller"
 
 #endif      //defines_h

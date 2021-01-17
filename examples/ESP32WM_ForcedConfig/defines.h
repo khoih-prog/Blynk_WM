@@ -1,5 +1,5 @@
 /****************************************************************************************************************************
-   Credentials.h for DHT11ESP32_SSL.ino
+   defines.h for ESP32WM_Config.ino
    For ESP32 boards
 
    Blynk_WM is a library for the ESP8266/ESP32 Arduino platform (https://github.com/esp8266/Arduino) to enable easy
@@ -32,79 +32,56 @@
     1.1.1     K Hoang      16/01/2021 Add functions to control Config Portal from software or Virtual Switches
  *****************************************************************************************************************************/
 
-#ifndef Credentials_h
-#define Credentials_h
+#ifndef defines_h
+#define defines_h
 
-/// Start Default Config Data //////////////////
-
-/*
-  // Defined in <BlynkSimpleEsp32_WM.h> and <BlynkSimpleEsp32_SSL_WM.h>
-
-  #define SSID_MAX_LEN      32
-  #define PASS_MAX_LEN      64
-  
-  typedef struct
-  {
-  char wifi_ssid[SSID_MAX_LEN];
-  char wifi_pw  [PASS_MAX_LEN];
-  }  WiFi_Credentials;
-
-  #define BLYNK_SERVER_MAX_LEN      32
-  #define BLYNK_TOKEN_MAX_LEN       36
-
-  typedef struct
-  {
-  char blynk_server[BLYNK_SERVER_MAX_LEN];
-  char blynk_token [BLYNK_TOKEN_MAX_LEN];
-  }  Blynk_Credentials;
-
-  #define NUM_WIFI_CREDENTIALS      2
-  #define NUM_BLYNK_CREDENTIALS     2
-
-  typedef struct Configuration
-  {
-  char header         [16];
-  WiFi_Credentials  WiFi_Creds  [NUM_WIFI_CREDENTIALS];
-  Blynk_Credentials Blynk_Creds [NUM_BLYNK_CREDENTIALS];
-  int  blynk_port;
-  char board_name     [24];
-  int  checkSum;
-  } Blynk_WM_Configuration;
-
-*/
-
-//bool LOAD_DEFAULT_CONFIG_DATA = true;
-bool LOAD_DEFAULT_CONFIG_DATA = false;
-
-Blynk_WM_Configuration defaultConfig =
-{
-  //char header[16], dummy, not used
-#if USE_SSL  
-  "SSL",
-#else
-  "NonSSL",
+#ifndef ESP32
+  #error This code is intended to run on the ESP32 platform! Please check your Tools->Board setting.
 #endif
-  //WiFi_Credentials  WiFi_Creds  [NUM_WIFI_CREDENTIALS]
-  //WiFi_Creds.wifi_ssid and WiFi_Creds.wifi_pw
-  "SSID1", "password1",
-  "SSID2", "password2",
-  // Blynk_Credentials Blynk_Creds [NUM_BLYNK_CREDENTIALS];
-  // Blynk_Creds.blynk_server and Blynk_Creds.blynk_token
-  "account.ddns.net",     "token",
-  "account.duckdns.org",  "token1", 
-  //int  blynk_port;
+
+#define BLYNK_PRINT       Serial
+#define BLYNK_WM_DEBUG    4
+
+// Not use #define USE_LITTLEFS and #define USE_SPIFFS  => using SPIFFS for configuration data in WiFiManager
+// (USE_LITTLEFS == false) and (USE_SPIFFS == false)    => using EEPROM for configuration data in WiFiManager
+// (USE_LITTLEFS == true) and (USE_SPIFFS == false)     => using LITTLEFS for configuration data in WiFiManager
+// (USE_LITTLEFS == true) and (USE_SPIFFS == true)      => using LITTLEFS for configuration data in WiFiManager
+// (USE_LITTLEFS == false) and (USE_SPIFFS == true)     => using SPIFFS for configuration data in WiFiManager
+// Those above #define's must be placed before #include <BlynkSimpleEsp32_WFM.h>
+
+#define USE_LITTLEFS          true
+#define USE_SPIFFS            false
+
+
+#if !( USE_SPIFFS || USE_LITTLEFS)
+  // EEPROM_SIZE must be <= 2048 and >= CONFIG_DATA_SIZE (currently 172 bytes)
+  #define EEPROM_SIZE    (2 * 1024)
+  // EEPROM_START + CONFIG_DATA_SIZE must be <= EEPROM_SIZE
+  #define EEPROM_START   0
+#endif
+
+// Force some params in Blynk, only valid for library version 1.0.1 and later
+#define TIMEOUT_RECONNECT_WIFI                    10000L
+#define RESET_IF_CONFIG_TIMEOUT                   true
+#define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET    5
+
+#define USE_DYNAMIC_PARAMETERS                    true
+// Those above #define's must be placed before #include <BlynkSimpleEsp8266_WM.h>
+
+#define USE_SSL   true
+//#define USE_SSL   false
+
 #if USE_SSL
-  9443,
+  #include <BlynkSimpleEsp32_SSL_WM.h>
 #else
-  8080,
+  #include <BlynkSimpleEsp32_WM.h>
 #endif
-  //char board_name     [24];
-  "Air-Control",
-  //int  checkSum, dummy, not used
-  0
-};
 
-/////////// End Default Config Data /////////////
+#define PIN_D22     22            // Pin D22 mapped to pin GPIO22/SCL of ESP32
 
+#define DHT_PIN     PIN_D22     // pin DATA @ D22 / GPIO22
+#define DHT_TYPE    DHT11
 
-#endif    //Credentials_h
+#define HOST_NAME   "ESP32-Master-Controller"
+
+#endif      //defines_h

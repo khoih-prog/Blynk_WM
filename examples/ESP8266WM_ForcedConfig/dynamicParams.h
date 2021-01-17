@@ -1,5 +1,5 @@
 /****************************************************************************************************************************
-   Credentials.h for DHT11ESP32_SSL.ino
+   dynamicParams.h for ESP8266WM_Config.ino
    For ESP32 boards
 
    Blynk_WM is a library for the ESP8266/ESP32 Arduino platform (https://github.com/esp8266/Arduino) to enable easy
@@ -7,7 +7,7 @@
    Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
    Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
    Licensed under MIT license
-   Version: 1.1.1
+   Version: 1.1.0
 
    Version    Modified By   Date      Comments
    -------    -----------  ---------- -----------
@@ -28,83 +28,70 @@
     1.0.14    K Hoang      03/05/2020 Fix bug and change feature in dynamicParams.
     1.0.15    K Hoang      12/05/2020 Fix bug and Update to use LittleFS for ESP8266 core 2.7.1+. Add example.
     1.0.16    K Hoang      25/06/2020 Fix bug and logic of USE_DEFAULT_CONFIG_DATA. Auto format SPIFFS/LittleFS.
-    1.1.0     K Hoang      01/01/2021 Add support to ESP32 LittleFS. Remove possible compiler warnings. Update examples. Add MRD
-    1.1.1     K Hoang      16/01/2021 Add functions to control Config Portal from software or Virtual Switches
+    1.1.0     K Hoang      01/01/2021 Add support to ESP32 LittleFS. Remove possible compiler warnings. Update examples
  *****************************************************************************************************************************/
 
-#ifndef Credentials_h
-#define Credentials_h
+#ifndef dynamicParams_h
+#define dynamicParams_h
 
-/// Start Default Config Data //////////////////
+#define USE_DYNAMIC_PARAMETERS      true
 
-/*
-  // Defined in <BlynkSimpleEsp32_WM.h> and <BlynkSimpleEsp32_SSL_WM.h>
+/////////////// Start dynamic Credentials ///////////////
 
-  #define SSID_MAX_LEN      32
-  #define PASS_MAX_LEN      64
-  
-  typedef struct
-  {
-  char wifi_ssid[SSID_MAX_LEN];
-  char wifi_pw  [PASS_MAX_LEN];
-  }  WiFi_Credentials;
-
-  #define BLYNK_SERVER_MAX_LEN      32
-  #define BLYNK_TOKEN_MAX_LEN       36
+//Defined in <BlynkSimpleEsp8266_WM.h> and <BlynkSimpleEsp8266_SSL_WM.h>
+/**************************************
+  #define MAX_ID_LEN                5
+  #define MAX_DISPLAY_NAME_LEN      16
 
   typedef struct
   {
-  char blynk_server[BLYNK_SERVER_MAX_LEN];
-  char blynk_token [BLYNK_TOKEN_MAX_LEN];
-  }  Blynk_Credentials;
+  char id             [MAX_ID_LEN + 1];
+  char displayName    [MAX_DISPLAY_NAME_LEN + 1];
+  char *pdata;
+  uint8_t maxlen;
+  } MenuItem;
+**************************************/
 
-  #define NUM_WIFI_CREDENTIALS      2
-  #define NUM_BLYNK_CREDENTIALS     2
+#if USE_DYNAMIC_PARAMETERS
 
-  typedef struct Configuration
-  {
-  char header         [16];
-  WiFi_Credentials  WiFi_Creds  [NUM_WIFI_CREDENTIALS];
-  Blynk_Credentials Blynk_Creds [NUM_BLYNK_CREDENTIALS];
-  int  blynk_port;
-  char board_name     [24];
-  int  checkSum;
-  } Blynk_WM_Configuration;
+#define MAX_MQTT_SERVER_LEN      34
+char MQTT_Server  [MAX_MQTT_SERVER_LEN + 1]   = "default-mqtt-server";
 
-*/
+#define MAX_MQTT_PORT_LEN        6
+char MQTT_Port   [MAX_MQTT_PORT_LEN + 1]  = "1883";
 
-//bool LOAD_DEFAULT_CONFIG_DATA = true;
-bool LOAD_DEFAULT_CONFIG_DATA = false;
+#define MAX_MQTT_USERNAME_LEN      34
+char MQTT_UserName  [MAX_MQTT_USERNAME_LEN + 1]   = "default-mqtt-username";
 
-Blynk_WM_Configuration defaultConfig =
+#define MAX_MQTT_PW_LEN        34
+char MQTT_PW   [MAX_MQTT_PW_LEN + 1]  = "default-mqtt-password";
+
+#define MAX_MQTT_SUBS_TOPIC_LEN      34
+char MQTT_SubsTopic  [MAX_MQTT_SUBS_TOPIC_LEN + 1]   = "default-mqtt-SubTopic";
+
+#define MAX_MQTT_PUB_TOPIC_LEN       34
+char MQTT_PubTopic   [MAX_MQTT_PUB_TOPIC_LEN + 1]  = "default-mqtt-PubTopic";
+
+MenuItem myMenuItems [] =
 {
-  //char header[16], dummy, not used
-#if USE_SSL  
-  "SSL",
-#else
-  "NonSSL",
-#endif
-  //WiFi_Credentials  WiFi_Creds  [NUM_WIFI_CREDENTIALS]
-  //WiFi_Creds.wifi_ssid and WiFi_Creds.wifi_pw
-  "SSID1", "password1",
-  "SSID2", "password2",
-  // Blynk_Credentials Blynk_Creds [NUM_BLYNK_CREDENTIALS];
-  // Blynk_Creds.blynk_server and Blynk_Creds.blynk_token
-  "account.ddns.net",     "token",
-  "account.duckdns.org",  "token1", 
-  //int  blynk_port;
-#if USE_SSL
-  9443,
-#else
-  8080,
-#endif
-  //char board_name     [24];
-  "Air-Control",
-  //int  checkSum, dummy, not used
-  0
+  { "mqtt", "MQTT Server",      MQTT_Server,      MAX_MQTT_SERVER_LEN },
+  { "mqpt", "Port",             MQTT_Port,        MAX_MQTT_PORT_LEN   },
+  { "user", "MQTT UserName",    MQTT_UserName,    MAX_MQTT_USERNAME_LEN },
+  { "mqpw", "MQTT PWD",         MQTT_PW,          MAX_MQTT_PW_LEN },
+  { "subs", "Subs Topics",      MQTT_SubsTopic,   MAX_MQTT_SUBS_TOPIC_LEN },
+  { "pubs", "Pubs Topics",      MQTT_PubTopic,    MAX_MQTT_PUB_TOPIC_LEN },
 };
 
-/////////// End Default Config Data /////////////
+uint16_t NUM_MENU_ITEMS = sizeof(myMenuItems) / sizeof(MenuItem);  //MenuItemSize;
+
+#else
+
+MenuItem myMenuItems [] = {};
+
+uint16_t NUM_MENU_ITEMS = 0;
+#endif
 
 
-#endif    //Credentials_h
+/////// // End dynamic Credentials ///////////
+
+#endif      //dynamicParams_h

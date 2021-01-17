@@ -99,6 +99,7 @@
 
 #define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET    5
 
+#define USE_DYNAMIC_PARAMETERS                    true
 // Those above #define's must be placed before #include <BlynkSimpleEsp8266_WM.h>
 
 //#define USE_SSL   true

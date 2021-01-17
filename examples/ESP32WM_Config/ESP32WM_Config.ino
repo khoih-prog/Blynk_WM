@@ -67,7 +67,7 @@ void set_led(byte status)
   digitalWrite(LED_BUILTIN, status);
 }
 
-void heartBeatPrint(void)
+void heartBeatPrint()
 {
   static int num = 1;
 
@@ -178,7 +178,7 @@ void setup()
 }
 
 #if USE_DYNAMIC_PARAMETERS
-void displayCredentials(void)
+void displayCredentials()
 {
   Serial.println(F("\nYour stored Credentials :"));
 
