@@ -1,5 +1,5 @@
 /****************************************************************************************************************************
-   ESP8266WM_Config.ino
+   ESP8266WM_ForcedConfig.ino
    For ESP8266 boards
 
    Blynk_WM is a library for the ESP8266/ESP32 Arduino platform (https://github.com/esp8266/Arduino) to enable easy
@@ -41,6 +41,39 @@
 DHT dht(DHT_PIN, DHT_TYPE);
 BlynkTimer timer;
 Ticker     led_ticker;
+
+#define BLYNK_PIN_FORCED_CONFIG           V10
+#define BLYNK_PIN_FORCED_PERS_CONFIG      V20
+
+// Use button V10 (BLYNK_PIN_FORCED_CONFIG) to forced Config Portal
+BLYNK_WRITE(BLYNK_PIN_FORCED_CONFIG)
+{ 
+  if (param.asInt())
+  {
+    Serial.println( "CP Button Hit. Rebooting" ); 
+
+    // This will keep CP once, clear after reset, even you didn't enter CP at all.
+    Blynk.resetAndEnterConfigPortal(); 
+    
+    delay ( 8000 );  
+    ESP.restart();
+  }
+}
+
+// Use button V20 (BLYNK_PIN_FORCED_PERS_CONFIG) to forced Persistent Config Portal
+BLYNK_WRITE(BLYNK_PIN_FORCED_PERS_CONFIG)
+{ 
+  if (param.asInt())
+  {
+    Serial.println( "Persistent CP Button Hit. Rebooting" ); 
+   
+    // This will keep CP forever, until you successfully enter CP, and Save data to clear the flag.
+    Blynk.resetAndEnterConfigPortalPersistent();
+    
+    delay ( 8000 );  
+    ESP.restart();
+  }
+}
 
 void readAndSendData()
 {
@@ -123,10 +156,10 @@ void setup()
   delay(200);
 
 #if ( USE_LITTLEFS || USE_SPIFFS)
-  Serial.print(F("\nStarting ESP8266WM_Config using "));
+  Serial.print(F("\nStarting ESP8266WM_ForcedConfig using "));
   Serial.print(CurrentFileFS);
 #else
-  Serial.print(F("\nStarting ESP8266WM_Config using EEPROM"));
+  Serial.print(F("\nStarting ESP8266WM_ForcedConfig using EEPROM"));
 #endif
 
 #if USE_SSL
