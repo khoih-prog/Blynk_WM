@@ -1,44 +1,45 @@
 /*******************************************************************************************************************************
-   BlynkSimpleEsp32_WM.h
-   For ESP32 boards
+  BlynkSimpleEsp32_WM.h
+  For ESP32 boards
 
-   Blynk_WM is a library for the ESP8266/ESP32 Arduino platform (https://github.com/esp8266/Arduino) to enable easy
-   configuration/reconfiguration and autoconnect/autoreconnect of WiFi/Blynk
-   Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
-   Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
-   Licensed under MIT license
-   
-   Original Blynk Library author:
-   @file       BlynkSimpleEsp8266.h
-   @author     Volodymyr Shymanskyy
-   @license    This project is released under the MIT License (MIT)
-   @copyright  Copyright (c) 2015 Volodymyr Shymanskyy
-   @date       Jan 2015
-   @brief
-   
-   Version: 1.1.1
+  Blynk_WM is a library for the ESP8266/ESP32 Arduino platform (https://github.com/esp8266/Arduino) to enable easy
+  configuration/reconfiguration and autoconnect/autoreconnect of WiFi/Blynk
+  Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
+  Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
+  Licensed under MIT license
 
-   Version    Modified By   Date      Comments
-   -------    -----------  ---------- -----------
-    1.0.0     K Hoang      28/10/2019 Initial coding
-    1.0.1     K Hoang      28/10/2019 Add features
-    1.0.2     K Hoang      21/11/2019 Fix bug. Add features.
-    1.0.3     K Hoang      31/11/2019 Fix compiler errors for ESP8266 core pre-2.5.2. Add examples.
-    1.0.4     K Hoang      07/01/2020 Add configurable personalized RFC-952 DHCP hostname
-    1.0.5     K Hoang      20/01/2020 Add configurable static IP, GW, SN, DNS1, DNS2 and Config Portal static IP and Credentials
-    1.0.6     K Hoang      05/02/2020 Optimize, fix EEPROM size to 2K from 4K, shorten code size, add functions
-    1.0.7     K Hoang      18/02/2020 Add checksum, enable AutoConnect to configurable MultiWiFi and MultiBlynk Credentials
-    1.0.8     K Hoang      24/02/2020 Fix AP-staying-open bug. Add clearConfigData()
-    1.0.9     K Hoang      12/03/2020 Enhance Config Portal GUI
-    1.0.10    K Hoang      08/04/2020 SSID password maxlen is 63 now. Permit special chars # and % in input data.
-    1.0.11    K Hoang      09/04/2020 Enable adding dynamic custom parameters from sketch
-    1.0.12    K Hoang      13/04/2020 Fix MultiWiFi/Blynk bug introduced in broken v1.0.11
-    1.0.13    K Hoang      25/04/2020 Add Configurable Config Portal Title, Default Config Data and DRD. Update examples.
-    1.0.14    K Hoang      03/05/2020 Fix bug and change feature in dynamicParams.
-    1.0.15    K Hoang      12/05/2020 Fix bug and Update to use LittleFS for ESP8266 core 2.7.1+. Add example.
-    1.0.16    K Hoang      25/06/2020 Fix bug and logic of USE_DEFAULT_CONFIG_DATA. Auto format SPIFFS/LittleFS.
-    1.1.0     K Hoang      01/01/2021 Add support to ESP32 LittleFS. Remove possible compiler warnings. Update examples. Add MRD
-    1.1.1     K Hoang      16/01/2021 Add functions to control Config Portal from software or Virtual Switches
+  Original Blynk Library author:
+  @file       BlynkSimpleEsp8266.h
+  @author     Volodymyr Shymanskyy
+  @license    This project is released under the MIT License (MIT)
+  @copyright  Copyright (c) 2015 Volodymyr Shymanskyy
+  @date       Jan 2015
+  @brief
+
+  Version: 1.1.2
+
+  Version    Modified By   Date      Comments
+  -------    -----------  ---------- -----------
+  1.0.0     K Hoang      28/10/2019 Initial coding
+  1.0.1     K Hoang      28/10/2019 Add features
+  1.0.2     K Hoang      21/11/2019 Fix bug. Add features.
+  1.0.3     K Hoang      31/11/2019 Fix compiler errors for ESP8266 core pre-2.5.2. Add examples.
+  1.0.4     K Hoang      07/01/2020 Add configurable personalized RFC-952 DHCP hostname
+  1.0.5     K Hoang      20/01/2020 Add configurable static IP, GW, SN, DNS1, DNS2 and Config Portal static IP and Credentials
+  1.0.6     K Hoang      05/02/2020 Optimize, fix EEPROM size to 2K from 4K, shorten code size, add functions
+  1.0.7     K Hoang      18/02/2020 Add checksum, enable AutoConnect to configurable MultiWiFi and MultiBlynk Credentials
+  1.0.8     K Hoang      24/02/2020 Fix AP-staying-open bug. Add clearConfigData()
+  1.0.9     K Hoang      12/03/2020 Enhance Config Portal GUI
+  1.0.10    K Hoang      08/04/2020 SSID password maxlen is 63 now. Permit special chars # and % in input data.
+  1.0.11    K Hoang      09/04/2020 Enable adding dynamic custom parameters from sketch
+  1.0.12    K Hoang      13/04/2020 Fix MultiWiFi/Blynk bug introduced in broken v1.0.11
+  1.0.13    K Hoang      25/04/2020 Add Configurable Config Portal Title, Default Config Data and DRD. Update examples.
+  1.0.14    K Hoang      03/05/2020 Fix bug and change feature in dynamicParams.
+  1.0.15    K Hoang      12/05/2020 Fix bug and Update to use LittleFS for ESP8266 core 2.7.1+. Add example.
+  1.0.16    K Hoang      25/06/2020 Fix bug and logic of USE_DEFAULT_CONFIG_DATA. Auto format SPIFFS/LittleFS.
+  1.1.0     K Hoang      01/01/2021 Add support to ESP32 LittleFS. Remove possible compiler warnings. Update examples. Add MRD
+  1.1.1     K Hoang      16/01/2021 Add functions to control Config Portal from software or Virtual Switches
+  1.1.2     K Hoang      28/01/2021 Fix Config Portal and Dynamic Params bugs
  ********************************************************************************************************************************/
 
 #ifndef BlynkSimpleEsp32_WM_h
@@ -48,7 +49,7 @@
   #error This code is intended to run on the ESP32 platform! Please check your Tools->Board setting.
 #endif
 
-#define BLYNK_WM_VERSION       "Blynk_WM for ESP32 v1.1.1"
+#define BLYNK_WM_VERSION       "Blynk_WM for ESP32 v1.1.2"
 
 #define BLYNK_SEND_ATOMIC
 
@@ -208,6 +209,7 @@ typedef struct
 #if USE_DYNAMIC_PARAMETERS
   extern uint16_t NUM_MENU_ITEMS;
   extern MenuItem myMenuItems [];
+  bool *menuItemUpdated = NULL;
 #endif
 
 #define SSID_MAX_LEN      32
@@ -2076,80 +2078,134 @@ class BlynkWifi
           memset(&BlynkESP32_WM_config, 0, sizeof(BlynkESP32_WM_config));
           strcpy(BlynkESP32_WM_config.header, BLYNK_BOARD_TYPE);
         }
-
-        if (key == "id")
+        
+#if USE_DYNAMIC_PARAMETERS
+        if (!menuItemUpdated)
         {
+          // Don't need to free
+          menuItemUpdated = new bool[NUM_MENU_ITEMS];
+          
+          if (menuItemUpdated)
+          {
+            for (uint16_t i = 0; i < NUM_MENU_ITEMS; i++)
+            {           
+              // To flag item is not yet updated
+              menuItemUpdated[i] = false;           
+            }
+  #if ( BLYNK_WM_DEBUG > 2)                 
+            BLYNK_LOG1(BLYNK_F("h: Init menuItemUpdated" ));
+  #endif                        
+          }
+          else
+          {
+            BLYNK_LOG1(BLYNK_F("h: Error can't alloc memory for menuItemUpdated" ));
+          }
+        }  
+#endif
+
+        static bool id_Updated  = false;
+        static bool pw_Updated  = false;
+        static bool id1_Updated = false;
+        static bool pw1_Updated = false;
+        static bool sv_Updated  = false;
+        static bool tk_Updated  = false;
+        static bool sv1_Updated = false;
+        static bool tk1_Updated = false;
+        static bool pt_Updated  = false;
+        static bool nm_Updated  = false;
+
+        if (!id_Updated && (key == String("id")))
+        {
+          id_Updated = true;
           number_items_Updated++;
+          
           if (strlen(value.c_str()) < sizeof(BlynkESP32_WM_config.WiFi_Creds[0].wifi_ssid) - 1)
             strcpy(BlynkESP32_WM_config.WiFi_Creds[0].wifi_ssid, value.c_str());
           else
             strncpy(BlynkESP32_WM_config.WiFi_Creds[0].wifi_ssid, value.c_str(), sizeof(BlynkESP32_WM_config.WiFi_Creds[0].wifi_ssid) - 1);
         }
-        else if (key == "pw")
+        else if (!pw_Updated && (key == String("pw")))
         {
+          pw_Updated = true;
           number_items_Updated++;
+          
           if (strlen(value.c_str()) < sizeof(BlynkESP32_WM_config.WiFi_Creds[0].wifi_pw) - 1)
             strcpy(BlynkESP32_WM_config.WiFi_Creds[0].wifi_pw, value.c_str());
           else
             strncpy(BlynkESP32_WM_config.WiFi_Creds[0].wifi_pw, value.c_str(), sizeof(BlynkESP32_WM_config.WiFi_Creds[0].wifi_pw) - 1);
         }
-
-        else if (key == "id1")
+        else if (!id1_Updated && (key == String("id1")))
         {
+          id1_Updated = true;
           number_items_Updated++;
+          
           if (strlen(value.c_str()) < sizeof(BlynkESP32_WM_config.WiFi_Creds[1].wifi_ssid) - 1)
             strcpy(BlynkESP32_WM_config.WiFi_Creds[1].wifi_ssid, value.c_str());
           else
             strncpy(BlynkESP32_WM_config.WiFi_Creds[1].wifi_ssid, value.c_str(), sizeof(BlynkESP32_WM_config.WiFi_Creds[1].wifi_ssid) - 1);
         }
-        else if (key == "pw1")
+        else if (!pw1_Updated && (key == String("pw1")))
         {
+          pw1_Updated = true;
           number_items_Updated++;
+          
           if (strlen(value.c_str()) < sizeof(BlynkESP32_WM_config.WiFi_Creds[1].wifi_pw) - 1)
             strcpy(BlynkESP32_WM_config.WiFi_Creds[1].wifi_pw, value.c_str());
           else
             strncpy(BlynkESP32_WM_config.WiFi_Creds[1].wifi_pw, value.c_str(), sizeof(BlynkESP32_WM_config.WiFi_Creds[1].wifi_pw) - 1);
         }
-        else if (key == "sv")
+        else if (!sv_Updated && (key == String("sv")))
         {
+          sv_Updated = true;
           number_items_Updated++;
+          
           if (strlen(value.c_str()) < sizeof(BlynkESP32_WM_config.Blynk_Creds[0].blynk_server) - 1)
             strcpy(BlynkESP32_WM_config.Blynk_Creds[0].blynk_server, value.c_str());
           else
             strncpy(BlynkESP32_WM_config.Blynk_Creds[0].blynk_server, value.c_str(), sizeof(BlynkESP32_WM_config.Blynk_Creds[0].blynk_server) - 1);
         }
-        else if (key == "tk")
+        else if (!tk_Updated && (key == String("tk")))
         {
+          tk_Updated = true;
           number_items_Updated++;
+          
           if (strlen(value.c_str()) < sizeof(BlynkESP32_WM_config.Blynk_Creds[0].blynk_token) - 1)
             strcpy(BlynkESP32_WM_config.Blynk_Creds[0].blynk_token, value.c_str());
           else
             strncpy(BlynkESP32_WM_config.Blynk_Creds[0].blynk_token, value.c_str(), sizeof(BlynkESP32_WM_config.Blynk_Creds[0].blynk_token) - 1);
         }
-        else if (key == "sv1")
+        else if (!sv1_Updated && (key == String("sv1")))
         {
+          sv1_Updated = true;
           number_items_Updated++;
+          
           if (strlen(value.c_str()) < sizeof(BlynkESP32_WM_config.Blynk_Creds[1].blynk_server) - 1)
             strcpy(BlynkESP32_WM_config.Blynk_Creds[1].blynk_server, value.c_str());
           else
             strncpy(BlynkESP32_WM_config.Blynk_Creds[1].blynk_server, value.c_str(), sizeof(BlynkESP32_WM_config.Blynk_Creds[1].blynk_server) - 1);
         }
-        else if (key == "tk1")
+        else if (!tk1_Updated && (key == String("tk1")))
         {
+          tk1_Updated = true;
           number_items_Updated++;
+          
           if (strlen(value.c_str()) < sizeof(BlynkESP32_WM_config.Blynk_Creds[1].blynk_token) - 1)
             strcpy(BlynkESP32_WM_config.Blynk_Creds[1].blynk_token, value.c_str());
           else
             strncpy(BlynkESP32_WM_config.Blynk_Creds[1].blynk_token, value.c_str(), sizeof(BlynkESP32_WM_config.Blynk_Creds[1].blynk_token) - 1);
         }
-        else if (key == "pt")
+        else if (!pt_Updated && (key == String("pt")))
         {
+          pt_Updated = true;
           number_items_Updated++;
+          
           BlynkESP32_WM_config.blynk_port = value.toInt();
         }
-        else if (key == "nm")
+        else if (!nm_Updated && (key == String("nm")))
         {
+          nm_Updated = true;
           number_items_Updated++;
+          
           if (strlen(value.c_str()) < sizeof(BlynkESP32_WM_config.board_name) - 1)
             strcpy(BlynkESP32_WM_config.board_name, value.c_str());
           else
@@ -2159,9 +2215,12 @@ class BlynkWifi
 #if USE_DYNAMIC_PARAMETERS
         for (uint16_t i = 0; i < NUM_MENU_ITEMS; i++)
         {
-          if (key == myMenuItems[i].id)
+          if ( !menuItemUpdated[i] && (key == myMenuItems[i].id) )
           {
-            //BLYNK_LOG4(F("h:"), myMenuItems[i].id, F("="), value.c_str() );
+            BLYNK_LOG4(BLYNK_F("h:"), myMenuItems[i].id, BLYNK_F("="), value.c_str() );
+            
+            menuItemUpdated[i] = true;
+            
             number_items_Updated++;
 
             // Actual size of pdata is [maxlen + 1]
