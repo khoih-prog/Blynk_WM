@@ -8,7 +8,7 @@
   Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
   Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
   Licensed under MIT license
-  Version: 1.1.2
+  Version: 1.1.3
 
   Version    Modified By   Date      Comments
   -------    -----------  ---------- -----------
@@ -32,6 +32,7 @@
   1.1.0     K Hoang      01/01/2021 Add support to ESP32 LittleFS. Remove possible compiler warnings. Update examples. Add MRD
   1.1.1     K Hoang      16/01/2021 Add functions to control Config Portal from software or Virtual Switches
   1.1.2     K Hoang      28/01/2021 Fix Config Portal and Dynamic Params bugs
+  1.1.3     K Hoang      31/01/2021 To permit autoreset after timeout if DRD/MRD or non-persistent forced-CP
  *****************************************************************************************************************************/
 
 // Sketch uses Arduino IDE-selected ESP32 and ESP8266 to select compile choices

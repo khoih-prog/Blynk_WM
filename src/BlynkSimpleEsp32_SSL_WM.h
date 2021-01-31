@@ -16,7 +16,7 @@
   @date       Jan 2015
   @brief
 
-  Version: 1.1.2
+  Version: 1.1.3
 
   Version    Modified By   Date      Comments
   -------    -----------  ---------- -----------
@@ -40,6 +40,7 @@
   1.1.0     K Hoang      01/01/2021 Add support to ESP32 LittleFS. Remove possible compiler warnings. Update examples. Add MRD
   1.1.1     K Hoang      16/01/2021 Add functions to control Config Portal from software or Virtual Switches
   1.1.2     K Hoang      28/01/2021 Fix Config Portal and Dynamic Params bugs
+  1.1.3     K Hoang      31/01/2021 To permit autoreset after timeout if DRD/MRD or non-persistent forced-CP
  ********************************************************************************************************************************/
 
 #ifndef BlynkSimpleEsp32_SSL_WM_h
@@ -49,7 +50,7 @@
   #error This code is intended to run on the ESP32 platform! Please check your Tools->Board setting.
 #endif
 
-#define BLYNK_WM_VERSION       "Blynk_WM SSL for ESP32 v1.1.2"
+#define BLYNK_WM_VERSION       "Blynk_WM SSL for ESP32 v1.1.3"
 
 #if defined(BLYNK_SSL_USE_LETSENCRYPT)
 static const char BLYNK_DEFAULT_ROOT_CA[] =
@@ -571,8 +572,9 @@ class BlynkWifi
           clearForcedCP();
         }
           
+        hadConfigData = isForcedConfigPortal ? true : (noConfigPortal ? false : true);
+        
         // failed to connect to Blynk server, will start configuration mode
-        hadConfigData = false;
         startConfigurationMode();
       }
     }
@@ -2383,9 +2385,20 @@ class BlynkWifi
 
       // If there is no saved config Data, stay in config mode forever until having config Data.
       if (hadConfigData)
+      {
         configTimeout = millis() + CONFIG_TIMEOUT;
+        
+#if ( BLYNK_WM_DEBUG > 2)                   
+        BLYNK_LOG4(BLYNK_F("s:millis() = "), millis(), BLYNK_F(", configTimeout = "), configTimeout);
+#endif
+      }
       else
+      {
         configTimeout = 0;
+#if ( BLYNK_WM_DEBUG > 2)                   
+        BLYNK_LOG1(BLYNK_F("s:configTimeout = 0"));
+#endif        
+      }
 
       configuration_mode = true;
     }
