@@ -1,6 +1,7 @@
 #######################################
 # Data types (KEYWORD1)
 #######################################
+
 Blynk	KEYWORD1
 BlynkTimer	KEYWORD1
 WidgetBridge	KEYWORD1
@@ -21,6 +22,7 @@ Blynk_WM_Configuration  KEYWORD1
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
+
 begin	KEYWORD2
 config	KEYWORD2
 run	KEYWORD2
@@ -57,8 +59,17 @@ getFullConfigData KEYWORD2
 clearConfigData KEYWORD2
 resetAndEnterConfigPortal KEYWORD2
 resetAndEnterConfigPortalPersistent KEYWORD2
+setCustomsStyle   KEYWORD2
+getCustomsStyle   KEYWORD2
+setCustomsHeadElement   KEYWORD2
+getCustomsHeadElement   KEYWORD2
+setCORSHeader   KEYWORD2
+getCORSHeader   KEYWORD2
 
-# Handler helpers
+#############################
+# Handler helpers (KEYWORD2)
+#############################
+
 BLYNK_READ	KEYWORD2
 BLYNK_WRITE	KEYWORD2
 BLYNK_READ_DEFAULT	KEYWORD2
@@ -74,13 +85,19 @@ BLYNK_INPUT	KEYWORD2
 BLYNK_OUTPUT_DEFAULT	KEYWORD2
 BLYNK_INPUT_DEFAULT	KEYWORD2
 
-# Variables binding
+###############################
+# Variables binding (KEYWORD2)
+###############################
+
 BLYNK_VAR_INT	KEYWORD2
 BLYNK_VAR_LONG	KEYWORD2
 BLYNK_VAR_DOUBLE	KEYWORD2
 BLYNK_VAR_STRING	KEYWORD2
 
-# Special defines
+###############################
+# Special defines (KEYWORD2)
+###############################
+
 BLYNK_DEBUG	KEYWORD2
 BLYNK_DEBUG_ALL	KEYWORD2
 BLYNK_PRINT	KEYWORD2
@@ -95,7 +112,9 @@ BLYNK_USE_DIRECT_CONNECT	KEYWORD2
 BLYNK_MAX_SENDBYTES	KEYWORD2
 BLYNK_MAX_READBYTES	KEYWORD2
 
-# Periodic actions
+###############################
+# Periodic actions (KEYWORD2)
+###############################
 #BLYNK_EVERY_N_MILLIS	KEYWORD2
 #BLYNK_EVERY_N_SECONDS	KEYWORD2
 #BLYNK_EVERY_N_MINUTES	KEYWORD2

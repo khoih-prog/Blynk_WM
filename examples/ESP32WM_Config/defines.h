@@ -25,8 +25,15 @@
 // (USE_LITTLEFS == false) and (USE_SPIFFS == true)     => using SPIFFS for configuration data in WiFiManager
 // Those above #define's must be placed before #include <BlynkSimpleEsp32_WFM.h>
 
-#define USE_LITTLEFS          true
-#define USE_SPIFFS            false
+#if ( ARDUINO_ESP32S2_DEV || ARDUINO_FEATHERS2 || ARDUINO_PROS2 || ARDUINO_MICROS2 )
+  // Currently, ESP32-S2 only supporting EEPROM. Will fix to support LittleFS and SPIFFS
+  #define USE_LITTLEFS          false
+  #define USE_SPIFFS            false
+  #warning ESP32-S2 only support supporting EEPROM now.
+#else
+  #define USE_LITTLEFS          true
+  #define USE_SPIFFS            false
+#endif
 
 
 #if !( USE_SPIFFS || USE_LITTLEFS)
@@ -36,13 +43,27 @@
   #define EEPROM_START   0
 #endif
 
+/////////////////////////////////////////////
+
+// Add customs headers from v1.2.0
+#define USING_CUSTOMS_STYLE                 true
+#define USING_CUSTOMS_HEAD_ELEMENT          true
+#define USING_CORS_FEATURE                  true
+
+/////////////////////////////////////////////
+
 // Force some params in Blynk, only valid for library version 1.0.1 and later
 #define TIMEOUT_RECONNECT_WIFI                    10000L
 #define RESET_IF_CONFIG_TIMEOUT                   true
+
 #define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET    5
 
-#define USE_DYNAMIC_PARAMETERS      true
-// Those above #define's must be placed before #include <BlynkSimpleEsp8266_WM.h>
+// Config Timeout 120s (default 60s)
+#define CONFIG_TIMEOUT                            120000L
+
+#define USE_DYNAMIC_PARAMETERS                    true
+// Those above #define's must be placed before #include <BlynkSimpleEsp32_WM.h> and <BlynkSimpleEsp32_SSL_WM.h>
+//////////////////////////////////////////
 
 //#define USE_SSL   true
 #define USE_SSL   false

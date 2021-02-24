@@ -29,9 +29,7 @@
 // Select USE_LITTLEFS (higher priority) or USE_SPIFFS
 
 #define USE_LITTLEFS                true
-//#define USE_LITTLEFS                false
 #define USE_SPIFFS                  false
-//#define USE_SPIFFS                  true
 
 #if USE_LITTLEFS
   //LittleFS has higher priority
@@ -52,15 +50,28 @@
   #define EEPROM_START  768
 #endif
 
+/////////////////////////////////////////////
+
+// Add customs headers from v1.2.0
+#define USING_CUSTOMS_STYLE                 true
+#define USING_CUSTOMS_HEAD_ELEMENT          true
+#define USING_CORS_FEATURE                  true
+
+/////////////////////////////////////////////
+
 // Force some params in Blynk, only valid for library version 1.0.1 and later
 #define TIMEOUT_RECONNECT_WIFI                    10000L
 #define RESET_IF_CONFIG_TIMEOUT                   true
+
 #define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET    5
 
-#define USE_DYNAMIC_PARAMETERS                    true
-// Those above #define's must be placed before #include <BlynkSimpleEsp8266_WM.h>
+// Config Timeout 120s (default 60s)
+#define CONFIG_TIMEOUT                            120000L
 
-//#define USE_SSL   true
+#define USE_DYNAMIC_PARAMETERS                    true
+// Those above #define's must be placed before #include <BlynkSimpleEsp8266_WM.h> and <BlynkSimpleEsp8266_SSL_WM.h>
+//////////////////////////////////////////
+
 #define USE_SSL   false
 
 #if USE_SSL

@@ -8,7 +8,7 @@
   Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
   Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
   Licensed under MIT license
-  Version: 1.1.3
+  Version: 1.2.0
 
   Version    Modified By   Date      Comments
   -------    -----------  ---------- -----------
@@ -33,6 +33,7 @@
   1.1.1     K Hoang      16/01/2021 Add functions to control Config Portal from software or Virtual Switches
   1.1.2     K Hoang      28/01/2021 Fix Config Portal and Dynamic Params bugs
   1.1.3     K Hoang      31/01/2021 To permit autoreset after timeout if DRD/MRD or non-persistent forced-CP
+  1.2.0     K Hoang      24/02/2021 Add customs HTML header feature and support to ESP32-S2.
  *****************************************************************************************************************************/
 
 // Sketch uses Arduino IDE-selected ESP32 and ESP8266 to select compile choices
@@ -175,8 +176,15 @@
     // (USE_LITTLEFS == false) and (USE_SPIFFS == true)     => using SPIFFS for configuration data in WiFiManager
     // Those above #define's must be placed before #include <BlynkSimpleEsp32_WFM.h>
     
-    #define USE_LITTLEFS          true
-    #define USE_SPIFFS            false
+    #if ( ARDUINO_ESP32S2_DEV || ARDUINO_FEATHERS2 || ARDUINO_PROS2 || ARDUINO_MICROS2 )
+      // Currently, ESP32-S2 only supporting EEPROM. Will fix to support LittleFS and SPIFFS
+      #define USE_LITTLEFS          false
+      #define USE_SPIFFS            false
+      #warning ESP32-S2 only support supporting EEPROM now.
+    #else
+      #define USE_LITTLEFS          true
+      #define USE_SPIFFS            false
+    #endif
 
     #if USE_LITTLEFS
       #warning Using LittleFS for ESP32

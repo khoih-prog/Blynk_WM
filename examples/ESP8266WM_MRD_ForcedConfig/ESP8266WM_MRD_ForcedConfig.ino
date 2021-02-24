@@ -148,6 +148,11 @@ void check_status()
   }
 }
 
+#if USING_CUSTOMS_STYLE
+const char NewCustomsStyle[] /*PROGMEM*/ = "<style>div,input{padding:5px;font-size:1em;}input{width:95%;}body{text-align: center;}\
+button{background-color:blue;color:white;line-height:2.4rem;font-size:1.2rem;width:100%;}fieldset{border-radius:0.3rem;margin:0px;}</style>";
+#endif
+
 void setup()
 {
   pinMode(PIN_LED, OUTPUT);
@@ -196,6 +201,22 @@ void setup()
   //Blynk.setSTAStaticIPConfig(IPAddress(192, 168, 2, 220), IPAddress(192, 168, 2, 1), IPAddress(255, 255, 255, 0),
   //                           IPAddress(4, 4, 4, 4), IPAddress(8, 8, 8, 8));
 
+//////////////////////////////////////////////
+  
+#if USING_CUSTOMS_STYLE
+  Blynk.setCustomsStyle(NewCustomsStyle);
+#endif
+
+#if USING_CUSTOMS_HEAD_ELEMENT
+  Blynk.setCustomsHeadElement("<style>html{filter: invert(10%);}</style>");
+#endif
+
+#if USING_CORS_FEATURE  
+  Blynk.setCORSHeader("Your Access-Control-Allow-Origin");
+#endif
+
+  //////////////////////////////////////////////
+  
   // Use this to default DHCP hostname to ESP8266-XXXXXX or ESP32-XXXXXX
   //Blynk.begin();
   // Use this to personalize DHCP hostname (RFC952 conformed)

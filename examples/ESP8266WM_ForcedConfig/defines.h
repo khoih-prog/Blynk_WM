@@ -13,7 +13,7 @@
 #define defines_h
 
 #ifndef ESP8266
-#error This code is intended to run on the ESP8266 platform! Please check your Tools->Board setting.
+  #error This code is intended to run on the ESP8266 platform! Please check your Tools->Board setting.
 #endif
 
 #define BLYNK_PRINT Serial
@@ -29,44 +29,56 @@
 // Select USE_LITTLEFS (higher priority) or USE_SPIFFS
 
 #define USE_LITTLEFS                true
-//#define USE_LITTLEFS                false
 #define USE_SPIFFS                  false
-//#define USE_SPIFFS                  true
 
 #if USE_LITTLEFS
-//LittleFS has higher priority
-#define CurrentFileFS     "LittleFS"
-#ifdef USE_SPIFFS
-#undef USE_SPIFFS
-#endif
-#define USE_SPIFFS                  false
+  //LittleFS has higher priority
+  #define CurrentFileFS     "LittleFS"
+  #ifdef USE_SPIFFS
+    #undef USE_SPIFFS
+  #endif
+  #define USE_SPIFFS                  false
 #elif USE_SPIFFS
-#define CurrentFileFS     "SPIFFS"
+  #define CurrentFileFS     "SPIFFS"
 #endif
 
 
 #if !( USE_LITTLEFS || USE_SPIFFS)
-// EEPROM_SIZE must be <= 4096 and >= CONFIG_DATA_SIZE (currently 172 bytes)
-#define EEPROM_SIZE    (4 * 1024)
-// EEPROM_START + CONFIG_DATA_SIZE must be <= EEPROM_SIZE
-#define EEPROM_START  768
+  // EEPROM_SIZE must be <= 4096 and >= CONFIG_DATA_SIZE (currently 172 bytes)
+  #define EEPROM_SIZE    (4 * 1024)
+  // EEPROM_START + CONFIG_DATA_SIZE must be <= EEPROM_SIZE
+  #define EEPROM_START  768
 #endif
+
+/////////////////////////////////////////////
+
+// Add customs headers from v1.2.0
+#define USING_CUSTOMS_STYLE                 true
+#define USING_CUSTOMS_HEAD_ELEMENT          true
+#define USING_CORS_FEATURE                  true
+
+/////////////////////////////////////////////
 
 // Force some params in Blynk, only valid for library version 1.0.1 and later
 #define TIMEOUT_RECONNECT_WIFI                    10000L
 #define RESET_IF_CONFIG_TIMEOUT                   true
+
 #define CONFIG_TIMEOUT_RETRYTIMES_BEFORE_RESET    5
 
-#define USE_DYNAMIC_PARAMETERS      true
-// Those above #define's must be placed before #include <BlynkSimpleEsp8266_WM.h>
+// Config Timeout 120s (default 60s)
+#define CONFIG_TIMEOUT                            120000L
+
+#define USE_DYNAMIC_PARAMETERS                    true
+// Those above #define's must be placed before #include <BlynkSimpleEsp8266_WM.h> and <BlynkSimpleEsp8266_SSL_WM.h>
+//////////////////////////////////////////
 
 //#define USE_SSL   true
 #define USE_SSL   false
 
 #if USE_SSL
-#include <BlynkSimpleEsp8266_SSL_WM.h>
+  #include <BlynkSimpleEsp8266_SSL_WM.h>
 #else
-#include <BlynkSimpleEsp8266_WM.h>
+  #include <BlynkSimpleEsp8266_WM.h>
 #endif
 
 #define PIN_LED   2   // Pin D4 mapped to pin GPIO2/TXD1 of ESP8266, NodeMCU and WeMoS, control on-board LED
