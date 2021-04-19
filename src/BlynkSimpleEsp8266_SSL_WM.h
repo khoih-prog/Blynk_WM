@@ -16,7 +16,7 @@
   @date       Jan 2015
   @brief
 
-  Version: 1.2.0
+  Version: 1.3.0
 
   Version    Modified By   Date      Comments
   -------    -----------  ---------- -----------
@@ -42,6 +42,8 @@
   1.1.2     K Hoang      28/01/2021 Fix Config Portal and Dynamic Params bugs
   1.1.3     K Hoang      31/01/2021 To permit autoreset after timeout if DRD/MRD or non-persistent forced-CP
   1.2.0     K Hoang      24/02/2021 Add customs HTML header feature and support to ESP32-S2.
+  1.3.0     K Hoang      19/04/2021 Add LittleFS and SPIFFS support to ESP32-S2. Add support to ESP32-C3 without LittleFS
+                                    Fix SSL issue with Blynk Cloud Server
  ********************************************************************************************************************************/
 
 #ifndef BlynkSimpleEsp8266_SSL_WM_h
@@ -51,7 +53,7 @@
   #error This code is intended to run on the ESP8266 platform! Please check your Tools->Board setting.
 #endif
 
-#define BLYNK_WM_VERSION       "Blynk_WM SSL for ESP8266 v1.2.0"
+#define BLYNK_WM_VERSION       "Blynk_WM SSL for ESP8266 v1.3.0"
 
 #include <version.h>
 
@@ -61,6 +63,7 @@
 
 // Fingerprint is not used by default
 //#define BLYNK_DEFAULT_FINGERPRINT "FD C0 7D 8D 47 97 F7 E3 07 05 D3 4E E3 BB 8E 3D C0 EA BE 1C"
+//#define BLYNK_DEFAULT_FINGERPRINT "32 35 C9 6C 05 1B 73 2C 37 E8 31 0C 70 EE 67 10 1F D6 07 6A"
 
 #if defined(BLYNK_SSL_USE_LETSENCRYPT)
 static const unsigned char BLYNK_DEFAULT_CERT_DER[] PROGMEM =
@@ -238,7 +241,7 @@ class BlynkArduinoClientSecure
       if (this->connected())
         return true;
 
-      // Synchronize time useing SNTP. This is necessary to verify that
+      // Synchronize time using SNTP. This is necessary to verify that
       // the TLS certificates offered by the server are currently valid.
       configTime(0, 0, "pool.ntp.org", "time.nist.gov");
       time_t now = time(nullptr);
@@ -256,9 +259,18 @@ class BlynkArduinoClientSecure
       ntpTime.trim();
       BLYNK_LOG2("NTP time: ", ntpTime);
 
+      /////////////////////////////////////////
+      // KH, New v1.3.0
+      if (String(this->domain) == BLYNK_DEFAULT_DOMAIN)
+      {
+        this->client->setInsecure();   
+      }
+      /////////////////////////////////////////
+
+        
       // Now try connecting
       if (BlynkArduinoClientGen<Client>::connect())
-      {
+      { 
         if (fingerprint && this->client->verify(fingerprint, this->domain))
         {
           BLYNK_LOG1(BLYNK_F("Fingerprint OK"));
@@ -510,8 +522,7 @@ class BlynkWifi
     void begin(const char *iHostname = "", const char* fingerprint = NULL)
     {
       _fingerprint = fingerprint;
-      
-      
+           
 #define TIMEOUT_CONNECT_WIFI			30000
 
       //Turn OFF

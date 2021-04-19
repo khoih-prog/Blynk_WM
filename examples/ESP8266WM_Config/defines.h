@@ -13,7 +13,7 @@
 #define defines_h
 
 #ifndef ESP8266
-  #error This code is intended to run on the ESP8266 platform! Please check your Tools->Board setting.
+#error This code is intended to run on the ESP8266 platform! Please check your Tools->Board setting.
 #endif
 
 #define BLYNK_PRINT Serial
@@ -32,22 +32,22 @@
 #define USE_SPIFFS                  false
 
 #if USE_LITTLEFS
-  //LittleFS has higher priority
-  #define CurrentFileFS     "LittleFS"
-  #ifdef USE_SPIFFS
-    #undef USE_SPIFFS
-  #endif
-  #define USE_SPIFFS                  false
+//LittleFS has higher priority
+#define CurrentFileFS     "LittleFS"
+#ifdef USE_SPIFFS
+#undef USE_SPIFFS
+#endif
+#define USE_SPIFFS                  false
 #elif USE_SPIFFS
-  #define CurrentFileFS     "SPIFFS"
+#define CurrentFileFS     "SPIFFS"
 #endif
 
 
 #if !( USE_LITTLEFS || USE_SPIFFS)
-  // EEPROM_SIZE must be <= 4096 and >= CONFIG_DATA_SIZE (currently 172 bytes)
-  #define EEPROM_SIZE    (4 * 1024)
-  // EEPROM_START + CONFIG_DATA_SIZE must be <= EEPROM_SIZE
-  #define EEPROM_START  768
+// EEPROM_SIZE must be <= 4096 and >= CONFIG_DATA_SIZE (currently 172 bytes)
+#define EEPROM_SIZE    (4 * 1024)
+// EEPROM_START + CONFIG_DATA_SIZE must be <= EEPROM_SIZE
+#define EEPROM_START  768
 #endif
 
 /////////////////////////////////////////////
@@ -75,9 +75,9 @@
 #define USE_SSL   false
 
 #if USE_SSL
-  #include <BlynkSimpleEsp8266_SSL_WM.h>
+#include <BlynkSimpleEsp8266_SSL_WM.h>
 #else
-  #include <BlynkSimpleEsp8266_WM.h>
+#include <BlynkSimpleEsp8266_WM.h>
 #endif
 
 #define PIN_LED   2   // Pin D4 mapped to pin GPIO2/TXD1 of ESP8266, NodeMCU and WeMoS, control on-board LED

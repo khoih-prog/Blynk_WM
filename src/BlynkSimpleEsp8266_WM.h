@@ -16,7 +16,7 @@
   @date       Jan 2015
   @brief
 
-  Version: 1.2.0
+  Version: 1.3.0
 
   Version    Modified By   Date      Comments
   -------    -----------  ---------- -----------
@@ -42,6 +42,8 @@
   1.1.2     K Hoang      28/01/2021 Fix Config Portal and Dynamic Params bugs
   1.1.3     K Hoang      31/01/2021 To permit autoreset after timeout if DRD/MRD or non-persistent forced-CP
   1.2.0     K Hoang      24/02/2021 Add customs HTML header feature and support to ESP32-S2.
+  1.3.0     K Hoang      19/04/2021 Add LittleFS and SPIFFS support to ESP32-S2. Add support to ESP32-C3 without LittleFS
+                                    Fix SSL issue with Blynk Cloud Server
  ********************************************************************************************************************************/
 
 
@@ -52,7 +54,7 @@
   #error This code is intended to run on the ESP8266 platform! Please check your Tools->Board setting.
 #endif
 
-#define BLYNK_WM_VERSION       "Blynk_WM for ESP8266 v1.2.0"
+#define BLYNK_WM_VERSION       "Blynk_WM for ESP8266 v1.3.0"
 
 #include <version.h>
 
