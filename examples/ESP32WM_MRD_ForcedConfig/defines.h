@@ -37,6 +37,7 @@
 #else
   #define BOARD_TYPE      "ESP32"
 #endif
+
 #define BLYNK_PRINT Serial
 
 #define BLYNK_WM_DEBUG                3

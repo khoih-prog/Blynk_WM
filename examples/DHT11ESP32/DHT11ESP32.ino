@@ -7,7 +7,7 @@
   Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
   Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
   Licensed under MIT license
-  Version: 1.3.0
+  Version: 1.3.1
 
   Version    Modified By   Date      Comments
   -------    -----------  ---------- -----------
@@ -35,6 +35,7 @@
   1.2.0     K Hoang      24/02/2021 Add customs HTML header feature and support to ESP32-S2.
   1.3.0     K Hoang      19/04/2021 Add LittleFS and SPIFFS support to ESP32-S2. Add support to ESP32-C3 without LittleFS
                                     Fix SSL issue with Blynk Cloud Server
+  1.3.1     K Hoang      24/04/2021 Fix issue of custom Blynk port (different from 8080 or 9443) not working on ESP32
  *****************************************************************************************************************************/
 
 #include "defines.h"

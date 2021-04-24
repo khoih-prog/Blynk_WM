@@ -18,6 +18,7 @@
   * [Features](#features)
   * [Currently supported Boards](#currently-supported-boards)
 * [Changelog](#changelog)
+  * [Releases v1.3.1](#releases-v131)
   * [Major Releases v1.3.0](#major-releases-v130)
   * [Major Releases v1.2.0](#major-releases-v120)
   * [Releases v1.1.3](#releases-v113)
@@ -178,15 +179,19 @@ With version `v1.0.5` or later, you can configure:
 
 This [**BlynkESP32_BT_WF** library](https://github.com/khoih-prog/BlynkESP32_BT_WF) currently supports these following boards:
 
- 1. **ESP32 using EEPROM, SPIFFS or LittleFS**.
- 2. **ESP32-S2 (ESP32-S2 Saola, AI-Thinker ESP-12K, etc.) using EEPROM**
- 3. **ESP8266 using EEPROM, SPIFFS or LittleFS**.
+ 1. **ESP8266 and ESP32-based boards using EEPROM, SPIFFS or LittleFS**.
+ 2. **ESP32-S2 (ESP32-S2 Saola, AI-Thinker ESP-12K, etc.) using EEPROM, SPIFFS or LittleFS**.
+ 3. **ESP32-C3 (ARDUINO_ESP32C3_DEV) using EEPROM or SPIFFS**.
 
 
 ---
 ---
 
 ## Changelog
+
+### Releases v1.3.1
+
+1. Fix issue of custom Blynk port (different from 8080 or 9443) not working on ESP32. Check [Custom Blynk port not working for BlynkSimpleEsp32_Async_WM.h #4](https://github.com/khoih-prog/Blynk_Async_WM/issues/4)
 
 ### Major Releases v1.3.0
 
@@ -2051,7 +2056,7 @@ Blynk.resetAndEnterConfigPortal();
 
 ```
 Starting ESP8266WM_MRD_ForcedConfig using LittleFS without SSL on ESP8266_NODEMCU
-Blynk_WM for ESP8266 v1.3.0
+Blynk_WM for ESP8266 v1.3.1
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -2137,7 +2142,7 @@ Non-Persistent CP will be removed after first reset, even you didn't enter the C
 
 ```
 Starting ESP8266WM_MRD_ForcedConfig using LittleFS without SSL on ESP8266_NODEMCU
-Blynk_WM for ESP8266 v1.3.0
+Blynk_WM for ESP8266 v1.3.1
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -2219,7 +2224,7 @@ Blynk.resetAndEnterConfigPortalPersistent();
 
 ```
 Starting ESP8266WM_MRD_ForcedConfig using LittleFS without SSL on ESP8266_NODEMCU
-Blynk_WM for ESP8266 v1.3.0
+Blynk_WM for ESP8266 v1.3.1
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -2306,7 +2311,7 @@ Persistent CP will remain after resets. The only way to get rid of Config Portal
 
 ```
 Starting ESP8266WM_MRD_ForcedConfig using LittleFS without SSL on ESP8266_NODEMCU
-Blynk_WM for ESP8266 v1.3.0
+Blynk_WM for ESP8266 v1.3.1
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -2580,6 +2585,10 @@ Sometimes, the library will only work if you update the board core to the latest
 
 ## Releases
 
+### Releases v1.3.1
+
+1. Fix issue of custom Blynk port (different from 8080 or 9443) not working on ESP32. Check [Custom Blynk port not working for BlynkSimpleEsp32_Async_WM.h #4](https://github.com/khoih-prog/Blynk_Async_WM/issues/4)
+
 ### Major Releases v1.3.0
 
 1. Add **LittleFS and SPIFFS** support to new **ESP32-S2** boards (**Arduino ESP32C3_DEV**). Check [HOWTO Install esp32 core for ESP32-S2 (Saola, AI-Thinker ESP-12K) and ESP32-C3 boards into Arduino IDE](#howto-install-esp32-core-for-esp32-s2-saola-ai-thinker-esp-12k-and-esp32-c3-boards-into-arduino-ide).
@@ -2791,6 +2800,7 @@ Submit issues to: [Blynk_WM issues](https://github.com/khoih-prog/Blynk_WM/issue
   * [How to trigger a Config Portal from code #25](https://github.com/khoih-prog/Blynk_WM/issues/25)
   * [Good new feature: Blynk.resetAndEnterConfigPortal() Thanks & question #27](https://github.com/khoih-prog/Blynk_WM/issues/27)
 5. Thanks to [Thor Johnson](https://github.com/thorathome) and [kevinleberge](https://github.com/kevinleberge) to help locate the bugs, discuss the USE_DEFAULT_CONFIG_DATA solution leading to release v1.0.16. See [Can’t load defaults](https://github.com/khoih-prog/Blynk_WM/issues/15) and [Setting "#define USE_DYNAMIC_PARAMETERS false" on Blynk_WM_Template.ino results in compile error](https://github.com/khoih-prog/Blynk_WM/issues/16)
+6. Thanks to [komaneko](https://github.com/jjskaife) to report bugs in [Custom Blynk port not working for BlynkSimpleEsp32_Async_WM.h #4](https://github.com/khoih-prog/Blynk_Async_WM/issues/4) leading to v1.3.1
 
 <table>
   <tr>
@@ -2799,6 +2809,7 @@ Submit issues to: [Blynk_WM issues](https://github.com/khoih-prog/Blynk_WM/issue
     <td align="center"><a href="https://github.com/brondolin"><img src="https://github.com/brondolin.png" width="100px;" alt="brondolin"/><br /><sub><b>brondolin</b></sub></a><br /></td>
     <td align="center"><a href="https://github.com/thorathome"><img src="https://github.com/thorathome.png" width="100px;" alt="thorathome"/><br /><sub><b>⭐️ Thor Johnson</b></sub></a><br /></td>
     <td align="center"><a href="https://github.com/kevinleberge"><img src="https://github.com/kevinleberge.png" width="100px;" alt="kevinleberge"/><br /><sub><b>kevinleberge</b></sub></a><br /></td>
+    <td align="center"><a href="https://github.com/jjskaife"><img src="https://github.com/jjskaife.png" width="100px;" alt="jjskaife"/><br /><sub><b>komaneko</b></sub></a><br /></td>
   </tr> 
 </table>
 
