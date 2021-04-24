@@ -1533,7 +1533,7 @@ The following is the sample terminal output when running example [ESP8266WM_MRD_
 
 ```
 Starting ESP8266WM_MRD_Config using LittleFS with SSL on ESP8266_NODEMCU
-Blynk_WM SSL for ESP8266 v1.3.0
+Blynk_WM SSL for ESP8266 v1.3.1
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFD0002
 multiResetDetectorFlag = 0xFFFD0002
@@ -1613,7 +1613,7 @@ BBBBBB
 
 ```
 Starting ESP8266WM_MRD_Config using LittleFS with SSL on ESP8266_NODEMCU
-Blynk_WM SSL for ESP8266 v1.3.0
+Blynk_WM SSL for ESP8266 v1.3.1
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFC0003
 multiResetDetectorFlag = 0xFFFC0003
@@ -1675,7 +1675,7 @@ The following is the sample terminal output when running example [DHT11ESP8266_S
 
 ```
 Starting DHT11ESP8266_SSL using LittleFS with SSL on ESP8266_NODEMCU
-Blynk_WM SSL for ESP8266 v1.3.0
+Blynk_WM SSL for ESP8266 v1.3.1
 ESP_DoubleResetDetector v1.1.1
 [293] Hostname=ESP8266-DHT11-SSL
 [316] LoadCfgFile 
@@ -1733,7 +1733,7 @@ The following is the sample terminal output when running example [ESP32WM_MRD_Co
 
 ```
 Starting ESP32WM_MRD_Config using LITTLEFS without SSL on ESP32_DEV
-Blynk_WM for ESP32 v1.3.0
+Blynk_WM for ESP32 v1.3.1
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -1810,7 +1810,7 @@ BBBBBB
 
 ```
 Starting ESP32WM_MRD_Config using LITTLEFS without SSL on ESP32_DEV
-Blynk_WM for ESP32 v1.3.0
+Blynk_WM for ESP32 v1.3.1
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFC0003
 multiResetDetectorFlag = 0xFFFC0003
@@ -1868,7 +1868,7 @@ ets Jun  8 2016 00:22:57
 
 ```
 Starting ESP32WM_MRD_Config using LITTLEFS without SSL on ESP32_DEV
-Blynk_WM for ESP32 v1.3.0
+Blynk_WM for ESP32 v1.3.1
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -1992,7 +1992,7 @@ The following is the sample terminal output when running example [DHT11ESP8266_S
 
 ```
 Starting DHT11ESP32_SSL using LITTLEFS with SSL on ESP32_DEV
-Blynk_WM SSL for ESP32 v1.3.0
+Blynk_WM SSL for ESP32 v1.3.1
 ESP_DoubleResetDetector v1.1.1
 [346] Hostname=ESP32-DHT11-SSL
 [385] LoadCfgFile 
@@ -2379,7 +2379,7 @@ The following is the sample terminal output when running example [ESP8266WM_MRD_
 
 ```
 Starting ESP8266WM_MRD_ForcedConfig using LittleFS with SSL on ESP8266_NODEMCU
-Blynk_WM SSL for ESP8266 v1.3.0
+Blynk_WM SSL for ESP8266 v1.3.1
 ESP_MultiResetDetector v1.1.1
 [267] Set CustomsStyle to : <style>div,input{padding:5px;font-size:1em;}input{width:95%;}body{text-align: center;}button{background-color:blue;color:white;line-height:2.4rem;font-size:1.2rem;width:100%;}fieldset{border-radius:0.3rem;margin:0px;}</style>
 [289] Set CustomsHeadElement to : <style>html{filter: invert(10%);}</style>
@@ -2467,7 +2467,7 @@ The following is the sample terminal output when running example [ESP32WM_MRD_Co
 
 ```
 Starting ESP32WM_MRD_Config using LITTLEFS with SSL on ESP32S2_DEV
-Blynk_WM SSL for ESP32 v1.3.0
+Blynk_WM SSL for ESP32 v1.3.1
 ESP_MultiResetDetector v1.1.1
 [134394] Set CustomsStyle to : <style>div,input{padding:5px;font-size:1em;}input{width:95%;}body{text-align: center;}button{background-color:blue;color:white;line-height:2.4rem;font-size:1.2rem;width:100%;}fieldset{border-radius:0.3rem;margin:0px;}</style>
 [134417] Set CustomsHeadElement to : <style>html{filter: invert(10%);}</style>
