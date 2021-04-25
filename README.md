@@ -97,7 +97,7 @@
   * [16. **ESP8266WM_MRD_ForcedConfig**](examples/ESP8266WM_MRD_ForcedConfig)
 * [So, how it works?](#so-how-it-works)
   * [ 1. Without SCAN_WIFI_NETWORKS](#1-without-scan_wifi_networks)
-  * [ 2. With SCAN_WIFI_NETWORKS]](#2-with-scan_wifi_networks)
+  * [ 2. With SCAN_WIFI_NETWORKS](#2-with-scan_wifi_networks)
 * [Example ESP32WM_MRD_ForcedConfig](#example-esp32wm_mrd_forcedconfig)
   * [1. File ESP32WM_MRD_ForcedConfig.ino](#1-file-esp32wm_mrd_forcedconfigino)
   * [2. File defines.h](#2-file-definesh) 
