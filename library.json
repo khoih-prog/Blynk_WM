@@ -1,7 +1,7 @@
 {
   "name": "Blynk_WM",
-  "version": "1.3.1",
-  "description": "Library for configuring/auto(re)connecting ESP32 (including ESP32-S2), ESP8266 modules to best or available MultiWiFi APs and MultiBlynk servers at runtime. Enable adding dynamic custom parameters from sketch and input using the same Config Portal (CP). CP will be auto-adjusted to match the number of dynamic parameters. Optional default Credentials to be autoloaded into CP to use or change instead of manually input. Static STA IP and DHCP Hostname as well as Config Portal AP channel, IP, SSID, Password can be configured. Config. Data saved in ESP8266/ESP32 LittleFS, SPIFFS or EEPROM. Multi, Double DetectDetector or Virtual CP Switch feature permits entering CP as requested. Configurable Customs HTML Headers, including Customs Style, Customs Head Elements, CORS Header.",
+  "version": "1.4.0",
+  "description": "Library for configuring/auto(re)connecting ESP32 (including ESP32-S2, ESP32-C3), ESP8266 modules to best or available MultiWiFi APs and MultiBlynk servers at runtime. Enable adding dynamic custom parameters from sketch and input using the same Config Portal (CP). CP will be auto-adjusted to match the number of dynamic parameters. Optional default Credentials to be autoloaded into CP to use or change instead of manually input. Static STA IP and DHCP Hostname as well as Config Portal AP channel, IP, SSID, Password can be configured. Config. Data saved in ESP8266/ESP32 LittleFS, SPIFFS or EEPROM. Multi, Double DetectDetector or Virtual CP Switch feature permits entering CP as requested. Configurable Customs HTML Headers, including Customs Style, Customs Head Elements, CORS Header. Now with scanning of WiFi networks for selection in Configuration Portal.",
   "keywords": "control, device, communication, blynk, iot, wifi, esp8266, esp32, esp32-s2, esp32-c3, drd, mrd, double-reset, multi-reset, config-portal, credentials, dynamic-params, customs-header, smartphone, mobile, app, web, cloud, sensors, m2m, protocol, ble, bluetooth, Manager, DynamicParameters, dynamic, configportal, usb, serial, ethernet, data, http, portal ",
   "authors":
   {
@@ -45,7 +45,7 @@
     {
       "owner": "lorol",
       "name": "LittleFS_esp32",
-      "version": ">=1.0.5",
+      "version": ">=1.0.6",
       "platforms": ["espressif32"]
     }
   ],

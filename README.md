@@ -18,6 +18,7 @@
   * [Features](#features)
   * [Currently supported Boards](#currently-supported-boards)
 * [Changelog](#changelog)
+  * [Major Releases v1.4.0](#major-releases-v140)
   * [Releases v1.3.1](#releases-v131)
   * [Major Releases v1.3.0](#major-releases-v130)
   * [Major Releases v1.2.0](#major-releases-v120)
@@ -67,6 +68,13 @@
   * [ 6. To use custom HTML Style](#6-to-use-custom-html-style)
   * [ 7. To use custom Head Elements](#7-to-use-custom-head-elements)
   * [ 8. To use CORS Header](#8-to-use-cors-header)
+  * [ 9. To use and input only one set of WiFi SSID and PWD](#9-to-use-and-input-only-one-set-of-wifi-ssid-and-pwd)
+    * [ 9.1 If you need to use and input only one set of WiFi SSID/PWD](#91-if-you-need-to-use-and-input-only-one-set-of-wifi-ssidpwd)
+    * [ 9.2 If you need to use both sets of WiFi SSID/PWD](#92-if-you-need-to-use-both-sets-of-wifi-ssidpwd)
+  * [10. To enable auto-scan of WiFi networks for selection in Configuration Portal](#10-to-enable-auto-scan-of-wifi-networks-for-selection-in-configuration-portal)
+    * [10.1 Enable auto-scan of WiFi networks for selection in Configuration Portal](#101-enable-auto-scan-of-wifi-networks-for-selection-in-configuration-portal)
+    * [10.2 Disable manually input SSIDs](#102-disable-manually-input-ssids)
+    * [10.3 Select maximum number of SSIDs in the list](#103-select-maximum-number-of-ssids-in-the-list)
 * [Important Notes for using Dynamic Parameters' ids](#important-notes-for-using-dynamic-parameters-ids)
 * [Important Notes](#important-notes)
 * [Why using this Blynk_WiFiManager with MultiWiFi-MultiBlynk features](#why-using-this-blynk_wifimanager-with-multiwifi-multiblynk-features)
@@ -112,6 +120,9 @@
     * [6.2. Enter persistent ConfigPortal](#62-enter-persistent-configportal)
   * [7. ESP8266WM_MRD_ForcedConfig using LITTLEFS with SSL on ESP8266_NODEMCU](#7-esp8266wm_mrd_forcedconfig-using-littlefs-with-ssl-on-esp8266_nodemcu)
   * [8. ESP32WM_MRD_Config using LITTLEFS with SSL on ESP32S2_DEV](#8-esp32wm_mrd_config-using-littlefs-with-ssl-on-esp32s2_dev)
+  * [9. ESP32WM_MRD_ForcedConfig using LITTLEFS with SSL on ESP32_DEV to demo WiFi Scan](#9-esp32wm_mrd_forcedconfig-using-littlefs-with-ssl-on-esp32_dev-to-demo-wifi-scan)
+    * [9.1 MRD/DRD => Open Config Portal](#91-mrddrd--open-config-portal)
+    * [9.2 Config Data Saved => Connection to Blynk](#92-config-data-saved--connection-to-blynk)
 * [Debug](#debug)
 * [Troubleshooting](#troubleshooting)
 * [Releases](#releases)
@@ -188,6 +199,14 @@ This [**BlynkESP32_BT_WF** library](https://github.com/khoih-prog/BlynkESP32_BT_
 ---
 
 ## Changelog
+
+### Major Release v1.4.0
+
+1. Enable scan of WiFi networks for selection in Configuration Portal. Check [PR for v1.3.0 - Enable scan of WiFi networks #10](https://github.com/khoih-prog/WiFiManager_NINA_Lite/pull/10). Now you can select optional **SCAN_WIFI_NETWORKS**, **MANUAL_SSID_INPUT_ALLOWED** to be able to manually input SSID, not only from a scanned SSID lists and **MAX_SSID_IN_LIST** (from 2-15)
+2. Fix invalid "blank" Config Data treated as Valid.
+3. Permit optionally inputting one set of WiFi SSID/PWD by using `REQUIRE_ONE_SET_SSID_PW == true`
+4. Enforce WiFi PWD minimum length of 8 chars
+5. Minor enhancement to not display garbage when data is invalid
 
 ### Releases v1.3.1
 
@@ -286,7 +305,7 @@ Thanks to [Thor Johnson](https://github.com/thorathome) to test, suggest and enc
 5. [`ESP8266 Core 2.7.4+`](https://github.com/esp8266/Arduino) for ESP8266-based boards. [![Latest release](https://img.shields.io/github/release/esp8266/Arduino.svg)](https://github.com/esp8266/Arduino/releases/latest/). To use ESP8266 core 2.7.1+ for LittleFS. 
 6. [`ESP_DoubleResetDetector library 1.1.1+`](https://github.com/khoih-prog/ESP_DoubleResetDetector) to use DRD feature. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/ESP_DoubleResetDetector.svg?)](https://www.ardu-badge.com/ESP_DoubleResetDetector).
 7. [`ESP_MultiResetDetector library 1.1.1+`](https://github.com/khoih-prog/ESP_MultiResetDetector) to use MRD feature. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/ESP_MultiResetDetector.svg?)](https://www.ardu-badge.com/ESP_MultiResetDetector).
-8. [`LittleFS_esp32 v1.0.6+`](https://github.com/lorol/LITTLEFS) for ESP32-based boards using LittleFS. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/LittleFS_esp32.svg?)](https://www.ardu-badge.com/LittleFS_esp32).
+8. [`LittleFS_esp32 v1.0.6+`](https://github.com/lorol/LITTLEFS) for ESP32-based boards using LittleFS. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/LittleFS_esp32.svg?)](https://www.ardu-badge.com/LittleFS_esp32). **Notice**: This [`LittleFS_esp32 library`](https://github.com/lorol/LITTLEFS) has been integrated to Arduino [esp32 core v1.0.6](https://github.com/espressif/arduino-esp32/tree/master/libraries/LITTLEFS).
 
 ---
 
@@ -843,6 +862,56 @@ Blynk.setCORSHeader("Your Access-Control-Allow-Origin");
 ```
 
 
+#### 9. To use and input only one set of WiFi SSID and PWD
+
+#### 9.1 If you need to use and input only one set of WiFi SSID/PWD
+
+```
+// Permit input only one set of WiFi SSID/PWD. The other can be "NULL or "blank"
+// Default is false (if not defined) => must input 2 sets of SSID/PWD
+#define REQUIRE_ONE_SET_SSID_PW       true
+```
+But it's always advisable to use and input both sets for reliability.
+ 
+#### 9.2 If you need to use both sets of WiFi SSID/PWD
+
+```
+// Permit input only one set of WiFi SSID/PWD. The other can be "NULL or "blank"
+// Default is false (if not defined) => must input 2 sets of SSID/PWD
+#define REQUIRE_ONE_SET_SSID_PW       false
+```
+
+#### 10. To enable auto-scan of WiFi networks for selection in Configuration Portal
+
+#### 10.1 Enable auto-scan of WiFi networks for selection in Configuration Portal
+
+
+```
+#define SCAN_WIFI_NETWORKS                  true
+```
+
+The manual input of SSIDs is default enabled, so that users can input arbitrary SSID, not only from the scanned list. This is for the sample use-cases in which users can input the known SSIDs of another place, then send the boards to that place. The boards can connect to WiFi without users entering Config Portal to re-configure.
+
+#### 10.2 Disable manually input SSIDs
+
+```
+// To disable manually input SSID, only from a scanned SSID lists
+#define MANUAL_SSID_INPUT_ALLOWED           false
+```
+
+This is for normal use-cases in which users can only select an SSID from a scanned list of SSIDs to avoid typo mistakes and/or security.
+
+#### 10.3 Select maximum number of SSIDs in the list
+
+The maximum number of SSIDs in the list is seletable from 2 to 15. If invalid number of SSIDs is selected, the default number of 10 will be used.
+
+
+```
+// From 2-15
+#define MAX_SSID_IN_LIST                    8
+```
+
+
 ---
 ---
 
@@ -962,13 +1031,30 @@ After you connected, please, go to http://192.168.4.1 or the configured AP IP. T
     <img src="https://github.com/khoih-prog/Blynk_WM/blob/master/pics/Default_Main.png">
 </p>
 
+
 Enter your WiFi and Blynk Credentials:
+
+### 1. Without SCAN_WIFI_NETWORKS
+
 
 <p align="center">
     <img src="https://github.com/khoih-prog/Blynk_WM/blob/master/pics/ConfigPortal.png">
 </p>
 
+
+### 2. With SCAN_WIFI_NETWORKS
+
+
+<p align="center">
+    <img src="https://github.com/khoih-prog/Blynk_WM/blob/master/pics/Input_With_Scan.png">
+</p>
+
+
 Then click **Save**. The system will auto-restart. You will see the board's built-in LED turned OFF. That means, it's already connected to your Blynk server successfully.
+
+<p align="center">
+    <img src="https://github.com/khoih-prog/Blynk_WM/blob/master/pics/Saved.png">
+</p>
 
 ---
 ---
@@ -1533,7 +1619,7 @@ The following is the sample terminal output when running example [ESP8266WM_MRD_
 
 ```
 Starting ESP8266WM_MRD_Config using LittleFS with SSL on ESP8266_NODEMCU
-Blynk_WM SSL for ESP8266 v1.3.1
+Blynk_WM SSL for ESP8266 v1.4.0
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFD0002
 multiResetDetectorFlag = 0xFFFD0002
@@ -1613,7 +1699,7 @@ BBBBBB
 
 ```
 Starting ESP8266WM_MRD_Config using LittleFS with SSL on ESP8266_NODEMCU
-Blynk_WM SSL for ESP8266 v1.3.1
+Blynk_WM SSL for ESP8266 v1.4.0
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFC0003
 multiResetDetectorFlag = 0xFFFC0003
@@ -1675,7 +1761,7 @@ The following is the sample terminal output when running example [DHT11ESP8266_S
 
 ```
 Starting DHT11ESP8266_SSL using LittleFS with SSL on ESP8266_NODEMCU
-Blynk_WM SSL for ESP8266 v1.3.1
+Blynk_WM SSL for ESP8266 v1.4.0
 ESP_DoubleResetDetector v1.1.1
 [293] Hostname=ESP8266-DHT11-SSL
 [316] LoadCfgFile 
@@ -1733,7 +1819,7 @@ The following is the sample terminal output when running example [ESP32WM_MRD_Co
 
 ```
 Starting ESP32WM_MRD_Config using LITTLEFS without SSL on ESP32_DEV
-Blynk_WM for ESP32 v1.3.1
+Blynk_WM for ESP32 v1.4.0
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -1810,7 +1896,7 @@ BBBBBB
 
 ```
 Starting ESP32WM_MRD_Config using LITTLEFS without SSL on ESP32_DEV
-Blynk_WM for ESP32 v1.3.1
+Blynk_WM for ESP32 v1.4.0
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFC0003
 multiResetDetectorFlag = 0xFFFC0003
@@ -1868,7 +1954,7 @@ ets Jun  8 2016 00:22:57
 
 ```
 Starting ESP32WM_MRD_Config using LITTLEFS without SSL on ESP32_DEV
-Blynk_WM for ESP32 v1.3.1
+Blynk_WM for ESP32 v1.4.0
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -1992,7 +2078,7 @@ The following is the sample terminal output when running example [DHT11ESP8266_S
 
 ```
 Starting DHT11ESP32_SSL using LITTLEFS with SSL on ESP32_DEV
-Blynk_WM SSL for ESP32 v1.3.1
+Blynk_WM SSL for ESP32 v1.4.0
 ESP_DoubleResetDetector v1.1.1
 [346] Hostname=ESP32-DHT11-SSL
 [385] LoadCfgFile 
@@ -2056,7 +2142,7 @@ Blynk.resetAndEnterConfigPortal();
 
 ```
 Starting ESP8266WM_MRD_ForcedConfig using LittleFS without SSL on ESP8266_NODEMCU
-Blynk_WM for ESP8266 v1.3.1
+Blynk_WM for ESP8266 v1.4.0
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -2142,7 +2228,7 @@ Non-Persistent CP will be removed after first reset, even you didn't enter the C
 
 ```
 Starting ESP8266WM_MRD_ForcedConfig using LittleFS without SSL on ESP8266_NODEMCU
-Blynk_WM for ESP8266 v1.3.1
+Blynk_WM for ESP8266 v1.4.0
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -2224,7 +2310,7 @@ Blynk.resetAndEnterConfigPortalPersistent();
 
 ```
 Starting ESP8266WM_MRD_ForcedConfig using LittleFS without SSL on ESP8266_NODEMCU
-Blynk_WM for ESP8266 v1.3.1
+Blynk_WM for ESP8266 v1.4.0
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -2311,7 +2397,7 @@ Persistent CP will remain after resets. The only way to get rid of Config Portal
 
 ```
 Starting ESP8266WM_MRD_ForcedConfig using LittleFS without SSL on ESP8266_NODEMCU
-Blynk_WM for ESP8266 v1.3.1
+Blynk_WM for ESP8266 v1.4.0
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -2379,7 +2465,7 @@ The following is the sample terminal output when running example [ESP8266WM_MRD_
 
 ```
 Starting ESP8266WM_MRD_ForcedConfig using LittleFS with SSL on ESP8266_NODEMCU
-Blynk_WM SSL for ESP8266 v1.3.1
+Blynk_WM SSL for ESP8266 v1.4.0
 ESP_MultiResetDetector v1.1.1
 [267] Set CustomsStyle to : <style>div,input{padding:5px;font-size:1em;}input{width:95%;}body{text-align: center;}button{background-color:blue;color:white;line-height:2.4rem;font-size:1.2rem;width:100%;}fieldset{border-radius:0.3rem;margin:0px;}</style>
 [289] Set CustomsHeadElement to : <style>html{filter: invert(10%);}</style>
@@ -2467,7 +2553,7 @@ The following is the sample terminal output when running example [ESP32WM_MRD_Co
 
 ```
 Starting ESP32WM_MRD_Config using LITTLEFS with SSL on ESP32S2_DEV
-Blynk_WM SSL for ESP32 v1.3.1
+Blynk_WM SSL for ESP32 v1.4.0
 ESP_MultiResetDetector v1.1.1
 [134394] Set CustomsStyle to : <style>div,input{padding:5px;font-size:1em;}input{width:95%;}body{text-align: center;}button{background-color:blue;color:white;line-height:2.4rem;font-size:1.2rem;width:100%;}fieldset{border-radius:0.3rem;margin:0px;}</style>
 [134417] Set CustomsHeadElement to : <style>html{filter: invert(10%);}</style>
@@ -2546,6 +2632,220 @@ Subs Topics = default-mqtt-SubTopic
 Pubs Topics = default-mqtt-PubTopic
 ```
 
+---
+
+---
+
+### 9. ESP32WM_MRD_ForcedConfig using LITTLEFS with SSL on ESP32_DEV to demo WiFi Scan
+
+The following is the sample terminal output when running example [ESP32WM_MRD_ForcedConfig](examples/ESP32WM_MRD_ForcedConfig) on **ESP32_DEV**  with WiFi Scan for selection in Configuration Portal.
+
+#### 9.1 MRD/DRD => Open Config Portal
+
+```
+Starting ESP32WM_MRD_ForcedConfig using LITTLEFS with SSL on ESP32_DEV
+Blynk_WM SSL for ESP32 v1.4.0
+ESP_MultiResetDetector v1.1.1
+[228] Set CustomsStyle to : <style>div,input{padding:5px;font-size:1em;}input{width:95%;}body{text-align: center;}button{background-color:blue;color:white;line-height:2.4rem;font-size:1.2rem;width:100%;}fieldset{border-radius:0.3rem;margin:0px;}</style>
+[250] Set CustomsHeadElement to : <style>html{filter: invert(10%);}</style>
+[257] Set CORS Header to : Your Access-Control-Allow-Origin
+LittleFS Flag read = 0xFFFC0003
+multiResetDetectorFlag = 0xFFFC0003
+lowerBytes = 0x0003, upperBytes = 0x0003
+multiResetDetected, number of times = 3
+Saving config file...
+Saving config file OK
+[332] Multi or Double Reset Detected
+[488] Hostname=ESP32-Master-Controller
+[558] LoadCfgFile 
+[571] OK
+[571] ======= Start Stored Config Data =======
+[571] Hdr=SSL_ESP32,BrdName=ESP8266
+[571] SSID=HueNet1,PW=password
+[571] SSID1=HueNet2,PW1=password
+[574] Server=blynk-cloud.com,Token=token
+[577] Server1=blynk-cloud.com,Token1=token2
+[581] Port=9443
+[583] ======= End Config Data =======
+[586] CCSum=0x2185,RCSum=0x2185
+[620] LoadCredFile 
+[632] CrR:pdata=default-mqtt-server,len=34
+[632] CrR:pdata=1883,len=6
+[632] CrR:pdata=default-mqtt-username,len=34
+[632] CrR:pdata=default-mqtt-password,len=34
+[635] CrR:pdata=default-mqtt-SubTopic,len=34
+[639] CrR:pdata=default-mqtt-PubTopic,len=34
+[643] OK
+[644] CrCCsum=0x29a6,CrRCsum=0x29a6
+[647] Valid Stored Dynamic Data
+[650] Hdr=SSL_ESP32,BrdName=ESP8266
+[653] SSID=HueNet1,PW=password
+[656] SSID1=HueNet2,PW1=password
+[659] Server=blynk-cloud.com,Token=token
+[663] Server1=blynk-cloud.com,Token1=token2
+[667] Port=9443
+[668] ======= End Config Data =======
+[671] Check if isForcedCP
+[702] LoadCPFile 
+[713] OK
+[713] bg: isForcedConfigPortal = false
+[713] bg:Stay forever in CP:DRD/MRD
+[713] clearForcedCP
+[746] SaveCPFile 
+[758] OK
+[790] SaveBkUpCPFile 
+[802] OK
+[802] Scanning Network
+[6310] scanWifiNetworks: Done, Scanned Networks n = 11
+[6310] Sorting
+[6310] Removing Dup
+[6311] WiFi networks found:
+[6312] 1: HueNet, -26dB
+[6312] 2: HueNet1, -30dB
+[6314] 3: HueNetTek, -32dB
+[6316] 4: dragino-1ed63c, -35dB
+[6319] 5: HueNet2, -57dB
+[6322] 6: bacau, -68dB
+[6324] 7: guest_24, -69dB
+[6326] 8: rogers786, -87dB
+[6328] 9: Rogers 786, -87dB
+[6331] 10: Access 2.0, -92dB
+[6334] 11: Family Room speaker.o, -96dB
+[7197] 
+stConf:SSID=TestPortal-ESP32,PW=TestPortalPass
+[7197] IP=192.168.4.1,ch=6
+[7299] s:millis() = 7299, configTimeout = 127299
+F
+Your stored Credentials :
+MQTT Server = default-mqtt-server
+Port = 1883
+MQTT UserName = default-mqtt-username
+MQTT PWD = default-mqtt-password
+Subs Topics = default-mqtt-SubTopic
+Pubs Topics = default-mqtt-PubTopic
+[19720] h: Init menuItemUpdated
+[19863] h:mqtt=default-mqtt-server
+[19863] h2:myMenuItems[0]=default-mqtt-server
+[19877] h:mqpt=1883
+[19877] h2:myMenuItems[1]=1883
+[19891] h:user=default-mqtt-username
+[19891] h2:myMenuItems[2]=default-mqtt-username
+[19911] h:mqpw=default-mqtt-password
+[19911] h2:myMenuItems[3]=default-mqtt-password
+[19925] h:subs=default-mqtt-SubTopic
+[19925] h2:myMenuItems[4]=default-mqtt-SubTopic
+[19939] h:pubs=default-mqtt-PubTopic
+[19939] h2:myMenuItems[5]=default-mqtt-PubTopic
+[19942] h:Updating LittleFS:/wmssl_conf.dat
+[19982] SaveCfgFile 
+[19982] WCSum=0x34ef
+[19996] OK
+[20173] SaveBkUpCfgFile 
+[20184] OK
+[20217] SaveCredFile 
+[20217] CW1:pdata=default-mqtt-server,len=34
+[20228] CW1:pdata=1883,len=6
+[20228] CW1:pdata=default-mqtt-username,len=34
+[20228] CW1:pdata=default-mqtt-password,len=34
+[20228] CW1:pdata=default-mqtt-SubTopic,len=34
+[20232] CW1:pdata=default-mqtt-PubTopic,len=34
+[20237] OK
+[20237] CrWCSum=0x29a6
+[20275] SaveBkUpCredFile 
+[20276] CW2:pdata=default-mqtt-server,len=34
+[20288] CW2:pdata=1883,len=6
+[20288] CW2:pdata=default-mqtt-username,len=34
+[20288] CW2:pdata=default-mqtt-password,len=34
+[20288] CW2:pdata=default-mqtt-SubTopic,len=34
+[20292] CW2:pdata=default-mqtt-PubTopic,len=34
+[20297] OK
+[20297] h:Rst
+```
+
+#### 9.2 Config Data Saved => Connection to Blynk
+
+
+```
+Starting ESP32WM_MRD_ForcedConfig using LITTLEFS with SSL on ESP32_DEV
+Blynk_WM SSL for ESP32 v1.4.0
+ESP_MultiResetDetector v1.1.1
+[227] Set CustomsStyle to : <style>div,input{padding:5px;font-size:1em;}input{width:95%;}body{text-align: center;}button{background-color:blue;color:white;line-height:2.4rem;font-size:1.2rem;width:100%;}fieldset{border-radius:0.3rem;margin:0px;}</style>
+[249] Set CustomsHeadElement to : <style>html{filter: invert(10%);}</style>
+[256] Set CORS Header to : Your Access-Control-Allow-Origin
+LittleFS Flag read = 0xFFFE0001
+multiResetDetectorFlag = 0xFFFE0001
+lowerBytes = 0x0001, upperBytes = 0x0001
+No multiResetDetected, number of times = 1
+LittleFS Flag read = 0xFFFE0001
+Saving config file...
+Saving config file OK
+[635] Hostname=ESP32-Master-Controller
+[704] LoadCfgFile 
+[716] OK
+[717] ======= Start Stored Config Data =======
+[717] Hdr=SSL_ESP32,BrdName=ESP32-SSL
+[717] SSID=HueNet,PW=password
+[717] SSID1=HueNet1,PW1=password
+[719] Server=account.duckdns.org,Token=token
+[726] Server1=account.duckdns.org,Token1=token1
+[732] Port=9443
+[733] ======= End Config Data =======
+[737] CCSum=0x34ef,RCSum=0x34ef
+[768] LoadCredFile 
+[779] CrR:pdata=default-mqtt-server,len=34
+[779] CrR:pdata=1883,len=6
+[779] CrR:pdata=default-mqtt-username,len=34
+[780] CrR:pdata=default-mqtt-password,len=34
+[783] CrR:pdata=default-mqtt-SubTopic,len=34
+[787] CrR:pdata=default-mqtt-PubTopic,len=34
+[791] OK
+[791] CrCCsum=0x29a6,CrRCsum=0x29a6
+[795] Valid Stored Dynamic Data
+[797] Hdr=SSL_ESP32,BrdName=ESP32-SSL
+[801] SSID=HueNet,PW=password
+[804] SSID1=HueNet1,PW1=password
+[806] Server=account.duckdns.org,Token=token
+[813] Server1=account.duckdns.org,Token1=token1
+[819] Port=9443
+[820] ======= End Config Data =======
+[824] Check if isForcedCP
+[858] LoadCPFile 
+[871] OK
+[871] bg: noConfigPortal = true
+[871] Connecting MultiWifi...
+[19266] WiFi connected after time: 1
+[19266] SSID: HueNet, RSSI = -29
+[19266] Channel: 10, IP address: 192.168.2.45
+[19267] bg: WiFi OK. Try Blynk
+[19268] 
+    ___  __          __
+   / _ )/ /_ _____  / /__
+  / _  / / // / _ \/  '_/
+ /____/_/\_, /_//_/_/\_\
+        /___/ v0.6.1 on ESP32
+
+[20282] NTP time: Sun Apr 25 04:52:35 2021
+[20282] BlynkArduinoClient.connect: Connecting to account.duckdns.org:9443
+[22407] Certificate OK
+[22412] Ready (ping: 4ms).
+[22480] Connected to Blynk Server = account.duckdns.org, Token = token
+[22480] bg: WiFi+Blynk OK
+
+Blynk ESP32 using LittleFS connected
+Board Name : ESP32-SSL
+Stop multiResetDetecting
+Saving config file...
+Saving config file OK
+B
+Your stored Credentials :
+MQTT Server = default-mqtt-server
+Port = 1883
+MQTT UserName = default-mqtt-username
+MQTT PWD = default-mqtt-password
+Subs Topics = default-mqtt-SubTopic
+Pubs Topics = default-mqtt-PubTopic
+RBRBRBRBRBRBRBRB
+```
 
 ---
 ---
@@ -2584,6 +2884,14 @@ Sometimes, the library will only work if you update the board core to the latest
 ---
 
 ## Releases
+
+### Major Release v1.4.0
+
+1. Enable scan of WiFi networks for selection in Configuration Portal. Check [PR for v1.3.0 - Enable scan of WiFi networks #10](https://github.com/khoih-prog/WiFiManager_NINA_Lite/pull/10). Now you can select optional **SCAN_WIFI_NETWORKS**, **MANUAL_SSID_INPUT_ALLOWED** to be able to manually input SSID, not only from a scanned SSID lists and **MAX_SSID_IN_LIST** (from 2-15)
+2. Fix invalid "blank" Config Data treated as Valid.
+3. Permit optionally inputting one set of WiFi SSID/PWD by using `REQUIRE_ONE_SET_SSID_PW == true`
+4. Enforce WiFi PWD minimum length of 8 chars
+5. Minor enhancement to not display garbage when data is invalid
 
 ### Releases v1.3.1
 
@@ -2751,7 +3059,7 @@ Submit issues to: [Blynk_WM issues](https://github.com/khoih-prog/Blynk_WM/issue
 ## TO DO
 
 1. Fix bug. Add enhancement
-2. Add support to **ESP32-S2 (ESP32-S2 Saola, AI-Thinker ESP-12K, etc.) using LittleFS and SPIFFS**
+
 
 
 ## DONE
@@ -2786,6 +3094,9 @@ Submit issues to: [Blynk_WM issues](https://github.com/khoih-prog/Blynk_WM/issue
 28. Configurable **Customs HTML Headers**, including Customs Style, Customs Head Elements, CORS Header
 29. Add support to **ESP32-C3 using EEPROM and SPIFFS**
 30. Fix SSL issue with Blynk Cloud Server by using SSL in unsecured mode.
+30. Permit optionally inputting one set of WiFi SSID/PWD by using `REQUIRE_ONE_SET_SSID_PW == true`
+31. Enforce WiFi PWD minimum length of 8 chars
+32. Enable **scan of WiFi networks** for selection in Configuration Portal
 
 ---
 ---
@@ -2801,6 +3112,9 @@ Submit issues to: [Blynk_WM issues](https://github.com/khoih-prog/Blynk_WM/issue
   * [Good new feature: Blynk.resetAndEnterConfigPortal() Thanks & question #27](https://github.com/khoih-prog/Blynk_WM/issues/27)
 5. Thanks to [Thor Johnson](https://github.com/thorathome) and [kevinleberge](https://github.com/kevinleberge) to help locate the bugs, discuss the USE_DEFAULT_CONFIG_DATA solution leading to release v1.0.16. See [Can’t load defaults](https://github.com/khoih-prog/Blynk_WM/issues/15) and [Setting "#define USE_DYNAMIC_PARAMETERS false" on Blynk_WM_Template.ino results in compile error](https://github.com/khoih-prog/Blynk_WM/issues/16)
 6. Thanks to [komaneko](https://github.com/jjskaife) to report bugs in [Custom Blynk port not working for BlynkSimpleEsp32_Async_WM.h #4](https://github.com/khoih-prog/Blynk_Async_WM/issues/4) leading to v1.3.1
+7. Thanks to [Michael H. "bizprof"](https://github.com/bizprof). With the impressive new feature :
+  - `Enable scan of WiFi networks for selection in Configuration Portal`. Check [PR for v1.3.0 - Enable scan of WiFi networks #10](https://github.com/khoih-prog/WiFiManager_NINA_Lite/pull/10) leading to v1.4.0
+  
 
 <table>
   <tr>
@@ -2810,7 +3124,10 @@ Submit issues to: [Blynk_WM issues](https://github.com/khoih-prog/Blynk_WM/issue
     <td align="center"><a href="https://github.com/thorathome"><img src="https://github.com/thorathome.png" width="100px;" alt="thorathome"/><br /><sub><b>⭐️ Thor Johnson</b></sub></a><br /></td>
     <td align="center"><a href="https://github.com/kevinleberge"><img src="https://github.com/kevinleberge.png" width="100px;" alt="kevinleberge"/><br /><sub><b>kevinleberge</b></sub></a><br /></td>
     <td align="center"><a href="https://github.com/jjskaife"><img src="https://github.com/jjskaife.png" width="100px;" alt="jjskaife"/><br /><sub><b>komaneko</b></sub></a><br /></td>
-  </tr> 
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/bizprof"><img src="https://github.com/bizprof.png" width="100px;" alt="bizprof"/><br /><sub><b>⭐️⭐️ Michael H. "bizprof"</b></sub></a><br /></td>
+  </tr>
 </table>
 
 ---
