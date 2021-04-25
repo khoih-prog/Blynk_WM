@@ -87,7 +87,7 @@
   #define USE_LITTLEFS          false
   #define USE_SPIFFS            true
 #else
-  #define USE_LITTLEFS          true
+  #define USE_LITTLEFS          false
   #define USE_SPIFFS            false
 #endif
 
@@ -119,6 +119,8 @@
 #define USE_DYNAMIC_PARAMETERS                    true
 
 /////////////////////////////////////////////
+
+#define REQUIRE_ONE_SET_SSID_PW             false
 
 #define SCAN_WIFI_NETWORKS                  true
 

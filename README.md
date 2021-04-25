@@ -96,6 +96,8 @@
   * [15. **ESP32WM_MRD_ForcedConfig**](examples/ESP32WM_MRD_ForcedConfig)
   * [16. **ESP8266WM_MRD_ForcedConfig**](examples/ESP8266WM_MRD_ForcedConfig)
 * [So, how it works?](#so-how-it-works)
+  * [ 1. Without SCAN_WIFI_NETWORKS](#1-without-scan_wifi_networks)
+  * [ 2. With SCAN_WIFI_NETWORKS]](#2-with-scan_wifi_networks)
 * [Example ESP32WM_MRD_ForcedConfig](#example-esp32wm_mrd_forcedconfig)
   * [1. File ESP32WM_MRD_ForcedConfig.ino](#1-file-esp32wm_mrd_forcedconfigino)
   * [2. File defines.h](#2-file-definesh) 
@@ -188,7 +190,7 @@ With version `v1.0.5` or later, you can configure:
 
 #### Currently supported Boards
 
-This [**BlynkESP32_BT_WF** library](https://github.com/khoih-prog/BlynkESP32_BT_WF) currently supports these following boards:
+This [**Blynk_WM** library](https://github.com/khoih-prog/Blynk_WM) currently supports these following boards:
 
  1. **ESP8266 and ESP32-based boards using EEPROM, SPIFFS or LittleFS**.
  2. **ESP32-S2 (ESP32-S2 Saola, AI-Thinker ESP-12K, etc.) using EEPROM, SPIFFS or LittleFS**.
@@ -199,6 +201,12 @@ This [**BlynkESP32_BT_WF** library](https://github.com/khoih-prog/BlynkESP32_BT_
 ---
 
 ## Changelog
+
+### Releases v1.5.0
+
+1. Fix bug. 
+2. Optimize and sync with [**Blynk_Async_WM library v1.5.0**](https://github.com/khoih-prog/Blynk_Async_WM) 
+
 
 ### Major Releases v1.4.0
 
@@ -1349,6 +1357,7 @@ void loop()
 #else
   #define BOARD_TYPE      "ESP32"
 #endif
+
 #define BLYNK_PRINT Serial
 
 #define BLYNK_WM_DEBUG                3
@@ -1398,7 +1407,7 @@ void loop()
   #define USE_LITTLEFS          false
   #define USE_SPIFFS            true
 #else
-  #define USE_LITTLEFS          true
+  #define USE_LITTLEFS          false
   #define USE_SPIFFS            false
 #endif
 
@@ -1428,6 +1437,21 @@ void loop()
 #define CONFIG_TIMEOUT                            120000L
 
 #define USE_DYNAMIC_PARAMETERS                    true
+
+/////////////////////////////////////////////
+
+#define REQUIRE_ONE_SET_SSID_PW             false
+
+#define SCAN_WIFI_NETWORKS                  true
+
+// To be able to manually input SSID, not from a scanned SSID lists
+#define MANUAL_SSID_INPUT_ALLOWED           true
+
+// From 2-15
+#define MAX_SSID_IN_LIST                    8
+  
+/////////////////////////////////////////////
+
 // Those above #define's must be placed before #include <BlynkSimpleEsp32_WM.h> and <BlynkSimpleEsp32_SSL_WM.h>
 //////////////////////////////////////////
 
@@ -1619,7 +1643,7 @@ The following is the sample terminal output when running example [ESP8266WM_MRD_
 
 ```
 Starting ESP8266WM_MRD_Config using LittleFS with SSL on ESP8266_NODEMCU
-Blynk_WM SSL for ESP8266 v1.4.0
+Blynk_WM SSL for ESP8266 v1.5.0
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFD0002
 multiResetDetectorFlag = 0xFFFD0002
@@ -1699,7 +1723,7 @@ BBBBBB
 
 ```
 Starting ESP8266WM_MRD_Config using LittleFS with SSL on ESP8266_NODEMCU
-Blynk_WM SSL for ESP8266 v1.4.0
+Blynk_WM SSL for ESP8266 v1.5.0
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFC0003
 multiResetDetectorFlag = 0xFFFC0003
@@ -1761,7 +1785,7 @@ The following is the sample terminal output when running example [DHT11ESP8266_S
 
 ```
 Starting DHT11ESP8266_SSL using LittleFS with SSL on ESP8266_NODEMCU
-Blynk_WM SSL for ESP8266 v1.4.0
+Blynk_WM SSL for ESP8266 v1.5.0
 ESP_DoubleResetDetector v1.1.1
 [293] Hostname=ESP8266-DHT11-SSL
 [316] LoadCfgFile 
@@ -1819,7 +1843,7 @@ The following is the sample terminal output when running example [ESP32WM_MRD_Co
 
 ```
 Starting ESP32WM_MRD_Config using LITTLEFS without SSL on ESP32_DEV
-Blynk_WM for ESP32 v1.4.0
+Blynk_WM for ESP32 v1.5.0
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -1896,7 +1920,7 @@ BBBBBB
 
 ```
 Starting ESP32WM_MRD_Config using LITTLEFS without SSL on ESP32_DEV
-Blynk_WM for ESP32 v1.4.0
+Blynk_WM for ESP32 v1.5.0
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFC0003
 multiResetDetectorFlag = 0xFFFC0003
@@ -1954,7 +1978,7 @@ ets Jun  8 2016 00:22:57
 
 ```
 Starting ESP32WM_MRD_Config using LITTLEFS without SSL on ESP32_DEV
-Blynk_WM for ESP32 v1.4.0
+Blynk_WM for ESP32 v1.5.0
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -2078,7 +2102,7 @@ The following is the sample terminal output when running example [DHT11ESP8266_S
 
 ```
 Starting DHT11ESP32_SSL using LITTLEFS with SSL on ESP32_DEV
-Blynk_WM SSL for ESP32 v1.4.0
+Blynk_WM SSL for ESP32 v1.5.0
 ESP_DoubleResetDetector v1.1.1
 [346] Hostname=ESP32-DHT11-SSL
 [385] LoadCfgFile 
@@ -2142,7 +2166,7 @@ Blynk.resetAndEnterConfigPortal();
 
 ```
 Starting ESP8266WM_MRD_ForcedConfig using LittleFS without SSL on ESP8266_NODEMCU
-Blynk_WM for ESP8266 v1.4.0
+Blynk_WM for ESP8266 v1.5.0
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -2228,7 +2252,7 @@ Non-Persistent CP will be removed after first reset, even you didn't enter the C
 
 ```
 Starting ESP8266WM_MRD_ForcedConfig using LittleFS without SSL on ESP8266_NODEMCU
-Blynk_WM for ESP8266 v1.4.0
+Blynk_WM for ESP8266 v1.5.0
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -2310,7 +2334,7 @@ Blynk.resetAndEnterConfigPortalPersistent();
 
 ```
 Starting ESP8266WM_MRD_ForcedConfig using LittleFS without SSL on ESP8266_NODEMCU
-Blynk_WM for ESP8266 v1.4.0
+Blynk_WM for ESP8266 v1.5.0
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -2397,7 +2421,7 @@ Persistent CP will remain after resets. The only way to get rid of Config Portal
 
 ```
 Starting ESP8266WM_MRD_ForcedConfig using LittleFS without SSL on ESP8266_NODEMCU
-Blynk_WM for ESP8266 v1.4.0
+Blynk_WM for ESP8266 v1.5.0
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -2465,7 +2489,7 @@ The following is the sample terminal output when running example [ESP8266WM_MRD_
 
 ```
 Starting ESP8266WM_MRD_ForcedConfig using LittleFS with SSL on ESP8266_NODEMCU
-Blynk_WM SSL for ESP8266 v1.4.0
+Blynk_WM SSL for ESP8266 v1.5.0
 ESP_MultiResetDetector v1.1.1
 [267] Set CustomsStyle to : <style>div,input{padding:5px;font-size:1em;}input{width:95%;}body{text-align: center;}button{background-color:blue;color:white;line-height:2.4rem;font-size:1.2rem;width:100%;}fieldset{border-radius:0.3rem;margin:0px;}</style>
 [289] Set CustomsHeadElement to : <style>html{filter: invert(10%);}</style>
@@ -2553,7 +2577,7 @@ The following is the sample terminal output when running example [ESP32WM_MRD_Co
 
 ```
 Starting ESP32WM_MRD_Config using LITTLEFS with SSL on ESP32S2_DEV
-Blynk_WM SSL for ESP32 v1.4.0
+Blynk_WM SSL for ESP32 v1.5.0
 ESP_MultiResetDetector v1.1.1
 [134394] Set CustomsStyle to : <style>div,input{padding:5px;font-size:1em;}input{width:95%;}body{text-align: center;}button{background-color:blue;color:white;line-height:2.4rem;font-size:1.2rem;width:100%;}fieldset{border-radius:0.3rem;margin:0px;}</style>
 [134417] Set CustomsHeadElement to : <style>html{filter: invert(10%);}</style>
@@ -2634,8 +2658,6 @@ Pubs Topics = default-mqtt-PubTopic
 
 ---
 
----
-
 ### 9. ESP32WM_MRD_ForcedConfig using LITTLEFS with SSL on ESP32_DEV to demo WiFi Scan
 
 The following is the sample terminal output when running example [ESP32WM_MRD_ForcedConfig](examples/ESP32WM_MRD_ForcedConfig) on **ESP32_DEV**  with WiFi Scan for selection in Configuration Portal.
@@ -2644,7 +2666,7 @@ The following is the sample terminal output when running example [ESP32WM_MRD_Fo
 
 ```
 Starting ESP32WM_MRD_ForcedConfig using LITTLEFS with SSL on ESP32_DEV
-Blynk_WM SSL for ESP32 v1.4.0
+Blynk_WM SSL for ESP32 v1.5.0
 ESP_MultiResetDetector v1.1.1
 [228] Set CustomsStyle to : <style>div,input{padding:5px;font-size:1em;}input{width:95%;}body{text-align: center;}button{background-color:blue;color:white;line-height:2.4rem;font-size:1.2rem;width:100%;}fieldset{border-radius:0.3rem;margin:0px;}</style>
 [250] Set CustomsHeadElement to : <style>html{filter: invert(10%);}</style>
@@ -2767,7 +2789,7 @@ Pubs Topics = default-mqtt-PubTopic
 
 ```
 Starting ESP32WM_MRD_ForcedConfig using LITTLEFS with SSL on ESP32_DEV
-Blynk_WM SSL for ESP32 v1.4.0
+Blynk_WM SSL for ESP32 v1.5.0
 ESP_MultiResetDetector v1.1.1
 [227] Set CustomsStyle to : <style>div,input{padding:5px;font-size:1em;}input{width:95%;}body{text-align: center;}button{background-color:blue;color:white;line-height:2.4rem;font-size:1.2rem;width:100%;}fieldset{border-radius:0.3rem;margin:0px;}</style>
 [249] Set CustomsHeadElement to : <style>html{filter: invert(10%);}</style>
@@ -2884,6 +2906,11 @@ Sometimes, the library will only work if you update the board core to the latest
 ---
 
 ## Releases
+
+### Releases v1.5.0
+
+1. Fix bug. 
+2. Optimize and sync with [**Blynk_Async_WM library v1.5.0**](https://github.com/khoih-prog/Blynk_Async_WM) 
 
 ### Major Release v1.4.0
 
@@ -3094,9 +3121,9 @@ Submit issues to: [Blynk_WM issues](https://github.com/khoih-prog/Blynk_WM/issue
 28. Configurable **Customs HTML Headers**, including Customs Style, Customs Head Elements, CORS Header
 29. Add support to **ESP32-C3 using EEPROM and SPIFFS**
 30. Fix SSL issue with Blynk Cloud Server by using SSL in unsecured mode.
-30. Permit optionally inputting one set of WiFi SSID/PWD by using `REQUIRE_ONE_SET_SSID_PW == true`
-31. Enforce WiFi PWD minimum length of 8 chars
-32. Enable **scan of WiFi networks** for selection in Configuration Portal
+31. Permit optionally inputting one set of WiFi SSID/PWD by using `REQUIRE_ONE_SET_SSID_PW == true`
+32. Enforce WiFi PWD minimum length of 8 chars
+33. Enable **scan of WiFi networks** for selection in Configuration Portal
 
 ---
 ---

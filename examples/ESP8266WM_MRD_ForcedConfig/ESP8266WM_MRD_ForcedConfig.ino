@@ -7,7 +7,7 @@
   Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
   Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
   Licensed under MIT license
-  Version: 1.4.0
+  Version: 1.5.0
 
   Version    Modified By   Date      Comments
   -------    -----------  ---------- -----------
@@ -37,6 +37,7 @@
                                     Fix SSL issue with Blynk Cloud Server
   1.3.1     K Hoang      24/04/2021 Fix issue of custom Blynk port (different from 8080 or 9443) not working on ESP32
   1.4.0     K Hoang      24/04/2021 Enable scan of WiFi networks for selection in Configuration Portal
+  1.5.0     K Hoang      25/04/2021 Fix bug. Optimize and sync with Blynk_Async_WM library v1.5.0
  ********************************************************************************************************************************/
 
 #include "defines.h"

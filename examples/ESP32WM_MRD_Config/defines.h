@@ -120,6 +120,8 @@
 
 /////////////////////////////////////////////
 
+#define REQUIRE_ONE_SET_SSID_PW             false
+
 #define SCAN_WIFI_NETWORKS                  true
 
 // To be able to manually input SSID, not from a scanned SSID lists

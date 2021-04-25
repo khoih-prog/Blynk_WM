@@ -16,7 +16,7 @@
   @date       Jan 2015
   @brief
 
-  Version: 1.4.0
+  Version: 1.5.0
 
   Version    Modified By   Date      Comments
   -------    -----------  ---------- -----------
@@ -46,6 +46,7 @@
                                     Fix SSL issue with Blynk Cloud Server
   1.3.1     K Hoang      24/04/2021 Fix issue of custom Blynk port (different from 8080 or 9443) not working on ESP32
   1.4.0     K Hoang      24/04/2021 Enable scan of WiFi networks for selection in Configuration Portal
+  1.5.0     K Hoang      25/04/2021 Fix bug. Optimize and sync with Blynk_Async_WM library v1.5.0
  ********************************************************************************************************************************/
 
 #ifndef BlynkSimpleEsp32_WM_h
@@ -55,7 +56,7 @@
   #error This code is intended to run on the ESP32 platform! Please check your Tools->Board setting.
 #endif
 
-#define BLYNK_WM_VERSION       "Blynk_WM for ESP32 v1.4.0"
+#define BLYNK_WM_VERSION       "Blynk_WM for ESP32 v1.5.0"
 
 #define BLYNK_SEND_ATOMIC
 
@@ -78,8 +79,7 @@
   // Use LittleFS
   #include "FS.h"
 
-  // The library will be depreciated after being merged to future major Arduino esp32 core release 2.x
-  // At that time, just remove this library inclusion
+  // The library has been merged into Arduino esp32 core release v1.0.6
   #include <LITTLEFS.h>             // https://github.com/lorol/LITTLEFS
   
   FS* filesystem =      &LITTLEFS;
@@ -302,17 +302,17 @@ const char BLYNK_WM_HTML_HEAD_START[] /*PROGMEM*/ = "<!DOCTYPE html><html><head>
 
 const char BLYNK_WM_HTML_HEAD_STYLE[] /*PROGMEM*/ = "<style>div,input{padding:5px;font-size:1em;}input{width:95%;}body{text-align: center;}button{background-color:#16A1E7;color:#fff;line-height:2.4rem;font-size:1.2rem;width:100%;}fieldset{border-radius:0.3rem;margin:0px;}</style>";
 
-const char BLYNK_WM_HTML_HEAD_END[]   /*PROGMEM*/ = "</head><div style=\"text-align:left;display:inline-block;min-width:260px;\">\
+const char BLYNK_WM_HTML_HEAD_END[]   /*PROGMEM*/ = "</head><div style='text-align:left;display:inline-block;min-width:260px;'>\
 <fieldset><div><label>*WiFi SSID</label>[[input_id]]<div></div></div>\
-<div><label>*PWD (8+ chars)</label><input value=\"[[pw]]\"id=\"pw\"><div></div></div>\
+<div><label>*PWD (8+ chars)</label><input value='[[pw]]'id='pw'><div></div></div>\
 <div><label>*WiFi SSID1</label>[[input_id1]]<div></div></div>\
-<div><label>*PWD1 (8+ chars)</label><input value=\"[[pw1]]\"id=\"pw1\"><div></div></div></fieldset>\
-<fieldset><div><label>Blynk Server</label><input value=\"[[sv]]\"id=\"sv\"><div></div></div>\
-<div><label>Token</label><input value=\"[[tk]]\"id=\"tk\"><div></div></div>\
-<div><label>Blynk Server1</label><input value=\"[[sv1]]\"id=\"sv1\"><div></div></div>\
-<div><label>Token1</label><input value=\"[[tk1]]\"id=\"tk1\"><div></div></div>\
-<div><label>Port</label><input value=\"[[pt]]\"id=\"pt\"><div></div></div></fieldset>\
-<fieldset><div><label>Board Name</label><input value=\"[[nm]]\"id=\"nm\"><div></div></div></fieldset>"; 	// DO NOT CHANGE THIS STRING EVER!!!!
+<div><label>*PWD1 (8+ chars)</label><input value='[[pw1]]'id='pw1'><div></div></div></fieldset>\
+<fieldset><div><label>Blynk Server</label><input value='[[sv]]'id='sv'><div></div></div>\
+<div><label>Token</label><input value='[[tk]]'id='tk'><div></div></div>\
+<div><label>Blynk Server1</label><input value='[[sv1]]'id='sv1'><div></div></div>\
+<div><label>Token1</label><input value='[[tk1]]'id='tk1'><div></div></div>\
+<div><label>Port</label><input value='[[pt]]'id='pt'><div></div></div></fieldset>\
+<fieldset><div><label>Board Name</label><input value='[[nm]]'id='nm'><div></div></div></fieldset>"; 	// DO NOT CHANGE THIS STRING EVER!!!!
 
 const char BLYNK_WM_HTML_INPUT_ID[]   /*PROGMEM*/ = "<input value='[[id]]' id='id'>";
 const char BLYNK_WM_HTML_INPUT_ID1[]  /*PROGMEM*/ = "<input value='[[id1]]' id='id1'>";
@@ -320,8 +320,8 @@ const char BLYNK_WM_HTML_INPUT_ID1[]  /*PROGMEM*/ = "<input value='[[id1]]' id='
 const char BLYNK_WM_FLDSET_START[]  /*PROGMEM*/ = "<fieldset>";
 const char BLYNK_WM_FLDSET_END[]    /*PROGMEM*/ = "</fieldset>";
 const char BLYNK_WM_HTML_PARAM[]    /*PROGMEM*/ = "<div><label>{b}</label><input value='[[{v}]]'id='{i}'><div></div></div>";
-const char BLYNK_WM_HTML_BUTTON[]   /*PROGMEM*/ = "<button onclick=\"sv()\">Save</button></div>";
-const char BLYNK_WM_HTML_SCRIPT[]   /*PROGMEM*/ = "<script id=\"jsbin-javascript\">\
+const char BLYNK_WM_HTML_BUTTON[]   /*PROGMEM*/ = "<button onclick='sv()'>Save</button></div>";
+const char BLYNK_WM_HTML_SCRIPT[]   /*PROGMEM*/ = "<script id='jsbin-javascript'>\
 function udVal(key,val){var request=new XMLHttpRequest();var url='/?key='+key+'&value='+encodeURIComponent(val);request.open('GET',url,false);request.send(null);}\
 function sv(){udVal('id',document.getElementById('id').value);udVal('pw',document.getElementById('pw').value);\
 udVal('id1',document.getElementById('id1').value);udVal('pw1',document.getElementById('pw1').value);\
@@ -2230,8 +2230,6 @@ class BlynkWifi
     
     //////////////////////////////////////////////
 
-#if 1
-    // NEW
     void createHTML(String& root_html_template)
     {
       String pitem;
@@ -2254,7 +2252,7 @@ class BlynkWifi
   #endif          
       
 #if SCAN_WIFI_NETWORKS
-      BLYNK_LOG2(WiFiNetworksFound, BLYNK_F(" SSIDs found, generating HTML now"));
+      
       // Replace HTML <input...> with <select...>, based on WiFi network scan in startConfigurationMode()
 
       ListOfSSIDs = "";
@@ -2268,7 +2266,10 @@ class BlynkWifi
         list_items++;		// Count number of suitable, distinct SSIDs to be included in list
       }
 
+  #if ( BLYNK_WM_DEBUG > 3)
+      BLYNK_LOG2(WiFiNetworksFound, BLYNK_F(" SSIDs found, generating HTML now"));
       BLYNK_LOG1(ListOfSSIDs);
+  #endif
 
       if (ListOfSSIDs == "")		// No SSID found or none was good enough
         ListOfSSIDs = BLYNK_WM_OPTION_START + String(BLYNK_WM_NO_NETWORKS_FOUND) + BLYNK_WM_OPTION_END;
@@ -2277,11 +2278,14 @@ class BlynkWifi
 
 #if MANUAL_SSID_INPUT_ALLOWED
       pitem.replace("[[input_id]]",  "<input id='id' list='SSIDs'>"  + String(BLYNK_WM_DATALIST_START) + "'SSIDs'>" + ListOfSSIDs + BLYNK_WM_DATALIST_END);
-      BLYNK_LOG2(BLYNK_F("pitem:"), pitem);
+      
       pitem.replace("[[input_id1]]", "<input id='id1' list='SSIDs'>" + String(BLYNK_WM_DATALIST_START) + "'SSIDs'>" + ListOfSSIDs + BLYNK_WM_DATALIST_END);
       
+  #if ( BLYNK_WM_DEBUG > 3) 
       BLYNK_LOG2(BLYNK_F("pitem:"), pitem);
-
+      BLYNK_LOG2(BLYNK_F("pitem:"), pitem);
+  #endif
+  
 #else
       pitem.replace("[[input_id]]",  "<select id='id'>"  + ListOfSSIDs + BLYNK_WM_SELECT_END);
       pitem.replace("[[input_id1]]", "<select id='id1'>" + ListOfSSIDs + BLYNK_WM_SELECT_END);
@@ -2349,48 +2353,6 @@ class BlynkWifi
       server->sendHeader(WM_HTTP_EXPIRES, "-1");
     }
        
-    //////////////////////////////////////////////
-
-#else   
-    
-    void createHTML(String &root_html_template)
-    {
-      String pitem;
-      
-      root_html_template = String(BLYNK_WM_HTML_HEAD)  + BLYNK_WM_FLDSET_START;
-
-#if USE_DYNAMIC_PARAMETERS      
-      for (uint16_t i = 0; i < NUM_MENU_ITEMS; i++)
-      {
-        pitem = String(BLYNK_WM_HTML_PARAM);
-
-        pitem.replace("{b}", myMenuItems[i].displayName);
-        pitem.replace("{v}", myMenuItems[i].id);
-        pitem.replace("{i}", myMenuItems[i].id);
-        
-        root_html_template += pitem;
-      }
-#endif
-      
-      root_html_template += String(BLYNK_WM_FLDSET_END) + BLYNK_WM_HTML_BUTTON + BLYNK_WM_HTML_SCRIPT;     
-
-#if USE_DYNAMIC_PARAMETERS      
-      for (uint16_t i = 0; i < NUM_MENU_ITEMS; i++)
-      {
-        pitem = String(BLYNK_WM_HTML_SCRIPT_ITEM);
-        
-        pitem.replace("{d}", myMenuItems[i].id);
-        
-        root_html_template += pitem;
-      }
-#endif
-      
-      root_html_template += String(BLYNK_WM_HTML_SCRIPT_END) + BLYNK_WM_HTML_END;
-      
-      return;     
-    }
-
-#endif
     
     //////////////////////////////////////////////
 
@@ -2428,24 +2390,23 @@ class BlynkWifi
             result.replace("BlynkSimpleEsp32_SSL_WM", BlynkESP32_WM_config.board_name);
           }
           
-          if (hadConfigData)
-          {
-            result.replace("[[id]]",  BlynkESP32_WM_config.WiFi_Creds[0].wifi_ssid);
-            result.replace("[[pw]]",  BlynkESP32_WM_config.WiFi_Creds[0].wifi_pw);
-            result.replace("[[id1]]", BlynkESP32_WM_config.WiFi_Creds[1].wifi_ssid);
-            result.replace("[[pw1]]", BlynkESP32_WM_config.WiFi_Creds[1].wifi_pw);
-            result.replace("[[sv]]",  BlynkESP32_WM_config.Blynk_Creds[0].blynk_server);
-            result.replace("[[tk]]",  BlynkESP32_WM_config.Blynk_Creds[0].blynk_token);
-            result.replace("[[sv1]]", BlynkESP32_WM_config.Blynk_Creds[1].blynk_server);
-            result.replace("[[tk1]]", BlynkESP32_WM_config.Blynk_Creds[1].blynk_token);
-            result.replace("[[pt]]",  String(BlynkESP32_WM_config.blynk_port));
-            result.replace("[[nm]]",  BlynkESP32_WM_config.board_name);
-          }
-          else
+          if (!hadConfigData)
           {
             // Nullify the invalid data to avoid displaying garbage
             memset(&BlynkESP32_WM_config, 0, sizeof(BlynkESP32_WM_config));
+            BlynkESP32_WM_config.blynk_port = BLYNK_SERVER_HARDWARE_PORT;
           }
+                   
+          result.replace("[[id]]",  BlynkESP32_WM_config.WiFi_Creds[0].wifi_ssid);
+          result.replace("[[pw]]",  BlynkESP32_WM_config.WiFi_Creds[0].wifi_pw);
+          result.replace("[[id1]]", BlynkESP32_WM_config.WiFi_Creds[1].wifi_ssid);
+          result.replace("[[pw1]]", BlynkESP32_WM_config.WiFi_Creds[1].wifi_pw);
+          result.replace("[[sv]]",  BlynkESP32_WM_config.Blynk_Creds[0].blynk_server);
+          result.replace("[[tk]]",  BlynkESP32_WM_config.Blynk_Creds[0].blynk_token);
+          result.replace("[[sv1]]", BlynkESP32_WM_config.Blynk_Creds[1].blynk_server);
+          result.replace("[[tk1]]", BlynkESP32_WM_config.Blynk_Creds[1].blynk_token);
+          result.replace("[[pt]]",  String(BlynkESP32_WM_config.blynk_port));
+          result.replace("[[nm]]",  BlynkESP32_WM_config.board_name);
 
 #if USE_DYNAMIC_PARAMETERS          
           // Load default configuration        
