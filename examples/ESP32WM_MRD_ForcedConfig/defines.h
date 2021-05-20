@@ -87,7 +87,7 @@
   #define USE_LITTLEFS          false
   #define USE_SPIFFS            true
 #else
-  #define USE_LITTLEFS          false
+  #define USE_LITTLEFS          true
   #define USE_SPIFFS            false
 #endif
 

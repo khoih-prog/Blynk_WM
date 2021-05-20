@@ -16,7 +16,7 @@
   @date       Jan 2015
   @brief
 
-  Version: 1.5.0
+  Version: 1.6.0
 
   Version    Modified By   Date      Comments
   -------    -----------  ---------- -----------
@@ -47,6 +47,7 @@
   1.3.1     K Hoang      24/04/2021 Fix issue of custom Blynk port (different from 8080 or 9443) not working on ESP32
   1.4.0     K Hoang      24/04/2021 Enable scan of WiFi networks for selection in Configuration Portal
   1.5.0     K Hoang      25/04/2021 Fix bug. Optimize and sync with Blynk_Async_WM library v1.5.0
+  1.6.0     K Hoang      19/05/2021 Fix AP connect and SSL issues caused by breaking ESP8266 core v3.0.0
  ********************************************************************************************************************************/
 
 #ifndef BlynkSimpleEsp32_SSL_WM_h
@@ -56,14 +57,43 @@
   #error This code is intended to run on the ESP32 platform! Please check your Tools->Board setting.
 #endif
 
-#define BLYNK_WM_VERSION       "Blynk_WM SSL for ESP32 v1.5.0"
+#define BLYNK_WM_VERSION       "Blynk_WM SSL for ESP32 v1.6.0"
+
+//////////////////////////////////////////////
+// From v1.6.0 to display correct BLYNK_INFO_DEVICE
+
+#define BLYNK_USE_128_VPINS
+
+#if defined(BLYNK_INFO_DEVICE)
+  #undef BLYNK_INFO_DEVICE
+#endif
+
+#define BLYNK_BUFFERS_SIZE    4096
+
+#if defined(BLYNK_INFO_DEVICE)
+  #undef BLYNK_INFO_DEVICE
+#endif
+
+#if defined(ARDUINO_BOARD)
+  #define BLYNK_INFO_DEVICE   ARDUINO_BOARD
+#elif defined(BOARD_NAME)
+  #define BLYNK_INFO_DEVICE   BOARD_NAME
+#elif defined(BOARD_TYPE)
+  #define BLYNK_INFO_DEVICE   BOARD_TYPE
+#else
+  #define BLYNK_INFO_DEVICE   "ESP32_SSL"
+#endif
+
+/////////////////////////////////////////////
 
 #if defined(BLYNK_SSL_USE_LETSENCRYPT)
   static const char BLYNK_DEFAULT_ROOT_CA[] =
   #include <certs/letsencrypt_pem.h>
+  #warning Using BLYNK_DEFAULT_ROOT_CA with BLYNK_SSL_USE_LETSENCRYPT
 #else
   static const char BLYNK_DEFAULT_ROOT_CA[] =
   #include <certs/blynkcloud_pem.h>
+  #warning Using BLYNK_DEFAULT_ROOT_CA without BLYNK_SSL_USE_LETSENCRYPT
 #endif
 
 #include <BlynkApiArduino.h>
@@ -261,7 +291,7 @@ class BlynkArduinoClientSecure
       if (this->connected())
         return true;
 
-      // Synchronize time useing SNTP. This is necessary to verify that
+      // Synchronize time using SNTP. This is necessary to verify that
       // the TLS certificates offered by the server are currently valid.
       configTime(0, 0, "pool.ntp.org", "time.nist.gov");
       time_t now = time(nullptr);
@@ -2762,13 +2792,13 @@ class BlynkWifi
       else
         channel = WiFiAPChannel;
 
+      // KH, Must be here for ESP8266 core v3.0.0. Good for v2.7.4- as well
+      WiFi.softAPConfig(portal_apIP, portal_apIP, IPAddress(255, 255, 255, 0));   
+
       WiFi.softAP(portal_ssid.c_str(), portal_pass.c_str(), channel);
       
       BLYNK_LOG4(BLYNK_F("\nstConf:SSID="), portal_ssid, BLYNK_F(",PW="), portal_pass);
       BLYNK_LOG4(BLYNK_F("IP="), portal_apIP.toString(), ",ch=", channel);
-      
-      delay(100); // ref: https://github.com/espressif/arduino-esp32/issues/985#issuecomment-359157428
-      WiFi.softAPConfig(portal_apIP, portal_apIP, IPAddress(255, 255, 255, 0));
 
       if (!server)
         server = new WebServer;

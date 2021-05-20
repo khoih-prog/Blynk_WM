@@ -174,6 +174,10 @@ This is a Blynk and WiFiManager Library for configuring/auto(re)connecting **ESP
  
 This library is designed to help you to eliminate `hardcoding` your Wifi and Blynk credentials for ESP8266 and ESP32 (with/without SSL), and updating/reflashing every time you need to change them.
 
+With version `v1.6.0` or later, you can use:
+
+1. `New ESP8266 core v3.0.0`
+
 With version `v1.1.0` or later, you can use:
 
 1. `LittleFS for ESP32`
@@ -202,6 +206,14 @@ This [**Blynk_WM** library](https://github.com/khoih-prog/Blynk_WM) currently su
 ---
 
 ## Changelog
+
+### Major Releases v1.6.0
+
+1. Fix AP connect issue caused by **breaking ESP8266 core v3.0.0**. Caused by multiple core changes, but the new solution results a better and faster connection to AP.
+2. Fix SSL issue caused by breaking ESP8266 core v3.0.0. Now the better **BearSSL** is used in both ESP32 and ESP8266 to replace the ESP8266 deprecated `axTLS`. Check [Remove axTLS from code and documentation #7437](https://github.com/esp8266/Arduino/pull/7437)
+3. Fix the `BLYNK_INFO_DEVICE`displaying the generic ESP8266 board with Blynk logo. Caused by new ESP8266 core changes of `build.board`. For example from `ESP8266_NODEMCU` in core v2.7.4 to `ESP8266_NODEMCU_ESP12E` in core v3.0.0
+4. Fix many warnings only displayed in new core ESP8266 v3.0.0
+5. Make code compatible for either new ESP8266 core v3.0.0+ or ealier cores v2.7.4-
 
 ### Releases v1.5.0
 
@@ -308,10 +320,10 @@ Thanks to [Thor Johnson](https://github.com/thorathome) to test, suggest and enc
 ## Prerequisites
 
 1. [`Arduino IDE 1.8.13+`](https://www.arduino.cc/en/Main/Software)
-2. [`Blynk library 0.6.1+`](https://github.com/blynkkk/blynk-library/releases). [![Latest release](https://img.shields.io/github/release/blynkkk/blynk-library.svg)](https://github.com/blynkkk/blynk-library/releases/latest/)
+2. [`Blynk library 0.6.1+`](https://github.com/blynkkk/blynk-library/releases). [![Latest release](https://img.shields.io/github/release/blynkkk/blynk-library.svg)](https://github.com/blynkkk/blynk-library/releases/latest/). Never use the `Blynk beta` versions.
 3. [`ESP32 Core 1.0.6+`](https://github.com/espressif/arduino-esp32) for ESP32-based boards. [![Latest release](https://img.shields.io/github/release/espressif/arduino-esp32.svg)](https://github.com/espressif/arduino-esp32/releases/latest/)
 4. [`ESP32-S2/C3 Core 1.0.6+`](https://github.com/espressif/arduino-esp32) for ESP32-S2/C3-based boards. Must follow [HOWTO Install esp32 core for ESP32-S2 (Saola, AI-Thinker ESP-12K) and ESP32-C3 boards into Arduino IDE](#howto-install-esp32-core-for-esp32-s2-saola-ai-thinker-esp-12k-and-esp32-c3-boards-into-arduino-ide).
-5. [`ESP8266 Core 2.7.4+`](https://github.com/esp8266/Arduino) for ESP8266-based boards. [![Latest release](https://img.shields.io/github/release/esp8266/Arduino.svg)](https://github.com/esp8266/Arduino/releases/latest/). To use ESP8266 core 2.7.1+ for LittleFS. 
+5. [`ESP8266 Core 3.0.0+`](https://github.com/esp8266/Arduino) for ESP8266-based boards. [![Latest release](https://img.shields.io/github/release/esp8266/Arduino.svg)](https://github.com/esp8266/Arduino/releases/latest/). To use ESP8266 core 2.7.1+ for LittleFS. 
 6. [`ESP_DoubleResetDetector library 1.1.1+`](https://github.com/khoih-prog/ESP_DoubleResetDetector) to use DRD feature. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/ESP_DoubleResetDetector.svg?)](https://www.ardu-badge.com/ESP_DoubleResetDetector).
 7. [`ESP_MultiResetDetector library 1.1.1+`](https://github.com/khoih-prog/ESP_MultiResetDetector) to use MRD feature. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/ESP_MultiResetDetector.svg?)](https://www.ardu-badge.com/ESP_MultiResetDetector).
 8. [`LittleFS_esp32 v1.0.6+`](https://github.com/lorol/LITTLEFS) for ESP32-based boards using LittleFS. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/LittleFS_esp32.svg?)](https://www.ardu-badge.com/LittleFS_esp32). **Notice**: This [`LittleFS_esp32 library`](https://github.com/lorol/LITTLEFS) has been integrated to Arduino [esp32 core v1.0.6](https://github.com/espressif/arduino-esp32/tree/master/libraries/LITTLEFS).
@@ -1668,7 +1680,8 @@ The following is the sample terminal output when running example [ESP8266WM_MRD_
 
 ```
 Starting ESP8266WM_MRD_Config using LittleFS with SSL on ESP8266_NODEMCU
-Blynk_WM SSL for ESP8266 v1.5.0
+Blynk_WM SSL for ESP8266 v1.6.0
+ESP8266 core v2.7.4
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFD0002
 multiResetDetectorFlag = 0xFFFD0002
@@ -1748,7 +1761,8 @@ BBBBBB
 
 ```
 Starting ESP8266WM_MRD_Config using LittleFS with SSL on ESP8266_NODEMCU
-Blynk_WM SSL for ESP8266 v1.5.0
+Blynk_WM SSL for ESP8266 v1.6.0
+ESP8266 core v2.7.4
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFC0003
 multiResetDetectorFlag = 0xFFFC0003
@@ -1810,7 +1824,8 @@ The following is the sample terminal output when running example [DHT11ESP8266_S
 
 ```
 Starting DHT11ESP8266_SSL using LittleFS with SSL on ESP8266_NODEMCU
-Blynk_WM SSL for ESP8266 v1.5.0
+Blynk_WM SSL for ESP8266 v1.6.0
+ESP8266 core v2.7.4
 ESP_DoubleResetDetector v1.1.1
 [293] Hostname=ESP8266-DHT11-SSL
 [316] LoadCfgFile 
@@ -1868,7 +1883,7 @@ The following is the sample terminal output when running example [ESP32WM_MRD_Co
 
 ```
 Starting ESP32WM_MRD_Config using LITTLEFS without SSL on ESP32_DEV
-Blynk_WM for ESP32 v1.5.0
+Blynk_WM for ESP32 v1.6.0
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -1945,7 +1960,7 @@ BBBBBB
 
 ```
 Starting ESP32WM_MRD_Config using LITTLEFS without SSL on ESP32_DEV
-Blynk_WM for ESP32 v1.5.0
+Blynk_WM for ESP32 v1.6.0
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFC0003
 multiResetDetectorFlag = 0xFFFC0003
@@ -2003,7 +2018,7 @@ ets Jun  8 2016 00:22:57
 
 ```
 Starting ESP32WM_MRD_Config using LITTLEFS without SSL on ESP32_DEV
-Blynk_WM for ESP32 v1.5.0
+Blynk_WM for ESP32 v1.6.0
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -2127,7 +2142,7 @@ The following is the sample terminal output when running example [DHT11ESP8266_S
 
 ```
 Starting DHT11ESP32_SSL using LITTLEFS with SSL on ESP32_DEV
-Blynk_WM SSL for ESP32 v1.5.0
+Blynk_WM SSL for ESP32 v1.6.0
 ESP_DoubleResetDetector v1.1.1
 [346] Hostname=ESP32-DHT11-SSL
 [385] LoadCfgFile 
@@ -2191,7 +2206,8 @@ Blynk.resetAndEnterConfigPortal();
 
 ```
 Starting ESP8266WM_MRD_ForcedConfig using LittleFS without SSL on ESP8266_NODEMCU
-Blynk_WM for ESP8266 v1.5.0
+Blynk_WM for ESP8266 v1.6.0
+ESP8266 core v2.7.4
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -2277,7 +2293,8 @@ Non-Persistent CP will be removed after first reset, even you didn't enter the C
 
 ```
 Starting ESP8266WM_MRD_ForcedConfig using LittleFS without SSL on ESP8266_NODEMCU
-Blynk_WM for ESP8266 v1.5.0
+Blynk_WM for ESP8266 v1.6.0
+ESP8266 core v2.7.4
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -2359,7 +2376,8 @@ Blynk.resetAndEnterConfigPortalPersistent();
 
 ```
 Starting ESP8266WM_MRD_ForcedConfig using LittleFS without SSL on ESP8266_NODEMCU
-Blynk_WM for ESP8266 v1.5.0
+Blynk_WM for ESP8266 v1.6.0
+ESP8266 core v2.7.4
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -2446,7 +2464,8 @@ Persistent CP will remain after resets. The only way to get rid of Config Portal
 
 ```
 Starting ESP8266WM_MRD_ForcedConfig using LittleFS without SSL on ESP8266_NODEMCU
-Blynk_WM for ESP8266 v1.5.0
+Blynk_WM for ESP8266 v1.6.0
+ESP8266 core v2.7.4
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -2514,7 +2533,8 @@ The following is the sample terminal output when running example [ESP8266WM_MRD_
 
 ```
 Starting ESP8266WM_MRD_ForcedConfig using LittleFS with SSL on ESP8266_NODEMCU
-Blynk_WM SSL for ESP8266 v1.5.0
+Blynk_WM SSL for ESP8266 v1.6.0
+ESP8266 core v2.7.4
 ESP_MultiResetDetector v1.1.1
 [267] Set CustomsStyle to : <style>div,input{padding:5px;font-size:1em;}input{width:95%;}body{text-align: center;}button{background-color:blue;color:white;line-height:2.4rem;font-size:1.2rem;width:100%;}fieldset{border-radius:0.3rem;margin:0px;}</style>
 [289] Set CustomsHeadElement to : <style>html{filter: invert(10%);}</style>
@@ -2602,7 +2622,7 @@ The following is the sample terminal output when running example [ESP32WM_MRD_Co
 
 ```
 Starting ESP32WM_MRD_Config using LITTLEFS with SSL on ESP32S2_DEV
-Blynk_WM SSL for ESP32 v1.5.0
+Blynk_WM SSL for ESP32 v1.6.0
 ESP_MultiResetDetector v1.1.1
 [134394] Set CustomsStyle to : <style>div,input{padding:5px;font-size:1em;}input{width:95%;}body{text-align: center;}button{background-color:blue;color:white;line-height:2.4rem;font-size:1.2rem;width:100%;}fieldset{border-radius:0.3rem;margin:0px;}</style>
 [134417] Set CustomsHeadElement to : <style>html{filter: invert(10%);}</style>
@@ -2691,7 +2711,7 @@ The following is the sample terminal output when running example [ESP32WM_MRD_Fo
 
 ```
 Starting ESP32WM_MRD_ForcedConfig using LITTLEFS with SSL on ESP32_DEV
-Blynk_WM SSL for ESP32 v1.5.0
+Blynk_WM SSL for ESP32 v1.6.0
 ESP_MultiResetDetector v1.1.1
 [228] Set CustomsStyle to : <style>div,input{padding:5px;font-size:1em;}input{width:95%;}body{text-align: center;}button{background-color:blue;color:white;line-height:2.4rem;font-size:1.2rem;width:100%;}fieldset{border-radius:0.3rem;margin:0px;}</style>
 [250] Set CustomsHeadElement to : <style>html{filter: invert(10%);}</style>
@@ -2814,7 +2834,7 @@ Pubs Topics = default-mqtt-PubTopic
 
 ```
 Starting ESP32WM_MRD_ForcedConfig using LITTLEFS with SSL on ESP32_DEV
-Blynk_WM SSL for ESP32 v1.5.0
+Blynk_WM SSL for ESP32 v1.6.0
 ESP_MultiResetDetector v1.1.1
 [227] Set CustomsStyle to : <style>div,input{padding:5px;font-size:1em;}input{width:95%;}body{text-align: center;}button{background-color:blue;color:white;line-height:2.4rem;font-size:1.2rem;width:100%;}fieldset{border-radius:0.3rem;margin:0px;}</style>
 [249] Set CustomsHeadElement to : <style>html{filter: invert(10%);}</style>
@@ -2895,6 +2915,96 @@ RBRBRBRBRBRBRBRB
 ```
 
 ---
+
+### 10. ESP8266WM_MRD_Config using LITTLEFS with SSL on ESP8266_NODEMCU_ESP12E using new ESP8266 core v3.0.0
+
+The following is the sample terminal output when running example [ESP8266WM_MRD_Config](examples/ESP8266WM_MRD_Config) on **ESP8266_NODEMCU_ESP12E** using new **ESP8266 core v3.0.0**
+
+
+```
+Starting ESP8266WM_MRD_Config using LittleFS with SSL on ESP8266_NODEMCU_ESP12E
+ESP8266 core v3.0.0
+Blynk_WM SSL for ESP8266 v1.6.0
+ESP_MultiResetDetector v1.1.1
+[274] Set CustomsStyle to : <style>div,input{padding:5px;font-size:1em;}input{width:95%;}body{text-align: center;}button{background-color:blue;color:white;line-height:2.4rem;font-size:1.2rem;width:100%;}fieldset{border-radius:0.3rem;margin:0px;}</style>
+[296] Set CustomsHeadElement to : <style>html{filter: invert(10%);}</style>
+[303] Set CORS Header to : Your Access-Control-Allow-Origin
+LittleFS Flag read = 0xFFFE0001
+multiResetDetectorFlag = 0xFFFE0001
+lowerBytes = 0x0001, upperBytes = 0x0001
+No multiResetDetected, number of times = 1
+LittleFS Flag read = 0xFFFE0001
+Saving config file...
+Saving config file OK
+[337] Hostname=8266-Master-Controller
+[349] LoadCfgFile 
+[349] OK
+[349] ======= Start Stored Config Data =======
+[349] Hdr=SSL_ESP8266,BrdName=ESP32
+[350] SSID=HueNet1,PW=password
+[351] SSID1=HueNet2,PW1=password
+[354] Server=account.duckdns.org,Token=token
+[360] Server1=account.duckdns.org,Token1=token1
+[366] Port=9443
+[368] ======= End Config Data =======
+[371] CCSum=0x3473,RCSum=0x3473
+[376] LoadCredFile 
+[376] CrR:pdata=default-mqtt-server,len=34
+[380] CrR:pdata=1883,len=6
+[382] CrR:pdata=default-mqtt-username,len=34
+[386] CrR:pdata=default-mqtt-password,len=34
+[390] CrR:pdata=default-mqtt-SubTopic,len=34
+[394] CrR:pdata=default-mqtt-PubTopic,len=34
+[398] OK
+[399] CrCCsum=0x29a6,CrRCsum=0x29a6
+[402] Valid Stored Dynamic Data
+[405] Hdr=SSL_ESP8266,BrdName=ESP32
+[408] SSID=HueNet1,PW=password
+[411] SSID1=HueNet2,PW1=password
+[414] Server=account.duckdns.org,Token=token
+[420] Server1=account.duckdns.org,Token1=token1
+[426] Port=9443
+[428] ======= End Config Data =======
+[431] Check if isForcedCP
+[436] LoadCPFile 
+[436] OK
+[436] bg: noConfigPortal = true
+[439] Connecting MultiWifi...
+[5576] WiFi connected after time: 1
+[5577] SSID: HueNet1, RSSI = -43
+[5577] Channel: 2, IP address: 192.168.2.135
+[5577] bg: WiFi OK. Try Blynk
+[5578] 
+    ___  __          __
+   / _ )/ /_ _____  / /__
+  / _  / / // / _ \/  '_/
+ /____/_/\_, /_//_/_/\_\
+        /___/ v0.6.1 on ESP8266_NODEMCU_ESP12E
+
+[6592] NTP time: Thu May 20 02:13:51 2021
+[6624] BlynkArduinoClient.connect: Connecting to account.duckdns.org:9443
+[7360] Certificate OK
+[7387] Ready (ping: 20ms).
+[7457] Connected to Blynk Server = account.duckdns.org, Token = token
+[7458] bg: WiFi+Blynk OK
+
+Blynk ESP8288 using LittleFS connected.
+Board Name : ESP8266
+B
+Your stored Credentials :
+MQTT Server = default-mqtt-server
+Port = 1883
+MQTT UserName = default-mqtt-username
+MQTT PWD = default-mqtt-password
+Subs Topics = default-mqtt-SubTopic
+Pubs Topics = default-mqtt-PubTopic
+Stop multiResetDetecting
+Saving config file...
+Saving config file OK
+BBBBBRBBBB BBRBBBBBBRBB BBBBRBBBBBB
+```
+
+---
 ---
 
 
@@ -2931,6 +3041,14 @@ Sometimes, the library will only work if you update the board core to the latest
 ---
 
 ## Releases
+
+### Major Releases v1.6.0
+
+1. Fix AP connect issue caused by breaking ESP8266 core v3.0.0. Caused by multiple core changes, but the new solution results a better and faster connection to AP.
+2. Fix SSL issue caused by breaking ESP8266 core v3.0.0. Now the better **BearSSL** is used in both ESP32 and ESP8266 to replace the ESP8266 deprecated `axTLS`. Check [Remove axTLS from code and documentation #7437](https://github.com/esp8266/Arduino/pull/7437)
+3. Fix the `BLYNK_INFO_DEVICE`displaying the generic ESP8266 board with Blynk logo. Caused by new ESP8266 core changes of `build.board`. For example from `ESP8266_NODEMCU` in core v2.7.4 to `ESP8266_NODEMCU_ESP12E` in core v3.0.0
+4. Fix many warnings only displayed in new core ESP8266 v3.0.0
+5. Make code compatible for either new ESP8266 core v3.0.0+ or ealier cores v2.7.4-
 
 ### Releases v1.5.0
 
@@ -3149,6 +3267,8 @@ Submit issues to: [Blynk_WM issues](https://github.com/khoih-prog/Blynk_WM/issue
 31. Permit optionally inputting one set of WiFi SSID/PWD by using `REQUIRE_ONE_SET_SSID_PW == true`
 32. Enforce WiFi PWD minimum length of 8 chars
 33. Enable **scan of WiFi networks** for selection in Configuration Portal
+34. Drastically update code to work with either ESP8266 new breaking ESP8266 core v3.0.0 or old core ESP8266 v2.7.4-
+35. Make SSL working using `BearSSL`, not deprecated `axTLS`
 
 ---
 ---

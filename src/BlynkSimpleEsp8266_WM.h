@@ -16,7 +16,7 @@
   @date       Jan 2015
   @brief
 
-  Version: 1.5.0
+  Version: 1.6.0
 
   Version    Modified By   Date      Comments
   -------    -----------  ---------- -----------
@@ -47,6 +47,7 @@
   1.3.1     K Hoang      24/04/2021 Fix issue of custom Blynk port (different from 8080 or 9443) not working on ESP32
   1.4.0     K Hoang      24/04/2021 Enable scan of WiFi networks for selection in Configuration Portal
   1.5.0     K Hoang      25/04/2021 Fix bug. Optimize and sync with Blynk_Async_WM library v1.5.0
+  1.6.0     K Hoang      19/05/2021 Fix AP connect and SSL issues caused by breaking ESP8266 core v3.0.0
  ********************************************************************************************************************************/
 
 
@@ -57,9 +58,88 @@
   #error This code is intended to run on the ESP8266 platform! Please check your Tools->Board setting.
 #endif
 
-#define BLYNK_WM_VERSION       "Blynk_WM for ESP8266 v1.5.0"
+#define BLYNK_WM_VERSION       "Blynk_WM for ESP8266 v1.6.0"
 
 #include <version.h>
+
+/////////////////////////////////////////////
+
+#if (ARDUINO_ESP8266_GIT_VER == 0xefb0341a)
+  #define USING_ESP8266_CORE_VERSION    30000
+  #define ESP8266_CORE_VERSION          "ESP8266 core v3.0.0"
+  #warning USING_ESP8266_CORE_VERSION "3.0.0"
+#elif (ARDUINO_ESP8266_GIT_VER == 0x2843a5ac)
+  #define USING_ESP8266_CORE_VERSION    20704
+  #define ESP8266_CORE_VERSION          "ESP8266 core v2.7.4"
+  #warning USING_ESP8266_CORE_VERSION "2.7.4"
+#elif (ARDUINO_ESP8266_GIT_VER == 0x5d3af165)
+  #define USING_ESP8266_CORE_VERSION    20703
+  #define ESP8266_CORE_VERSION          "ESP8266 core v2.7.3"
+  #warning USING_ESP8266_CORE_VERSION "2.7.3"
+#elif (ARDUINO_ESP8266_GIT_VER == 0x39c79d9b)
+  #define USING_ESP8266_CORE_VERSION    20702
+  #define ESP8266_CORE_VERSION          "ESP8266 core v2.7.2"
+  #warning USING_ESP8266_CORE_VERSION "2.7.2"
+#elif (ARDUINO_ESP8266_GIT_VER == 0xa5432625)
+  #define USING_ESP8266_CORE_VERSION    20701
+  #define ESP8266_CORE_VERSION          "ESP8266 core v2.7.1"
+  #warning USING_ESP8266_CORE_VERSION "2.7.1"
+#elif (ARDUINO_ESP8266_GIT_VER == 0x3d128e5c)
+  #define USING_ESP8266_CORE_VERSION    20603
+  #define ESP8266_CORE_VERSION          "ESP8266 core v2.6.3"
+  #warning USING_ESP8266_CORE_VERSION "2.6.3"
+#elif (ARDUINO_ESP8266_GIT_VER == 0x482516e3)
+  #define USING_ESP8266_CORE_VERSION    20602
+  #define ESP8266_CORE_VERSION          "ESP8266 core v2.6.2"
+  #warning USING_ESP8266_CORE_VERSION "2.6.2"
+#elif (ARDUINO_ESP8266_GIT_VER == 0x482516e3)
+  #define USING_ESP8266_CORE_VERSION    20601
+  #define ESP8266_CORE_VERSION          "ESP8266 core v2.6.1"
+  #warning USING_ESP8266_CORE_VERSION "2.6.1"
+#elif (ARDUINO_ESP8266_GIT_VER == 0x643ec203)
+  #define USING_ESP8266_CORE_VERSION    20600
+  #define ESP8266_CORE_VERSION          "ESP8266 core v2.6.0"
+  #warning USING_ESP8266_CORE_VERSION "2.6.0"
+#elif (ARDUINO_ESP8266_GIT_VER == 0x8b899c12)
+  #define USING_ESP8266_CORE_VERSION    20502
+  #define ESP8266_CORE_VERSION          "ESP8266 core v2.5.2"
+  #warning USING_ESP8266_CORE_VERSION "2.5.2"
+#elif (ARDUINO_ESP8266_GIT_VER == 0x00000000)
+  #define USING_ESP8266_CORE_VERSION    20402
+  #define ESP8266_CORE_VERSION          "ESP8266 core v2.4.2"
+  #warning USING_ESP8266_CORE_VERSION "2.4.2"
+#elif (ARDUINO_ESP8266_GIT_VER == 0x643ec203)
+  #define USING_ESP8266_CORE_VERSION    0
+  #define ESP8266_CORE_VERSION          "ESP8266 core too old"
+  #warning USING_ESP8266_CORE_VERSION "0.0.0"
+#endif
+
+//////////////////////////////////////////////
+// From v1.6.0 to display correct BLYNK_INFO_DEVICE
+
+#define BLYNK_USE_128_VPINS
+
+#if defined(BLYNK_INFO_DEVICE)
+  #undef BLYNK_INFO_DEVICE
+#endif
+
+#define BLYNK_BUFFERS_SIZE    4096
+
+#if defined(BLYNK_INFO_DEVICE)
+  #undef BLYNK_INFO_DEVICE
+#endif
+
+#if defined(ARDUINO_BOARD)
+  #define BLYNK_INFO_DEVICE   ARDUINO_BOARD
+#elif defined(BOARD_NAME)
+  #define BLYNK_INFO_DEVICE   BOARD_NAME
+#elif defined(BOARD_TYPE)
+  #define BLYNK_INFO_DEVICE   BOARD_TYPE
+#else
+  #define BLYNK_INFO_DEVICE   "ESP8266"
+#endif
+
+/////////////////////////////////////////////
 
 #if ESP_SDK_VERSION_NUMBER < 0x020200
 #error Please update your ESP8266 Arduino Core
@@ -2655,15 +2735,18 @@ class BlynkWifi
         channel = random(MAX_WIFI_CHANNEL) + 1;
       else
         channel = WiFiAPChannel;
+        
+      // KH, Must be here for ESP8266 core v3.0.0. Good for v2.7.4- as well
+      WiFi.softAPConfig(portal_apIP, portal_apIP, IPAddress(255, 255, 255, 0));  
 
       WiFi.softAP(portal_ssid.c_str(), portal_pass.c_str(), channel);
       
       BLYNK_LOG4(BLYNK_F("\nstConf:SSID="), portal_ssid, BLYNK_F(",PW="), portal_pass);
       BLYNK_LOG4(BLYNK_F("IP="), portal_apIP.toString(), ",ch=", channel);
-      
-      delay(100); // ref: https://github.com/espressif/arduino-esp32/issues/985#issuecomment-359157428
-      WiFi.softAPConfig(portal_apIP, portal_apIP, IPAddress(255, 255, 255, 0));
 
+      IPAddress myIP = WiFi.softAPIP();
+      BLYNK_LOG2(BLYNK_F("AP IP address: "), myIP);
+      
       if (!server)
         server = new ESP8266WebServer;
 

@@ -119,8 +119,8 @@
 // Those above #define's must be placed before #include <BlynkSimpleEsp8266_WM.h> and <BlynkSimpleEsp8266_SSL_WM.h>
 //////////////////////////////////////////
 
-//#define USE_SSL   true
-#define USE_SSL   false
+#define USE_SSL   true
+//#define USE_SSL   false
 
 #if USE_SSL
   #include <BlynkSimpleEsp8266_SSL_WM.h>
