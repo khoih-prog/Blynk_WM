@@ -14,8 +14,8 @@ If you don't find anything, please [open a new issue](https://github.com/khoih-p
 
 Please ensure to specify the following:
 
-* Arduino IDE version (e.g. 1.8.13) or Platform.io version
-* `ESP8266` or `ESP32` Core Version (e.g. ESP8266 core v3.0.0 or ESP32 v1.0.6)
+* Arduino IDE version (e.g. 1.8.15) or Platform.io version
+* `ESP8266` or `ESP32` Core Version (e.g. ESP8266 core v3.0.1 or ESP32 v1.0.6)
 * Contextual information (e.g. what you were trying to achieve)
 * Simplest possible steps to reproduce
 * Anything that might be relevant in your opinion, such as:
@@ -26,10 +26,10 @@ Please ensure to specify the following:
 ### Example
 
 ```
-Arduino IDE version: v1.8.13
-ESP8266 Core Version v3.0.0
+Arduino IDE version: v1.8.15
+ESP8266 Core Version v3.0.1
 OS: Ubuntu 20.04 LTS
-Linux Inspiron 5.4.0-73-generic #82-Ubuntu SMP Wed Apr 14 17:39:42 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux
+Linux Inspiron 5.4.0-77-generic #86-Ubuntu SMP Thu Jun 17 02:35:03 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux
 
 Context:
 The board couldn't autoreconnect to Local Blynk Server after router power recycling.
