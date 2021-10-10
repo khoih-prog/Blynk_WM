@@ -17,45 +17,11 @@
 * [Why do we need this Blynk_WM library](#why-do-we-need-this-blynk_wm-library)
   * [Features](#features)
   * [Currently supported Boards](#currently-supported-boards)
-* [Changelog](#changelog)
-  * [Releases v1.6.1](#releases-v161)
-  * [Major Releases v1.6.0](#major-releases-v160)
-  * [Releases v1.5.0](#releases-v150)
-  * [Major Releases v1.4.0](#major-releases-v140)
-  * [Releases v1.3.1](#releases-v131)
-  * [Major Releases v1.3.0](#major-releases-v130)
-  * [Major Releases v1.2.0](#major-releases-v120)
-  * [Releases v1.1.3](#releases-v113)
-  * [Releases v1.1.2](#releases-v112)
-  * [Releases v1.1.1](#releases-v111)
-  * [Major Releases v1.1.0](#major-releases-v110)
-  * [Releases v1.0.16](#releases-v1016)
-  * [Releases v1.0.15](#releases-v1015)
-  * [Releases v1.0.14](#releases-v1014)
-  * [Releases v1.0.13](#releases-v1013)
-  * [Releases v1.0.12](#releases-v1012)
-  * [Releases v1.0.11](#releases-v1011)
-  * [Releases v1.0.10](#releases-v1010)
+* [Changelog](changelog.md)
 * [Prerequisites](#prerequisites)
 * [Installation](#installation)
   * [I) For Arduino IDE](#i-for-arduino-ide)
   * [II) For VS Code & PlatformIO:](#ii-for-vs-code--platformio)
-* [HOWTO Install esp32 core for ESP32-S2 (Saola, AI-Thinker ESP-12K) and ESP32-C3 boards into Arduino IDE](#howto-install-esp32-core-for-esp32-s2-saola-ai-thinker-esp-12k-and-esp32-c3-boards-into-arduino-ide)
-  * [1. Save the original esp32 core](#1-save-the-original-esp32-core)
-  * [2. Install esp32 core v1.0.6](#2-install-esp32-core-v106)
-    * [2.1 Install esp32 core](#21-install-esp32-core)
-    * [2.2 Download latest zip with esp32-s2 support](#22-download-latest-zip-with-esp32-s2-support)
-    * [2.3 Unzip](#23-unzip)
-    * [2.3 Update esp32 core directories](#24-update-esp32-core-directories)
-  * [3. Download tools for ESP32-S2](#3-download-tools-for-esp32-s2) 
-    * [3.1 Download Toolchain for Xtensa (ESP32-S2) based on GCC](#31-download-toolchain-for-xtensa-esp32-s2-based-on-gcc)
-    * [3.2 Download esptool](#32-download-esptool)
-    * [3.3 Unzip](#33-unzip)
-  * [4. Update tools](#4-update-tools)
-    * [4.1 Update Toolchain](#41-update-toolchain)
-    * [4.2 Update esptool](#42-update-esptool)
-  * [5. Download tools for ESP32-C3](#5-download-tools-for-esp32-c3)
-  * [6. esp32-s2 WebServer Library Patch](#6-esp32-s2-webserver-library-patch)
 * [Note for Platform IO using ESP32 LittleFS](#note-for-platform-io-using-esp32-littlefs)
 * [HOWTO Use analogRead() with ESP32 running WiFi and/or BlueTooth (BT/BLE)](#howto-use-analogread-with-esp32-running-wifi-andor-bluetooth-btble)
   * [1. ESP32 has 2 ADCs, named ADC1 and ADC2](#1--esp32-has-2-adcs-named-adc1-and-adc2)
@@ -131,7 +97,6 @@
   * [10. ESP8266WM_MRD_Config using LITTLEFS with SSL on ESP8266_NODEMCU_ESP12E using new ESP8266 core v3.0.0](#10-esp8266wm_mrd_config-using-littlefs-with-ssl-on-esp8266_nodemcu_esp12e-using-new-esp8266-core-v300)
 * [Debug](#debug)
 * [Troubleshooting](#troubleshooting)
-* [Releases](#releases)
 * [Issues](#issues)
 * [TO DO](#to-do)
 * [DONE](#done)
@@ -208,133 +173,16 @@ This [**Blynk_WM** library](https://github.com/khoih-prog/Blynk_WM) currently su
 ---
 ---
 
-## Changelog
-
-### Releases v1.6.1
-
-1. Fix issue with new **ESP8266 core v3.0.1**
-
-
-### Major Releases v1.6.0
-
-1. Fix AP connect issue caused by **breaking ESP8266 core v3.0.0**. Caused by multiple core changes, but the new solution results a better and faster connection to AP.
-2. Fix SSL issue caused by breaking ESP8266 core v3.0.0. Now the better **BearSSL** is used in both ESP32 and ESP8266 to replace the ESP8266 deprecated `axTLS`. Check [Remove axTLS from code and documentation #7437](https://github.com/esp8266/Arduino/pull/7437)
-3. Fix the `BLYNK_INFO_DEVICE`displaying the generic ESP8266 board with Blynk logo. Caused by new ESP8266 core changes of `build.board`. For example from `ESP8266_NODEMCU` in core v2.7.4 to `ESP8266_NODEMCU_ESP12E` in core v3.0.0
-4. Fix many warnings only displayed in new core ESP8266 v3.0.0
-5. Make code compatible for either new ESP8266 core v3.0.0+ or ealier cores v2.7.4-
-
-### Releases v1.5.0
-
-1. Fix bug. 
-2. Optimize and sync with [**Blynk_Async_WM library v1.5.0**](https://github.com/khoih-prog/Blynk_Async_WM) 
-
-
-### Major Releases v1.4.0
-
-1. Enable scan of WiFi networks for selection in Configuration Portal. Check [PR for v1.3.0 - Enable scan of WiFi networks #10](https://github.com/khoih-prog/WiFiManager_NINA_Lite/pull/10). Now you can select optional **SCAN_WIFI_NETWORKS**, **MANUAL_SSID_INPUT_ALLOWED** to be able to manually input SSID, not only from a scanned SSID lists and **MAX_SSID_IN_LIST** (from 2-15)
-2. Fix invalid "blank" Config Data treated as Valid.
-3. Permit optionally inputting one set of WiFi SSID/PWD by using `REQUIRE_ONE_SET_SSID_PW == true`
-4. Enforce WiFi PWD minimum length of 8 chars
-5. Minor enhancement to not display garbage when data is invalid
-
-### Releases v1.3.1
-
-1. Fix issue of custom Blynk port (different from 8080 or 9443) not working on ESP32. Check [Custom Blynk port not working for BlynkSimpleEsp32_Async_WM.h #4](https://github.com/khoih-prog/Blynk_Async_WM/issues/4)
-
-### Major Releases v1.3.0
-
-1. Add **LittleFS and SPIFFS** support to new **ESP32-S2** boards (**Arduino ESP32C3_DEV**). Check [HOWTO Install esp32 core for ESP32-S2 (Saola, AI-Thinker ESP-12K) and ESP32-C3 boards into Arduino IDE](#howto-install-esp32-core-for-esp32-s2-saola-ai-thinker-esp-12k-and-esp32-c3-boards-into-arduino-ide).
-2. Add **EEPROM and SPIFFS** support to new **ESP32-C3** boards (**Arduino ESP32C3_DEV**). Check [HOWTO Install esp32 core for ESP32-S2 (Saola, AI-Thinker ESP-12K) and ESP32-C3 boards into Arduino IDE](#howto-install-esp32-core-for-esp32-s2-saola-ai-thinker-esp-12k-and-esp32-c3-boards-into-arduino-ide).
-3. Fix SSL issue with Blynk Cloud Server
-4. Update examples
-
-### Major Releases v1.2.0
-
-1. Configurable **Customs HTML Headers**, including Customs Style, Customs Head Elements, CORS Header.
-2. Add support to **ESP32-S2 (ESP32-S2 Saola and AI-Thinker ESP-12K)**. Currently using EEPROM only. To add support to LittleFS and SPIFFS in future releases.
-3. Fix Config Portal Bug.
-4. Tested with [**Latest ESP32 Core 1.0.5**](https://github.com/espressif/arduino-esp32) for ESP32-based boards.
-5. Update examples
-
-### Releases v1.1.3
-
-1. To permit autoreset after configurable timeout if DRD/MRD or non-persistent forced-CP. Check [**Good new feature: Blynk.resetAndEnterConfigPortal() Thanks & question #27**](https://github.com/khoih-prog/Blynk_WM/issues/27)
-
-### Releases v1.1.2
-
-1. Fix rare Config Portal bug not updating Config and dynamic Params data successfully in very noisy or weak WiFi situation
-
-### Releases v1.1.1
-
-1. Add functions to control Config Portal from software or Virtual Switches. Check [How to trigger a Config Portal from code #25](https://github.com/khoih-prog/Blynk_WM/issues/25)
-2. Add examples to demo the new Virtual ConfigPortal SW feature
-3. Optimize code
-
-### Major Releases v1.1.0
-
-1. Add support to LittleFS for ESP32 using [LITTLEFS](https://github.com/lorol/LITTLEFS) Library
-2. Add support to MultiDetectDetector. **MultiDetectDetector** feature to force Config Portal when configurable multi-reset is detected within predetermined time.
-3. Clean-up all compiler warnings possible.
-4. Add Table of Contents
-5. Add Version String
-6. Add MRD-related examples.
-
-### Releases v1.0.16
-
-1. Fix bug and logic of USE_DEFAULT_CONFIG_DATA.
-2. Auto format SPIFFS/LittleFS for first time usage.
-
-#### Releases v1.0.15
-
-1. Update to use LittleFS for ESP8266 core 2.7.1+.
-2. Fix SSL connection bug.
-3. Fix dynamicParams loading bug in v1.0.14. 
-4. Add [Blynk_WM_Template example](examples/Blynk_WM_Template) contributed by [Thor Johnson](https://github.com/thorathome).
-
-Again thanks to [Thor Johnson](https://github.com/thorathome) and [Thor Johnson in Blynk](https://community.blynk.cc/u/thorathome) for testing, bug finding, feature adding, README rewriting, collaborating, etc..
-
-#### Releases v1.0.14
-
-1. Fix dynamicParams bug in v1.0.13. Again thanks to [Thor Johnson](https://github.com/thorathome) and [Thor Johnson in Blynk](https://community.blynk.cc/u/thorathome)
-
-#### Releases v1.0.13
-
-1. Optional default **Credentials as well as Dynamic parameters to be optionally autoloaded into Config Portal** to use or change instead of manually input.
-2. **DoubleDetectDetector** feature to force Config Portal when double reset is detected within predetermined time, default 10s.
-3. Configurable **Config Portal Title** to be either HostName, BoardName or default undistinguishable names.
-4. Examples are redesigned to separate Credentials / Defines / Dynamic Params / Code so that you can change Credentials / Dynamic Params quickly for each device.
-
-Thanks to [Thor Johnson](https://github.com/thorathome) to test, suggest and encourage to add those new features in v1.0.13, such as Default Credentials/Dynamic Params, Configurable Config Portal Title, DRD.
-
-#### Releases v1.0.12
-
-1. Fix severe bug in v1.0.11
-
-#### Releases v1.0.11
-
-##### Severe connecting bug. Don't use
-
-1. New **powerful-yet-simple-to-use feature to enable adding dynamic custom parameters** from sketch and input using the same Config Portal. Config Portal will be auto-adjusted to match the number of dynamic parameters.
-2. Dynamic custom parameters to be saved **automatically in EEPROM, or SPIFFS**.
-
-#### Releases v1.0.10
-
-1. WiFi Password max length is 63, according to WPA2 standard
-2. Permit to input special chars such as **~, !, @, #, $, %, ^, &, _, -, space,etc.** into data fields. Thanks to [brondolin](https://github.com/brondolin) to provide the amazing fix.
-
----
----
 
 ## Prerequisites
 
-1. [`Arduino IDE 1.8.15+`](https://www.arduino.cc/en/Main/Software)
-2. [`Blynk library 0.6.1+`](https://github.com/blynkkk/blynk-library/releases). [![Latest release](https://img.shields.io/github/release/blynkkk/blynk-library.svg)](https://github.com/blynkkk/blynk-library/releases/latest/). Never use the `Blynk beta` versions.
-3. [`ESP32 Core 1.0.6+`](https://github.com/espressif/arduino-esp32) for ESP32-based boards. [![Latest release](https://img.shields.io/github/release/espressif/arduino-esp32.svg)](https://github.com/espressif/arduino-esp32/releases/latest/)
-4. [`ESP32-S2/C3 Core 1.0.6+`](https://github.com/espressif/arduino-esp32) for ESP32-S2/C3-based boards. Must follow [HOWTO Install esp32 core for ESP32-S2 (Saola, AI-Thinker ESP-12K) and ESP32-C3 boards into Arduino IDE](#howto-install-esp32-core-for-esp32-s2-saola-ai-thinker-esp-12k-and-esp32-c3-boards-into-arduino-ide).
-5. [`ESP8266 Core 3.0.1+`](https://github.com/esp8266/Arduino) for ESP8266-based boards. [![Latest release](https://img.shields.io/github/release/esp8266/Arduino.svg)](https://github.com/esp8266/Arduino/releases/latest/). To use ESP8266 core 2.7.1+ for LittleFS. 
-6. [`ESP_DoubleResetDetector library 1.1.1+`](https://github.com/khoih-prog/ESP_DoubleResetDetector) to use DRD feature. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/ESP_DoubleResetDetector.svg?)](https://www.ardu-badge.com/ESP_DoubleResetDetector).
-7. [`ESP_MultiResetDetector library 1.1.1+`](https://github.com/khoih-prog/ESP_MultiResetDetector) to use MRD feature. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/ESP_MultiResetDetector.svg?)](https://www.ardu-badge.com/ESP_MultiResetDetector).
-8. [`LittleFS_esp32 v1.0.6+`](https://github.com/lorol/LITTLEFS) for ESP32-based boards using LittleFS. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/LittleFS_esp32.svg?)](https://www.ardu-badge.com/LittleFS_esp32). **Notice**: This [`LittleFS_esp32 library`](https://github.com/lorol/LITTLEFS) has been integrated to Arduino [esp32 core v1.0.6](https://github.com/espressif/arduino-esp32/tree/master/libraries/LITTLEFS).
+1. [`Arduino IDE 1.8.16+`](https://www.arduino.cc/en/Main/Software)
+2. [`Blynk library 1.0.1+`](https://github.com/blynkkk/blynk-library/releases). [![Latest release](https://img.shields.io/github/release/blynkkk/blynk-library.svg)](https://github.com/blynkkk/blynk-library/releases/latest/). Never use the `Blynk beta` versions.
+3. [`ESP32 Core 2.0.0+`](https://github.com/espressif/arduino-esp32) for ESP32-based boards. [![Latest release](https://img.shields.io/github/release/espressif/arduino-esp32.svg)](https://github.com/espressif/arduino-esp32/releases/latest/)
+4. [`ESP8266 Core 3.0.2+`](https://github.com/esp8266/Arduino) for ESP8266-based boards. [![Latest release](https://img.shields.io/github/release/esp8266/Arduino.svg)](https://github.com/esp8266/Arduino/releases/latest/). To use ESP8266 core 2.7.1+ for LittleFS. 
+5. [`ESP_DoubleResetDetector library 1.1.1+`](https://github.com/khoih-prog/ESP_DoubleResetDetector) to use DRD feature. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/ESP_DoubleResetDetector.svg?)](https://www.ardu-badge.com/ESP_DoubleResetDetector).
+6. [`ESP_MultiResetDetector library 1.1.1+`](https://github.com/khoih-prog/ESP_MultiResetDetector) to use MRD feature. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/ESP_MultiResetDetector.svg?)](https://www.ardu-badge.com/ESP_MultiResetDetector).
+7. [`LittleFS_esp32 v1.0.6+`](https://github.com/lorol/LITTLEFS) for ESP32-based boards using LittleFS. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/LittleFS_esp32.svg?)](https://www.ardu-badge.com/LittleFS_esp32). **Notice**: This [`LittleFS_esp32 library`](https://github.com/lorol/LITTLEFS) has been integrated to Arduino [esp32 core v1.0.6+](https://github.com/espressif/arduino-esp32/tree/master/libraries/LITTLEFS).
 
 ---
 
@@ -377,172 +225,12 @@ Thanks to [Thor Johnson](https://github.com/thorathome) to test, suggest and enc
 
 1. Install [VS Code](https://code.visualstudio.com/)
 2. Install [PlatformIO](https://platformio.org/platformio-ide)
-3. Install [**Blynk_WiFiManager** library](https://platformio.org/lib/show/6925/Blynk_WiFiManager) by using [Library Manager](https://platformio.org/lib/show/6925/Blynk_WiFiManager/installation). Search for **Blynk_WiFiManager** in [Platform.io Author's Libraries](https://platformio.org/lib/search?query=author:%22Khoi%20Hoang%22)
+3. Install [**Blynk_WM** library](https://platformio.org/lib/show/11638/Blynk_WM) by using [Library Manager](https://platformio.org/lib/show/11638/Blynk_WiFiManager/installation). Search for **Blynk_WM** in [Platform.io Author's Libraries](https://platformio.org/lib/search?query=author:%22Khoi%20Hoang%22)
 4. Use included [platformio.ini](platformio/platformio.ini) file from examples to ensure that all dependent libraries will installed automatically. Please visit documentation for the other options and examples at [Project Configuration File](https://docs.platformio.org/page/projectconf.html)
 
 ---
 ---
 
-## HOWTO Install esp32 core for ESP32-S2 (Saola, AI-Thinker ESP-12K) and ESP32-C3 boards into Arduino IDE
-
-
-These are instructions demonstrating the steps to install esp32-s2/c3 core on Ubuntu machines. For Windows or other OS'es, just follow the the similar principles and steps.
-
-* Windows 10, follows these steps in [Steps to install Arduino ESP32 support on Windows](https://github.com/espressif/arduino-esp32/blob/master/docs/arduino-ide/windows.md) 
-
-* Mac OS, follows these steps in [Installation instructions for Mac OS](https://github.com/espressif/arduino-esp32/blob/master/docs/arduino-ide/mac.md)
-
-* Fedora, follows these steps in [Installation instructions for Fedora](https://github.com/espressif/arduino-esp32/blob/master/docs/arduino-ide/fedora.md)
-
-* openSUSE, follows these steps in [Installation instructions for openSUSE](https://github.com/espressif/arduino-esp32/blob/master/docs/arduino-ide/opensuse.md)
-
-* You can also try to add [package_esp32_dev_index.json](https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_dev_index.json) into Arduino IDE `File - Preferences - Additional Boards Manager URLs` 
-
-
-```
-https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_dev_index.json
-```
-
-and have Board Manager auto-install the **development** esp32 core. For example : esp32 core `v2.0.0-alpha1`
-
-
----
-
-If you're already successful in testing the core, after installing by using the above procedures, you don't need to follows the hereafter manual steps.
-
----
-
-Assuming you already installed Arduino IDE ESP32 core and the installed directory is
-
-`/home/your_account/.arduino15/packages/esp32`
-
-
-### 1. Save the original esp32 core
-
-First, copy the whole original esp32 core to another safe place. Then delete all the sub-directories of
-
-`/home/your_account/.arduino15/packages/esp32/hardware/esp32/1.0.4`
-
----
-
-
-### 2. Install esp32 core v1.0.6
-
-#### 2.1 Install esp32 core
-
-Just use Arduino IDE Board Manager to install [ESP32 Arduino Release 1.0.6 based on ESP-IDF v3.3.5](https://github.com/espressif/arduino-esp32/releases/tag/1.0.6). This official v1.06 core doesn't have esp32-s2/s3 support. You have to download and use the latest master branch.
-
-
-#### 2.2 Download latest zip with esp32-s2 support
-
-As of **April 16th 2021**, the **esp32-s2/c3** board support has been included in master branch of esp32 core. Download [**esp32 core, master branch**](https://github.com/espressif/arduino-esp32) in the zip format.
-
-#### 2.3 Unzip
-
-<p align="center">
-    <img src="https://github.com/khoih-prog/Blynk_WM/blob/master/pics/esp32_s2_Core_Unzipped.png">
-</p>
-
-#### 2.4 Update esp32 core directories
-
-Copy all subdirectories of esp32 core into `/home/your_account/.arduino15/packages/esp32/hardware/esp32/1.0.6`
-
-
----
-
-### 3 Download tools for ESP32-S2
-
-
-#### 3.1 Download Toolchain for Xtensa (ESP32-S2) based on GCC
-
-Download [**esp32-s2 Toolchain**](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s2/api-guides/tools/idf-tools.html#xtensa-esp32s2-elf) corresponding to your environment (linux-amd64, win64, etc.).
-
-For example `xtensa-esp32s2-elf-gcc8_4_0-esp-2020r3-linux-amd64.tar.gz`, then un-archive.
-
-
-<p align="center">
-    <img src="https://github.com/khoih-prog/Blynk_WM/blob/master/pics/esp32_s2_Toolchain.png">
-</p>
-
-#### 3.2 Download esptool
-
-
-Download [esptool](https://github.com/espressif/esptool/releases) int the `zip` format:
-
-`esptool-3.0.zip`
-
-#### 3.3 Unzip
-
-<p align="center">
-    <img src="https://github.com/khoih-prog/Blynk_WM/blob/master/pics/esp32_s2_esptool.png">
-</p>
-
----
-
-### 4. Update tools
-
-#### 4.1 Update Toolchain
-
-Copy whole `xtensa-esp32s2-elf` directory into `/home/your_account/.arduino15/packages/esp32/hardware/esp32/1.0.6/tools`
-
-
-#### 4.2 Update esptool
-
-Rename `esptool-3.0` directory to `esptool`
-
-
-Copy whole `esptool` directory into `/home/your_account/.arduino15/packages/esp32/hardware/esp32/1.0.6/tools`
-
-
-<p align="center">
-    <img src="https://github.com/khoih-prog/Blynk_WM/blob/master/pics/esp32_s2_tools.png">
-</p>
-
-
-### 5 Download tools for ESP32-C3
-
-Download [**esp32-c3 Toolchain**](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s2/api-guides/tools/idf-tools.html#riscv32-esp-elf) corresponding to your environment (linux-amd64, win64, etc.).
-
-For example`riscv32-esp-elf-gcc8_4_0-crosstool-ng-1.24.0-123-g64eb9ff-linux-amd64.tar.gz`, then un-archive.
-
-Then using the similar steps as in
-
-* [3. Download tools for ESP32-S2](#3-download-tools-for-esp32-s2) 
-  * [3.1 Download Toolchain for Xtensa (ESP32-S2) based on GCC](#31-download-toolchain-for-xtensa-esp32-s2-based-on-gcc)
-  * [3.2 Download esptool](#32-download-esptool)
-  * [3.3 Unzip](#33-unzip)
-* [4. Update tools](#4-update-tools)
-  * [4.1 Update Toolchain](#41-update-toolchain)
-  * [4.2 Update esptool](#42-update-esptool)
-
-then copy whole `riscv32-esp-elf` directory into `/home/your_account/.arduino15/packages/esp32/hardware/esp32/1.0.6/tools`
-
-<p align="center">
-    <img src="https://github.com/khoih-prog/Blynk_WM/blob/master/pics/Blynk_ESP32_C3_Support.png">
-</p>
-
-
-### 6. esp32-s2 WebServer Library Patch
-
-#### Necessary only for esp32 core v1.0.6-
-
-If you haven't installed a new version with [WebServer.handleClient delay PR #4350](https://github.com/espressif/arduino-esp32/pull/4350) or haven't applied the above mentioned PR, you have to use the following patch.
-
-
-**To be able to run Config Portal on ESP32-S2 boards**, you have to copy the files in [esp32-s2 WebServer Patch](esp32s2_WebServer_Patch/) directory into esp32-s2 WebServer library directory (~/.arduino15/packages/esp32/hardware/esp32/1.0.4/libraries/WebServer).
-
-Supposing the esp32-s2 version is 1.0.4, these files `WebServer.h/cpp` must be copied into the directory to replace:
-
-- `~/.arduino15/packages/esp32/hardware/esp32/1.0.4/libraries/WebServer/src/WebServer.h`
-- `~/.arduino15/packages/esp32/hardware/esp32/1.0.4/libraries/WebServer/src/WebServer.cpp`
-
-
----
-
-That's it. You're now ready to compile and test for **ESP32-S2 and ESP32-C3** now
-
----
----
 
 ### Note for Platform IO using ESP32 LittleFS
 
@@ -1688,8 +1376,8 @@ The following is the sample terminal output when running example [ESP8266WM_MRD_
 
 ```
 Starting ESP8266WM_MRD_Config using LittleFS with SSL on ESP8266_NODEMCU
-Blynk_WM SSL for ESP8266 v1.6.1
-ESP8266 core v3.0.1
+Blynk_WM SSL for ESP8266 v1.6.2
+ESP8266 core v3.0.2
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFD0002
 multiResetDetectorFlag = 0xFFFD0002
@@ -1738,7 +1426,7 @@ Saving config file OK
    / _ )/ /_ _____  / /__
   / _  / / // / _ \/  '_/
  /____/_/\_, /_//_/_/\_\
-        /___/ v0.6.1 on NodeMCU
+        /___/ v1.0.1 on NodeMCU
 
 [22723] NTP time: Fri Jan  1 22:15:49 2021
 [22724] BlynkArduinoClient.connect: Connecting to account.duckdns.org:9443
@@ -1769,8 +1457,8 @@ BBBBBB
 
 ```
 Starting ESP8266WM_MRD_Config using LittleFS with SSL on ESP8266_NODEMCU
-Blynk_WM SSL for ESP8266 v1.6.1
-ESP8266 core v3.0.1
+Blynk_WM SSL for ESP8266 v1.6.2
+ESP8266 core v3.0.2
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFC0003
 multiResetDetectorFlag = 0xFFFC0003
@@ -1832,8 +1520,8 @@ The following is the sample terminal output when running example [DHT11ESP8266_S
 
 ```
 Starting DHT11ESP8266_SSL using LittleFS with SSL on ESP8266_NODEMCU
-Blynk_WM SSL for ESP8266 v1.6.1
-ESP8266 core v3.0.1
+Blynk_WM SSL for ESP8266 v1.6.2
+ESP8266 core v3.0.2
 ESP_DoubleResetDetector v1.1.1
 [293] Hostname=ESP8266-DHT11-SSL
 [316] LoadCfgFile 
@@ -1859,7 +1547,7 @@ ESP_DoubleResetDetector v1.1.1
    / _ )/ /_ _____  / /__
   / _  / / // / _ \/  '_/
  /____/_/\_, /_//_/_/\_\
-        /___/ v0.6.1 on NodeMCU
+        /___/ v1.0.1 on NodeMCU
 
 [22644] NTP time: Fri Jan  1 21:13:34 2021
 [22645] BlynkArduinoClient.connect: Connecting to account.duckdns.org:9443
@@ -1891,7 +1579,7 @@ The following is the sample terminal output when running example [ESP32WM_MRD_Co
 
 ```
 Starting ESP32WM_MRD_Config using LITTLEFS without SSL on ESP32_DEV
-Blynk_WM for ESP32 v1.6.1
+Blynk_WM for ESP32 v1.6.2
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -1940,7 +1628,7 @@ Saving config file OK
    / _ )/ /_ _____  / /__
   / _  / / // / _ \/  '_/
  /____/_/\_, /_//_/_/\_\
-        /___/ v0.6.1 on ESP32
+        /___/ v1.0.1 on ESP32
 
 [6453] BlynkArduinoClient.connect: Connecting to account.duckdns.org:8080
 [6587] Ready (ping: 8ms).
@@ -1968,7 +1656,7 @@ BBBBBB
 
 ```
 Starting ESP32WM_MRD_Config using LITTLEFS without SSL on ESP32_DEV
-Blynk_WM for ESP32 v1.6.1
+Blynk_WM for ESP32 v1.6.2
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFC0003
 multiResetDetectorFlag = 0xFFFC0003
@@ -2026,7 +1714,7 @@ ets Jun  8 2016 00:22:57
 
 ```
 Starting ESP32WM_MRD_Config using LITTLEFS without SSL on ESP32_DEV
-Blynk_WM for ESP32 v1.6.1
+Blynk_WM for ESP32 v1.6.2
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -2075,7 +1763,7 @@ Saving config file OK
    / _ )/ /_ _____  / /__
   / _  / / // / _ \/  '_/
  /____/_/\_, /_//_/_/\_\
-        /___/ v0.6.1 on ESP32
+        /___/ v1.0.1 on ESP32
 
 [6453] BlynkArduinoClient.connect: Connecting to account.duckdns.org:8080
 [6587] Ready (ping: 8ms).
@@ -2113,7 +1801,7 @@ RBRBRBRBRBRBRBRBRBRB RBRBRBRBRBRBRBRBRBRB RBRBRBRBRBRBRB
    / _ )/ /_ _____  / /__
   / _  / / // / _ \/  '_/
  /____/_/\_, /_//_/_/\_\
-        /___/ v0.6.1 on ESP32
+        /___/ v1.0.1 on ESP32
 
 [3984637] BlynkArduinoClient.connect: Connecting to account.duckdns.org:8080
 [3984791] Ready (ping: 6ms).
@@ -2132,7 +1820,7 @@ RBRBRBRBRBRBRBRBRBRB RBRBRBRBRBRBRBRBRBRB RBRBRBRBRBRBRB
    / _ )/ /_ _____  / /__
   / _  / / // / _ \/  '_/
  /____/_/\_, /_//_/_/\_\
-        /___/ v0.6.1 on ESP32
+        /___/ v1.0.1 on ESP32
 
 [3984637] BlynkArduinoClient.connect: Connecting to account.duckdns.org:8080
 [3984791] Ready (ping: 6ms).
@@ -2150,7 +1838,7 @@ The following is the sample terminal output when running example [DHT11ESP8266_S
 
 ```
 Starting DHT11ESP32_SSL using LITTLEFS with SSL on ESP32_DEV
-Blynk_WM SSL for ESP32 v1.6.1
+Blynk_WM SSL for ESP32 v1.6.2
 ESP_DoubleResetDetector v1.1.1
 [346] Hostname=ESP32-DHT11-SSL
 [385] LoadCfgFile 
@@ -2176,7 +1864,7 @@ ESP_DoubleResetDetector v1.1.1
    / _ )/ /_ _____  / /__
   / _  / / // / _ \/  '_/
  /____/_/\_, /_//_/_/\_\
-        /___/ v0.6.1 on ESP32
+        /___/ v1.0.1 on ESP32
 
 [7364] NTP time: Fri Jan  1 21:14:44 2021
 [7364] BlynkArduinoClient.connect: Connecting to account.duckdns.org:9443
@@ -2214,8 +1902,8 @@ Blynk.resetAndEnterConfigPortal();
 
 ```
 Starting ESP8266WM_MRD_ForcedConfig using LittleFS without SSL on ESP8266_NODEMCU
-Blynk_WM for ESP8266 v1.6.1
-ESP8266 core v3.0.1
+Blynk_WM for ESP8266 v1.6.2
+ESP8266 core v3.0.2
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -2267,7 +1955,7 @@ Saving config file OK
    / _ )/ /_ _____  / /__
   / _  / / // / _ \/  '_/
  /____/_/\_, /_//_/_/\_\
-        /___/ v0.6.1 on NodeMCU
+        /___/ v1.0.1 on NodeMCU
 
 [6661] BlynkArduinoClient.connect: Connecting to account.duckdns.org:8080
 [6765] Ready (ping: 7ms).
@@ -2301,8 +1989,8 @@ Non-Persistent CP will be removed after first reset, even you didn't enter the C
 
 ```
 Starting ESP8266WM_MRD_ForcedConfig using LittleFS without SSL on ESP8266_NODEMCU
-Blynk_WM for ESP8266 v1.6.1
-ESP8266 core v3.0.1
+Blynk_WM for ESP8266 v1.6.2
+ESP8266 core v3.0.2
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -2384,8 +2072,8 @@ Blynk.resetAndEnterConfigPortalPersistent();
 
 ```
 Starting ESP8266WM_MRD_ForcedConfig using LittleFS without SSL on ESP8266_NODEMCU
-Blynk_WM for ESP8266 v1.6.1
-ESP8266 core v3.0.1
+Blynk_WM for ESP8266 v1.6.2
+ESP8266 core v3.0.2
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -2437,7 +2125,7 @@ Saving config file OK
    / _ )/ /_ _____  / /__
   / _  / / // / _ \/  '_/
  /____/_/\_, /_//_/_/\_\
-        /___/ v0.6.1 on NodeMCU
+        /___/ v1.0.1 on NodeMCU
 
 [6770] BlynkArduinoClient.connect: Connecting to account.duckdns.org:8080
 [6874] Ready (ping: 9ms).
@@ -2472,8 +2160,8 @@ Persistent CP will remain after resets. The only way to get rid of Config Portal
 
 ```
 Starting ESP8266WM_MRD_ForcedConfig using LittleFS without SSL on ESP8266_NODEMCU
-Blynk_WM for ESP8266 v1.6.1
-ESP8266 core v3.0.1
+Blynk_WM for ESP8266 v1.6.2
+ESP8266 core v3.0.2
 ESP_MultiResetDetector v1.1.1
 LittleFS Flag read = 0xFFFE0001
 multiResetDetectorFlag = 0xFFFE0001
@@ -2541,8 +2229,8 @@ The following is the sample terminal output when running example [ESP8266WM_MRD_
 
 ```
 Starting ESP8266WM_MRD_ForcedConfig using LittleFS with SSL on ESP8266_NODEMCU
-Blynk_WM SSL for ESP8266 v1.6.1
-ESP8266 core v3.0.1
+Blynk_WM SSL for ESP8266 v1.6.2
+ESP8266 core v3.0.2
 ESP_MultiResetDetector v1.1.1
 [267] Set CustomsStyle to : <style>div,input{padding:5px;font-size:1em;}input{width:95%;}body{text-align: center;}button{background-color:blue;color:white;line-height:2.4rem;font-size:1.2rem;width:100%;}fieldset{border-radius:0.3rem;margin:0px;}</style>
 [289] Set CustomsHeadElement to : <style>html{filter: invert(10%);}</style>
@@ -2597,7 +2285,7 @@ Saving config file OK
    / _ )/ /_ _____  / /__
   / _  / / // / _ \/  '_/
  /____/_/\_, /_//_/_/\_\
-        /___/ v0.6.1 on NodeMCU
+        /___/ v1.0.1 on NodeMCU
 
 [22695] NTP time: Mon Apr 19 06:36:31 2021
 [22695] BlynkArduinoClient.connect: Connecting to blynk-cloud.com:9443
@@ -2630,7 +2318,7 @@ The following is the sample terminal output when running example [ESP32WM_MRD_Co
 
 ```
 Starting ESP32WM_MRD_Config using LITTLEFS with SSL on ESP32S2_DEV
-Blynk_WM SSL for ESP32 v1.6.1
+Blynk_WM SSL for ESP32 v1.6.2
 ESP_MultiResetDetector v1.1.1
 [134394] Set CustomsStyle to : <style>div,input{padding:5px;font-size:1em;}input{width:95%;}body{text-align: center;}button{background-color:blue;color:white;line-height:2.4rem;font-size:1.2rem;width:100%;}fieldset{border-radius:0.3rem;margin:0px;}</style>
 [134417] Set CustomsHeadElement to : <style>html{filter: invert(10%);}</style>
@@ -2685,7 +2373,7 @@ Saving config file OK
    / _ )/ /_ _____  / /__
   / _  / / // / _ \/  '_/
  /____/_/\_, /_//_/_/\_\
-        /___/ v0.6.1 on ESP32
+        /___/ v1.0.1 on ESP32
 
 [145549] NTP time: Mon Apr 19 05:11:59 2021
 [145549] BlynkArduinoClient.connect: Connecting to account.duckdns.org:9443
@@ -2719,7 +2407,7 @@ The following is the sample terminal output when running example [ESP32WM_MRD_Fo
 
 ```
 Starting ESP32WM_MRD_ForcedConfig using LITTLEFS with SSL on ESP32_DEV
-Blynk_WM SSL for ESP32 v1.6.1
+Blynk_WM SSL for ESP32 v1.6.2
 ESP_MultiResetDetector v1.1.1
 [228] Set CustomsStyle to : <style>div,input{padding:5px;font-size:1em;}input{width:95%;}body{text-align: center;}button{background-color:blue;color:white;line-height:2.4rem;font-size:1.2rem;width:100%;}fieldset{border-radius:0.3rem;margin:0px;}</style>
 [250] Set CustomsHeadElement to : <style>html{filter: invert(10%);}</style>
@@ -2842,7 +2530,7 @@ Pubs Topics = default-mqtt-PubTopic
 
 ```
 Starting ESP32WM_MRD_ForcedConfig using LITTLEFS with SSL on ESP32_DEV
-Blynk_WM SSL for ESP32 v1.6.1
+Blynk_WM SSL for ESP32 v1.6.2
 ESP_MultiResetDetector v1.1.1
 [227] Set CustomsStyle to : <style>div,input{padding:5px;font-size:1em;}input{width:95%;}body{text-align: center;}button{background-color:blue;color:white;line-height:2.4rem;font-size:1.2rem;width:100%;}fieldset{border-radius:0.3rem;margin:0px;}</style>
 [249] Set CustomsHeadElement to : <style>html{filter: invert(10%);}</style>
@@ -2897,7 +2585,7 @@ Saving config file OK
    / _ )/ /_ _____  / /__
   / _  / / // / _ \/  '_/
  /____/_/\_, /_//_/_/\_\
-        /___/ v0.6.1 on ESP32
+        /___/ v1.0.1 on ESP32
 
 [20282] NTP time: Sun Apr 25 04:52:35 2021
 [20282] BlynkArduinoClient.connect: Connecting to account.duckdns.org:9443
@@ -2931,8 +2619,8 @@ The following is the sample terminal output when running example [ESP8266WM_MRD_
 
 ```
 Starting ESP8266WM_MRD_Config using LittleFS with SSL on ESP8266_NODEMCU_ESP12E
-ESP8266 core v3.0.1
-Blynk_WM SSL for ESP8266 v1.6.1
+ESP8266 core v3.0.2
+Blynk_WM SSL for ESP8266 v1.6.2
 ESP_MultiResetDetector v1.1.1
 [274] Set CustomsStyle to : <style>div,input{padding:5px;font-size:1em;}input{width:95%;}body{text-align: center;}button{background-color:blue;color:white;line-height:2.4rem;font-size:1.2rem;width:100%;}fieldset{border-radius:0.3rem;margin:0px;}</style>
 [296] Set CustomsHeadElement to : <style>html{filter: invert(10%);}</style>
@@ -2987,7 +2675,7 @@ Saving config file OK
    / _ )/ /_ _____  / /__
   / _  / / // / _ \/  '_/
  /____/_/\_, /_//_/_/\_\
-        /___/ v0.6.1 on ESP8266_NODEMCU_ESP12E
+        /___/ v1.0.1 on ESP8266_NODEMCU_ESP12E
 
 [6592] NTP time: Thu May 20 02:13:51 2021
 [6624] BlynkArduinoClient.connect: Connecting to account.duckdns.org:9443
@@ -3048,188 +2736,6 @@ Sometimes, the library will only work if you update the board core to the latest
 ---
 ---
 
-## Releases
-
-### Releases v1.6.1
-
-1. Fix issue with new **ESP8266 core v3.0.1**
-
-### Major Releases v1.6.0
-
-1. Fix AP connect issue caused by breaking ESP8266 core v3.0.0. Caused by multiple core changes, but the new solution results a better and faster connection to AP.
-2. Fix SSL issue caused by breaking ESP8266 core v3.0.0. Now the better **BearSSL** is used in both ESP32 and ESP8266 to replace the ESP8266 deprecated `axTLS`. Check [Remove axTLS from code and documentation #7437](https://github.com/esp8266/Arduino/pull/7437)
-3. Fix the `BLYNK_INFO_DEVICE`displaying the generic ESP8266 board with Blynk logo. Caused by new ESP8266 core changes of `build.board`. For example from `ESP8266_NODEMCU` in core v2.7.4 to `ESP8266_NODEMCU_ESP12E` in core v3.0.0
-4. Fix many warnings only displayed in new core ESP8266 v3.0.0
-5. Make code compatible for either new ESP8266 core v3.0.0+ or ealier cores v2.7.4-
-
-### Releases v1.5.0
-
-1. Fix bug. 
-2. Optimize and sync with [**Blynk_Async_WM library v1.5.0**](https://github.com/khoih-prog/Blynk_Async_WM) 
-
-### Major Release v1.4.0
-
-1. Enable scan of WiFi networks for selection in Configuration Portal. Check [PR for v1.3.0 - Enable scan of WiFi networks #10](https://github.com/khoih-prog/WiFiManager_NINA_Lite/pull/10). Now you can select optional **SCAN_WIFI_NETWORKS**, **MANUAL_SSID_INPUT_ALLOWED** to be able to manually input SSID, not only from a scanned SSID lists and **MAX_SSID_IN_LIST** (from 2-15)
-2. Fix invalid "blank" Config Data treated as Valid.
-3. Permit optionally inputting one set of WiFi SSID/PWD by using `REQUIRE_ONE_SET_SSID_PW == true`
-4. Enforce WiFi PWD minimum length of 8 chars
-5. Minor enhancement to not display garbage when data is invalid
-
-### Releases v1.3.1
-
-1. Fix issue of custom Blynk port (different from 8080 or 9443) not working on ESP32. Check [Custom Blynk port not working for BlynkSimpleEsp32_Async_WM.h #4](https://github.com/khoih-prog/Blynk_Async_WM/issues/4)
-
-### Major Releases v1.3.0
-
-1. Add **LittleFS and SPIFFS** support to new **ESP32-S2** boards (**Arduino ESP32C3_DEV**). Check [HOWTO Install esp32 core for ESP32-S2 (Saola, AI-Thinker ESP-12K) and ESP32-C3 boards into Arduino IDE](#howto-install-esp32-core-for-esp32-s2-saola-ai-thinker-esp-12k-and-esp32-c3-boards-into-arduino-ide).
-2. Add **EEPROM and SPIFFS** support to new **ESP32-C3** boards (**Arduino ESP32C3_DEV**). Check [HOWTO Install esp32 core for ESP32-S2 (Saola, AI-Thinker ESP-12K) and ESP32-C3 boards into Arduino IDE](#howto-install-esp32-core-for-esp32-s2-saola-ai-thinker-esp-12k-and-esp32-c3-boards-into-arduino-ide).
-3. Fix SSL issue with Blynk Cloud Server
-4. Update examples
-
-### Major Releases v1.2.0
-
-1. Configurable **Customs HTML Headers**, including Customs Style, Customs Head Elements, CORS Header.
-2. Add support to **ESP32-S2 (ESP32-S2 Saola and AI-Thinker ESP-12K)**. Currently using EEPROM only. To add support to LittleFS and SPIFFS in future releases.
-3. Fix Config Portal Bug.
-4. Tested with [**Latest ESP32 Core 1.0.5**](https://github.com/espressif/arduino-esp32) for ESP32-based boards.
-5. Update examples
-
-### Releases v1.1.3
-
-1. To permit autoreset after configurable timeout if DRD/MRD or non-persistent forced-CP. Check [**Good new feature: Blynk.resetAndEnterConfigPortal() Thanks & question #27**](https://github.com/khoih-prog/Blynk_WM/issues/27)
-
-### Releases v1.1.2
-
-1. Fix rare Config Portal bug not updating Config and dynamic Params data successfully in very noisy or weak WiFi situation
-
-### Releases v1.1.1
-
-1. Add functions to control Config Portal from software or Virtual Switches. Check [How to trigger a Config Portal from code #25](https://github.com/khoih-prog/Blynk_WM/issues/25)
-2. Add examples to demo the new Virtual ConfigPortal SW feature
-3. Optimize code
-
-### Major Releases v1.1.0
-
-1. Add support to LittleFS for ESP32 using [LITTLEFS](https://github.com/lorol/LITTLEFS) Library
-2. Add support to MultiDetectDetector. **MultiDetectDetector** feature to force Config Portal when configurable multi-reset is detected within predetermined time.
-3. Clean-up all compiler warnings possible.
-4. Add Table of Contents
-5. Add Version String
-6. Add MRD-related examples.
-
-### Releases v1.0.16
-
-1. Fix bug and logic of USE_DEFAULT_CONFIG_DATA.
-2. Auto format SPIFFS/LittleFS for first time usage.
-
-#### Releases v1.0.15
-
-1. Update to use LittleFS for ESP8266 core 2.7.1+.
-2. Fix SSL connection bug.
-3. Fix dynamicParams loading bug in v1.0.14. 
-4. Add [Blynk_WM_Template example](examples/Blynk_WM_Template) contributed by [Thor Johnson](https://github.com/thorathome).
-
-Again thanks to [Thor Johnson](https://github.com/thorathome) and [Thor Johnson in Blynk](https://community.blynk.cc/u/thorathome) for testing, bug finding, feature adding, README rewriting, collaborating, etc..
-
-#### Releases v1.0.14
-
-1. Fix dynamicParams bug in v1.0.13. Again thanks to [Thor Johnson](https://github.com/thorathome) and [Thor Johnson in Blynk](https://community.blynk.cc/u/thorathome)
-
-#### Releases v1.0.13
-
-1. Optional default **Credentials as well as Dynamic parameters to be optionally autoloaded into Config Portal** to use or change instead of manually input.
-2. **DoubleDetectDetector** feature to force Config Portal when double reset is detected within predetermined time, default 10s.
-3. Configurable **Config Portal Title** to be either Hostname, BoardName or default undistinguishable names.
-4. Examples are redesigned to separate Credentials / Defines / Dynamic Params / Code so that you can change Credentials / Dynamic Params quickly for each device
-
-#### Releases v1.0.12
-
-1. Fix severe bug in v1.0.11
-
-#### Releases v1.0.11
-
-**Severe connecting bug. Don't use**
-
-1. New **powerful-yet-simple-to-use feature to enable adding dynamic custom parameters** from sketch and input using the same Config Portal. Config Portal will be auto-adjusted to match the number of dynamic parameters.
-2. Dynamic custom parameters to be saved **automatically in EEPROM, or SPIFFS**.
-
-#### Releases v1.0.10
-
-**Why this version**
-
-1. WiFi Password max length is 63, according to WPA2 standard.
-2. Permit to input special chars such as **~, !, @, #, $, %, ^, &, *, (, ), _, -, space,etc"** into data fields. Thanks to [brondolin](https://github.com/brondolin) to provide the amazing fix.
-
-#### Releases v1.0.9
-
-1. Enhance Config Portal GUI. Not using the terrible GUI of the original version. Finally had some time to get this out of the bucket list.
-
-#### Releases v1.0.8
-
-1. Fix [AP-staying-open bug](https://github.com/khoih-prog/Blynk_WM/issues/2). Thanks to [chriskio](https://github.com/chriskio) to report.
-2. Add clearConfigData().
-
-#### Releases v1.0.7
-
-**Why this version**
-
-1. Add checksum for more reliable data
-2. Add MultiWiFi feature to enable reconnect to the best / available WiFi AP.
-3. Add MultiBlynk feature to enable reconnect to the best / available Blynk Server.
-
-#### Releases v1.0.6
-
-Optimize, fix ESP32 EEPROM size to 2K from 4K, shorten code size, add functions, use dynamically allocated Config Portal WebServer.
-
-#### Releases v1.0.5
-
-Normally, the `default Portal IP (192.168.4.1)`, SSID and PW as well as the `dynamically allocated` board's IP address are good enough.
-In special cases where there is conflict, if static IP is required or bad router's DNS settings, you can use the new features to force the configurable IP addresses. **But please use with care to avoid potential issues.**
-
-**New in this version**
-
-Add new features to enable :
-
-1. configuring Portal Static IP address, Name and Password.
-2. configuring Static IP address, Gateway, Subnet Mask and 2 DNS Servers IP addresses.
-
-#### Releases v1.0.4
-
-I'm really fed-up with the unfriendly, confusing and cryptic DHCP hostnames such as `ESP_XXXXXX`, `espressif` using ChipID. Thanks to an issue opened in library [ESP_WiFiManager](https://github.com/khoih-prog/ESP_WiFiManager), I decided to add this option to have built-in, yet configurable DHCP hostname to these libraries.
-
-Now you can easily specify and have the friendly, identifiable, RFC-952-conformed DHCP hostnames associated with your boards, such as `SmartFarm-1`, `Irrigation`, `Master-Controller`, etc. You'll be happier to have a look at your WiFi Router DHCP list.
-
-**New in this version**
-
-1. Add configurable personalized RFC-952 DHCP hostname and setHostname()
-
-2. Modify examples to use new feature
-
-#### Releases v1.0.3
-
-1. Modify code to be compatible with ESP8266 core pre-2.5.2. But it's still advisable to update to the latest stable core, such as 2.6.3
-
-2. Add examples
-
-#### Releases v1.0.2
-
-**Features**
-
-1. This release of very-easy-to-use will help you to eliminate hardcoding your Wifi and Blynk credentials for ESP8266 and ESP32 (with / without SSL), and updating/reflashing every time when you need to change them.
-
-2. Configuration data are stored in either SPIFFS or EEPROM.
-
-3. When WiFi and/or Blynk connection is lost, the WM will try auto-reconnect.
-
-**New in this version**
-
-1. Fix bug
-
-2. If the config data not entered completely (SSID, password, Server and Blynk token), entering config portal
-
-3. Correct the operation of BUILTIN_LED
-
----
 
 ### Issues ###
 

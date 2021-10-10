@@ -16,7 +16,7 @@
   @date       Jan 2015
   @brief
 
-  Version: 1.6.1
+  Version: 1.6.2
 
   Version    Modified By   Date      Comments
   -------    -----------  ---------- -----------
@@ -49,6 +49,7 @@
   1.5.0     K Hoang      25/04/2021 Fix bug. Optimize and sync with Blynk_Async_WM library v1.5.0
   1.6.0     K Hoang      19/05/2021 Fix AP connect and SSL issues caused by breaking ESP8266 core v3.0.0
   1.6.1     K Hoang      29/06/2021 Fix issue with ESP8266 core v3.0.1
+  1.6.2     K Hoang      10/10/2021  Update `platform.ini` and `library.json`  
  ********************************************************************************************************************************/
 
 #ifndef BlynkSimpleEsp8266_SSL_WM_h
@@ -58,15 +59,19 @@
   #error This code is intended to run on the ESP8266 platform! Please check your Tools->Board setting.
 #endif
 
-#define BLYNK_WM_VERSION       "Blynk_WM SSL for ESP8266 v1.6.1"
+#define BLYNK_WM_VERSION       "Blynk_WM SSL for ESP8266 v1.6.2"
 
 #include <version.h>
 
 /////////////////////////////////////////////
 
-#if (ARDUINO_ESP8266_GIT_VER == 0xcbf44fb3)
+#if (ARDUINO_ESP8266_GIT_VER == 0xcf6ff4c4)
+  #define USING_ESP8266_CORE_VERSION    30002
+  #define ESP8266_CORE_VERSION          "ESP8266 core v3.0.2"
+  #warning USING_ESP8266_CORE_VERSION "3.0.2"
+#elif (ARDUINO_ESP8266_GIT_VER == 0xcbf44fb3)
   #define USING_ESP8266_CORE_VERSION    30001
-  #define ESP8266_CORE_VERSION          "ESP8266 core v3.0.1"
+  #define ESP8266_CORE_VERSION          "ESP8266 core v3.0.1" 
   #warning USING_ESP8266_CORE_VERSION "3.0.1"
 #elif (ARDUINO_ESP8266_GIT_VER == 0xefb0341a)
   #define USING_ESP8266_CORE_VERSION    30000

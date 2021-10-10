@@ -1,7 +1,7 @@
 {
   "name": "Blynk_WM",
-  "version": "1.6.1",
-  "description": "Library for configuring/auto(re)connecting ESP32 (including ESP32-S2, ESP32-C3), ESP8266 modules to best or available MultiWiFi APs and MultiBlynk servers at runtime. Enable adding dynamic custom parameters from sketch and input using the same Config Portal (CP). CP will be auto-adjusted to match the number of dynamic parameters. Optional default Credentials to be autoloaded into CP to use or change instead of manually input. Static STA IP and DHCP Hostname as well as Config Portal AP channel, IP, SSID, Password can be configured. Config. Data saved in ESP8266/ESP32 LittleFS, SPIFFS or EEPROM. Multi, Double DetectDetector or Virtual CP Switch feature permits entering CP as requested. Configurable Customs HTML Headers, including Customs Style, Customs Head Elements, CORS Header. Now with scanning of WiFi networks for selection in Configuration Portal. Now working with new ESP8266 core v3.0.0 and ESP32 core v1.0.6",
+  "version": "1.6.2",
+  "description": "Library for configuring/auto(re)connecting ESP32 (including ESP32-S2, ESP32-C3), ESP8266 modules to best or available MultiWiFi APs and MultiBlynk servers at runtime. Enable adding dynamic custom parameters from sketch and input using the same Config Portal (CP). CP will be auto-adjusted to match the number of dynamic parameters. Optional default Credentials to be autoloaded into CP to use or change instead of manually input. Static STA IP and DHCP Hostname as well as Config Portal AP channel, IP, SSID, Password can be configured. Config. Data saved in ESP8266/ESP32 LittleFS, SPIFFS or EEPROM. Multi, Double DetectDetector or Virtual CP Switch feature permits entering CP as requested. Configurable Customs HTML Headers, including Customs Style, Customs Head Elements, CORS Header. Now with scanning of WiFi networks for selection in Configuration Portal. Now working with new ESP8266 core v3.0.2 and ESP32 core v2.0.0",
   "keywords": "control, device, communication, blynk, iot, wifi, esp8266, esp32, esp32-s2, esp32-c3, drd, mrd, double-reset, multi-reset, config-portal, credentials, dynamic-params, customs-header, Manager, DynamicParameters, dynamic, configportal, usb, serial, ethernet, data, http, portal, smartphone, mobile, app, web, cloud, sensors, m2m, protocol, ble, bluetooth",
   "authors":
   {
@@ -27,17 +27,17 @@
     {
       "owner": "blynkkk",
       "name": "Blynk",
-      "version": "^0.6.1",
+      "version": "^1.0.1",
       "platforms": ["*"]
     },
     {
-      "owner": "khoih.prog",
+      "owner": "khoih-prog",
       "name": "ESP_DoubleResetDetector",
       "version": "^1.1.1",
       "platforms": ["espressif8266", "espressif32"]
     },
     {
-      "owner": "khoih.prog",
+      "owner": "khoih-prog",
       "name": "ESP_MultiResetDetector",
       "version": "^1.1.1",
       "platforms": ["espressif8266", "espressif32"]

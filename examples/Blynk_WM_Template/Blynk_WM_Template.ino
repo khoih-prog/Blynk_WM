@@ -8,24 +8,6 @@
   Forked from Blynk library v0.6.1 https://github.com/blynkkk/blynk-library/releases
   Built by Khoi Hoang https://github.com/khoih-prog/Blynk_WM
   Licensed under MIT license
-  Version: 1.6.1
-
-  Version    Modified By   Date      Comments
-  -------    -----------  ---------- -----------
-  1.0.0     K Hoang      28/10/2019 Initial coding
-  ...
-  1.1.0     K Hoang      01/01/2021 Add support to ESP32 LittleFS. Remove possible compiler warnings. Update examples. Add MRD
-  1.1.1     K Hoang      16/01/2021 Add functions to control Config Portal from software or Virtual Switches
-  1.1.2     K Hoang      28/01/2021 Fix Config Portal and Dynamic Params bugs
-  1.1.3     K Hoang      31/01/2021 To permit autoreset after timeout if DRD/MRD or non-persistent forced-CP
-  1.2.0     K Hoang      24/02/2021 Add customs HTML header feature and support to ESP32-S2.
-  1.3.0     K Hoang      19/04/2021 Add LittleFS and SPIFFS support to ESP32-S2. Add support to ESP32-C3 without LittleFS
-                                    Fix SSL issue with Blynk Cloud Server
-  1.3.1     K Hoang      24/04/2021 Fix issue of custom Blynk port (different from 8080 or 9443) not working on ESP32
-  1.4.0     K Hoang      24/04/2021 Enable scan of WiFi networks for selection in Configuration Portal
-  1.5.0     K Hoang      25/04/2021 Fix bug. Optimize and sync with Blynk_Async_WM library v1.5.0
-  1.6.0     K Hoang      19/05/2021 Fix AP connect and SSL issues caused by breaking ESP8266 core v3.0.0
-  1.6.1     K Hoang      29/06/2021 Fix issue with ESP8266 core v3.0.1
  *****************************************************************************************************************************/
 
 // Sketch uses Arduino IDE-selected ESP32 and ESP8266 to select compile choices
